@@ -1,0 +1,12 @@
+{
+    "name": "dias/laserpoints",
+    "require": {
+    },
+    "require-dev": {
+    },
+    "autoload": {
+        "psr-4": {
+            "Dias\\Modules\\Laserpoints\\": "src"
+        }
+    }
+}
