@@ -25,6 +25,9 @@ class LaserpointsServiceProvider extends ServiceProvider {
             require __DIR__.'/Http/routes.php';
         });
         $this->publishes([
+            __DIR__.'/config/laserpoints.php' => config_path('laserpoints.php'),
+        ], 'config');
+        $this->publishes([
             __DIR__.'/database/migrations/' => database_path('migrations')
         ], 'migrations');
     }
@@ -36,6 +39,7 @@ class LaserpointsServiceProvider extends ServiceProvider {
      */
     public function register()
     {
+        $this->mergeConfigFrom(__DIR__.'/config/laserpoints.php', 'laserpoints');
         // set up the install console command
         $this->app->singleton('command.laserpoints.install', function ($app) {
             return new InstallCommand();

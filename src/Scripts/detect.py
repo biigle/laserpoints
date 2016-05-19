@@ -14,13 +14,15 @@ laserdistparam = sys.argv[2]
 img = mpimg.imread(imgfile)
 width = img.shape[0]
 height = img.shape[1]
-
+detection = ""
 data = None
-if len(sys.argv) == 4:
+if (len(sys.argv) == 4) and (sys.argv[3] != "[]"):
     # work with provided data points
     coords = ast.literal_eval(sys.argv[3])
     data = np.array(coords)
+    detection = "manual"
 else:
+    detection = "heuristic"
     # extract red points
     data = np.vstack((img[:, :, 2] > 230).nonzero()).T
     if not data.size:
@@ -60,4 +62,4 @@ else:
 pixelsize = width * height
 if (aqm < 0.1) or (aqm > 50):
     exit(5)
-print json.dumps({"area": aqm, "px": pixelsize, "numLaserpoints": laserpoints.shape[0]})
+print json.dumps({"area": aqm, "px": pixelsize, "numLaserpoints": laserpoints.shape[0], "detection": detection})
