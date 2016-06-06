@@ -24,10 +24,17 @@ if (len(sys.argv) == 4) and (sys.argv[3] != "[]"):
 else:
     detection = "heuristic"
     # extract red points
-    data = np.vstack((img[:, :, 2] > 230).nonzero()).T
+    datar = np.vstack((img[:, :, 1] > 230).nonzero()).T
+    # extract green points
+    datag = np.vstack((img[:, :, 0] > 230).nonzero()).T
+    if datar.size > datag.size:
+        data = datar
+    else:
+        data = datag
     if not data.size:
         # no red points found return error
         exit(1)
+
 km = sklearn.cluster.KMeans(n_clusters=3)
 km.fit(data)
 laserpoints = km.cluster_centers_.astype(np.int)
