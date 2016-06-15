@@ -69,6 +69,7 @@ class ComputeAreaForImage extends Job implements ShouldQueue
             $tmp["px"] = $ret["px"];
             $tmp["numLaserpoints"] = $ret["numLaserpoints"];
             $tmp["detection"] = $ret["detection"];
+            $tmp["laserdist"] = $this->laserdist;
             DB::update("update images set metainfo =? where id =?",[json_encode($tmp),$this->image->id]);
         }else{
             Log::warning("laserpoint job for image with ID ".$this->image->id."ended with error code ".$err_code);

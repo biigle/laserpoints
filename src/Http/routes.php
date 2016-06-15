@@ -5,10 +5,10 @@ $router->group([
     'prefix' => 'api/v1',
     'middleware' => 'auth.api',
 ], function ($router) {
-    $router->get('images/{id}/laserpoints/area/{laserdist}', [
+    $router->post('images/{id}/laserpoints/area/{laserdist}', [
         'uses' => 'LaserpointsController@area',
     ]);
-    $router->get('transects/{id}/laserpoints/area/{laserdist}', [
+    $router->post('transects/{id}/laserpoints/area/{laserdist}', [
         'uses' => 'LaserpointsController@TransectArea',
     ]);
 });

@@ -5,6 +5,7 @@ namespace Dias\Modules\Laserpoints;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Routing\Router;
 use Dias\Modules\Laserpoints\Console\Commands\Install as InstallCommand;
+use Dias\Services\Modules;
 
 class LaserpointsServiceProvider extends ServiceProvider {
 
@@ -16,8 +17,9 @@ class LaserpointsServiceProvider extends ServiceProvider {
      *
      * @return void
      */
-    public function boot(Router $router)
+    public function boot(Modules $modules,Router $router)
     {
+        $this->loadViewsFrom(__DIR__.'/resources/views', 'laserpoints');
         $router->group([
             'namespace' => 'Dias\Modules\Laserpoints\Http\Controllers',
             'middleware' => 'web',
@@ -25,11 +27,15 @@ class LaserpointsServiceProvider extends ServiceProvider {
             require __DIR__.'/Http/routes.php';
         });
         $this->publishes([
+            __DIR__.'/public/assets' => public_path('vendor/laserpoints'),
+        ], 'public');
+        $this->publishes([
             __DIR__.'/config/laserpoints.php' => config_path('laserpoints.php'),
         ], 'config');
         $this->publishes([
             __DIR__.'/database/migrations/' => database_path('migrations')
         ], 'migrations');
+        $modules->addMixin('laserpoints', 'imagesIndex');
     }
 
     /**
