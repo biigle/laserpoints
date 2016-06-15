@@ -28,7 +28,7 @@
             @if (isset(json_decode($image->metainfo)->laserdist))
             <tr>
                 <th>Distance of laserpoints</th>
-                <td>{{ json_decode($image->metainfo)->laserdist }}</td>
+                <td>{{ json_decode($image->metainfo)->laserdist }} cm</td>
             </tr>
             @endif
             <tr>
