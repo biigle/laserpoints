@@ -7,6 +7,7 @@
             <h3 class="panel-title">Laserpoints</h3>
         </div>
         <table class="table">
+        @if (isset($image->metainfo))
             <tr>
                 <th>#Pixels</th>
                 <td>{{ json_decode($image->metainfo)->px }}</td>
@@ -19,6 +20,7 @@
                 <th>#Laserpoints</th>
                 <td>{{ json_decode($image->metainfo)->numLaserpoints }}</td>
             </tr>
+        @endif
             @if (isset(json_decode($image->metainfo)->laserdist))
             <tr>
                 <th>Detection Type</th>
