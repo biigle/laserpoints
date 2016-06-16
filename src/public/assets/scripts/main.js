@@ -26,7 +26,6 @@ angular.module('dias.laserpoints').controller('computeAreaController', ["$scope"
         $scope.distance = null;
         $scope.iscomputing = false;
         $scope.request=function(imageid,distance){
-            console.log($scope.distance);
             if (distance === undefined){
                 distance = $scope.distance;
             }

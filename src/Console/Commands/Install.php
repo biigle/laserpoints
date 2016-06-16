@@ -39,6 +39,10 @@ class Install extends Command
             '--provider' => ServiceProvider::class,
             '--tag' => ['migrations'],
         ]);
+        $this->call('vendor:publish', [
+            '--provider' => ServiceProvider::class,
+            '--tag' => ['public'],
+        ]);
 
         if ($this->confirm('Do you want to run the migration right away?')) {
             $this->call('migrate');

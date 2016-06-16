@@ -28,7 +28,7 @@ class LaserpointsController extends Controller
     {
         $image = Image::findOrFail($id);
         $transect = Transect::findOrFail($image->transect_id);
-        $this->requireCanSee($image);
+        $this->authorize('access', $image);
         $this->dispatch(new ComputeAreaForImage($image,$transect,$laserdist));
         echo "Job dispatched. Please wait. The results will be available soon.";
     }
@@ -55,7 +55,7 @@ class LaserpointsController extends Controller
         $transect = Transect::findOrFail($id);
         foreach ($imageInTransect as $imgid) {
             $image = Image::findOrFail($imgid->id);
-            $this->requireCanSee($image);
+            $this->authorize('access', $image);
             $this->dispatch(new ComputeAreaForImage($image,$transect,$laserdist));
             $i++;
         }
