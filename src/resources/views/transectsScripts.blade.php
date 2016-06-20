@@ -1,0 +1,1 @@
+<script src="{{ asset('vendor/laserpoints/scripts/main.js') }}"></script>

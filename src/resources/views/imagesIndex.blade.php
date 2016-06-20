@@ -52,7 +52,7 @@
             @if (isset(json_decode($image->metainfo)->laserdist))
                 <tr>
                     <th>Compute Area</th>
-                    <td><button class="btn-primary" data-ng-disabled="iscomputing" data-ng-click="request({{$image->id}},{{json_decode($image->metainfo)->laserdist}})">Compute Area</button></td>
+                    <td><button class="btn btn-success" data-ng-disabled="iscomputing" data-ng-click="request({{$image->id}},{{json_decode($image->metainfo)->laserdist}})">Compute Area</button></td>
                 </tr>
             @else
                 <tr>
@@ -61,7 +61,7 @@
                 </tr>
                 <tr>
                     <th></th>
-                    <td><button class="btn-primary" data-ng-disabled="iscomputing" data-ng-click="request({{$image->id}})">Compute Area</button></td>
+                    <td><button class="btn btn-success" data-ng-disabled="iscomputing" data-ng-click="request({{$image->id}})">Compute Area</button></td>
                 </tr>
             @endif
         </table>

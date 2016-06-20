@@ -36,6 +36,8 @@ class LaserpointsServiceProvider extends ServiceProvider {
             __DIR__.'/database/migrations/' => database_path('migrations')
         ], 'migrations');
         $modules->addMixin('laserpoints', 'imagesIndex');
+        $modules->addMixin('laserpoints', 'transectsMenubar');
+        $modules->addMixin('laserpoints', 'transectsScripts');
     }
 
     /**
