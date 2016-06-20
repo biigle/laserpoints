@@ -58,22 +58,24 @@ class ComputeAreaForImage extends Job implements ShouldQueue
         $output = [];
         $err_code = 0;
         exec('/usr/bin/python /home/vagrant/dias/vendor/dias/laserpoints/src/Scripts/detect.py '.$this->transect->url."/".$this->image->filename." ".$this->laserdist." ".$laserpoints,$output,$err_code);
+        $jsfield = DB::select("select metainfo from images where id=?",[$this->image->id]);
+        $tmp = json_decode($jsfield[0]->metainfo,true);
+        if (is_null($tmp)){
+            $tmp=array();
+        }
         if ($err_code ==0){
-            $ret = json_decode($output[0],true);
-            $jsfield = DB::select("select metainfo from images where id=?",[$this->image->id]);
-            $tmp = json_decode($jsfield[0]->metainfo,true);
-            if (is_null($tmp)){
-                $tmp=array();
-            }
+            $ret = json_decode($output[0],true);    
             $tmp["area"] = $ret["area"];
             $tmp["px"] = $ret["px"];
             $tmp["numLaserpoints"] = $ret["numLaserpoints"];
             $tmp["detection"] = $ret["detection"];
             $tmp["laserdist"] = $this->laserdist;
             $tmp["laserpoints"] = $ret["laserpoints"];
-            DB::update("update images set metainfo =? where id =?",[json_encode($tmp),$this->image->id]);
+            $tmp["laserpointerror"] = $err_code;
         }else{
             Log::warning("laserpoint job for image with ID ".$this->image->id."ended with error code ".$err_code);
+            $tmp["laserpointerror"] = $err_code;
         }
+        DB::update("update images set metainfo =? where id =?",[json_encode($tmp),$this->image->id]);
     }
 }

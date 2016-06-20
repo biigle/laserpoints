@@ -8,20 +8,31 @@
         </div>
         <table class="table">
         @if (isset($image->metainfo))
+            @if (isset(json_decode($image->metainfo)->laserpointerror) && (json_decode($image->metainfo)->laserpointerror!=0))
+            <tr>
+                <th>Heuristics Error</th>
+                <td>The automatic laserpoint detection failed. Please set laserpoints manually.</td>
+            </tr>    
+            @endif
+            @if (isset(json_decode($image->metainfo)->px))
             <tr>
                 <th>#Pixels</th>
                 <td>{{ json_decode($image->metainfo)->px }}</td>
             </tr>
+            @endif
+            @if (isset(json_decode($image->metainfo)->area))
             <tr>
                 <th>Area</th>
                 <td>{{ json_decode($image->metainfo)->area }} m<sup>2</sup></td>
             </tr>
+            @endif
+            @if (isset(json_decode($image->metainfo)->numLaserpoints))
             <tr>
                 <th>#Laserpoints</th>
                 <td>{{ json_decode($image->metainfo)->numLaserpoints }}</td>
             </tr>
-        @endif
-            @if (isset(json_decode($image->metainfo)->laserdist))
+            @endif
+            @if (isset(json_decode($image->metainfo)->detection))
             <tr>
                 <th>Detection Type</th>
                 <td>{{ json_decode($image->metainfo)->detection }}</td>
@@ -33,6 +44,7 @@
                 <td>{{ json_decode($image->metainfo)->laserdist }} cm</td>
             </tr>
             @endif
+        @endif
             <tr>
                 <th>Operations</th>
                 <td></td>
