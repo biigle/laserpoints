@@ -11,16 +11,16 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class ComputeAreaForImage extends Job implements ShouldQueue
+class ComputeAreaForTransect extends Job implements ShouldQueue
 {
     use InteractsWithQueue, SerializesModels;
 
     /**
-     * The image to compute the area for
+     * The transect to compute the area for
      *
-     * @var Image
+     * @var Transect
      */
-    private $image;
+    private $transect;
 
     /**
      * Distance between laserpoints im cm to use for computation
@@ -32,14 +32,14 @@ class ComputeAreaForImage extends Job implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param Image $image
+     * @param Transect $transect
      * @param float $distance
      *
      * @return void
      */
-    public function __construct(Image $image, $distance)
+    public function __construct(Transect $transect, $distance)
     {
-        $this->image = $image;
+        $this->transect = $transect;
         $this->distance = $distance;
     }
 
@@ -52,6 +52,15 @@ class ComputeAreaForImage extends Job implements ShouldQueue
     {
         $transect = $this->image->transect;
         $laserpointId = config('laserpoints.label_id');
+
+        $images = $this->transect->images()
+            ->pluck('filename', 'id');
+
+        dd($images);
+
+        foreach ($variable as $key => $value) {
+            # code...
+        }
 
         // all laserpoint coordinates of the image
         $annotationPoints = Annotation::join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')

@@ -1,65 +1,65 @@
 <?php
 
 namespace Dias\Modules\Laserpoints\Http\Controllers\Api;
-use DB;
-use Dias\Image;
+
+use Dias\Modules\Laserpoints\Image;
 use Dias\Transect;
 use Dias\Http\Controllers\Api\Controller;
 use Dias\Modules\Laserpoints\Jobs\ComputeAreaForImage;
+use Dias\Modules\Laserpoints\Jobs\ComputeAreaForTransect;
 
 class LaserpointsController extends Controller
 {
     /**
-     * ComputeDistance between laserpoints
+     * Compute distance between laserpoints for an image
      *
-     * @api {post} images/:id/laserpoints/area/:laserdist Compute image footprint
+     * @api {post} images/:id/laserpoints/area Compute image footprint
      * @apiGroup Images
-     * @apiName ComputeArea
-     * @apiPermission projectMember
+     * @apiName ImagesComputeArea
+     * @apiPermission projectEditor
      *
      * @apiParam {Number} id The image ID.
-     * @apiParam {Number} laserdist The distance between two laserpoints in cm.
+     * @apiParam (Required arguments) {Number} distance The distance between two laserpoints in cm.
      *
      * @param int $id image id
-     * @param int $laserdist The distance between two laserpoints in cm.
      * @return \Illuminate\Http\Response
      */
-    public function area($id, $laserdist)
+    public function computeImage($id)
     {
-        $image = Image::findOrFail($id);
-        $transect = Transect::findOrFail($image->transect_id);
-        $this->authorize('access', $image);
-        $this->dispatch(new ComputeAreaForImage($image,$transect,$laserdist));
-        echo "Job dispatched. Please wait. The results will be available soon.";
+        $image = Image::with('transect')->findOrFail($id);
+        $this->authorize('edit-in', $image->transect);
+
+        $this->validate($this->request, Image::$laserpointsRules);
+        $distance = $this->request->input('distance');
+
+        $this->dispatch(new ComputeAreaForImage($image, $distance));
     }
 
      /**
-     * ComputeDistance between laserpoints
+     * Compute distance between laserpoints for a transect
      *
-     * @api {post} transects/:id/laserpoints/area/:laserdist Compute image footprint for all images in a transect
+     * @api {post} transects/:id/laserpoints/area Compute image footprint for all images
      * @apiGroup Transects
-     * @apiName ComputeArea
-     * @apiPermission projectMember
+     * @apiName TransectsComputeImageArea
+     * @apiPermission projectEditor
      *
      * @apiParam {Number} id The transect ID.
-     * @apiParam {Number} laserdist The distance between two laserpoints in cm.
+     * @apiParam (Required arguments) {Number} distance The distance between two laserpoints in cm.
      *
      * @param int $id transect id
-     * @param int $laserdist The distance between two laserpoints in cm.
      * @return \Illuminate\Http\Response
      */
-    public function TransectArea($id, $laserdist)
+    public function computeTransect($id)
     {
-        $imageInTransect = DB::select('SELECT images.id FROM images WHERE transect_id =?',[$id]);
-        $i=0;
-        $transect = Transect::findOrFail($id);
-        foreach ($imageInTransect as $imgid) {
-            $image = Image::findOrFail($imgid->id);
-            $this->authorize('access', $image);
-            $this->dispatch(new ComputeAreaForImage($image,$transect,$laserdist));
-            $i++;
+        $transect = Transect::widht('images')->findOrFail($id);
+        $this->authorize('edit-in', $transect);
+
+        $this->validate($this->request, Image::$laserpointsRules);
+        $distance = $this->request->input('distance');
+
+        foreach ($transect->images as $image) {
+            $this->dispatch(new ComputeAreaForTransect($transect, $distance));
         }
-        echo $i." jobs dispatched. Please wait. The results will be available soon.";
     }
 
 

@@ -1,6 +1,6 @@
 import sys
 import numpy as np
-from scipy.misc import imread, imsave
+from scipy.misc import imread
 import sklearn.cluster
 import scipy.spatial.distance
 import ast
@@ -24,7 +24,7 @@ if (len(sys.argv) == 4) and (sys.argv[3] != "[]"):
 else:
     detection = "heuristic"
     # extract red points
-    thresholdr = 240
+    thresholdr = 140
     datar = np.vstack((img[:, :, 1] > thresholdr).nonzero()).T
     thresholdg = 240
     datag = np.vstack((img[:, :, 0] > thresholdg).nonzero()).T
@@ -71,4 +71,4 @@ else:
 pixelsize = width * height
 if (aqm < 0.1) or (aqm > 50):
     exit(5)
-print json.dumps({"area": aqm, "px": pixelsize, "numLaserpoints": laserpoints.shape[0], "detection": detection, "laserpoints": laserpoints.tolist()})
+print json.dumps({"area": aqm, "px": pixelsize, "count": laserpoints.shape[0], "method": detection, "points": laserpoints.tolist()})
