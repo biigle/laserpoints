@@ -5,7 +5,7 @@ return [
     /*
     | label_id of a laserpoint
     */
-    'label_id' => 5,
+    'label_id' => null,
 
     /*
     | Path to the Python executable.
