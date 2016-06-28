@@ -50,7 +50,7 @@ class LaserpointsController extends Controller
      */
     public function computeTransect($id)
     {
-        $transect = Transect::with('images')->findOrFail($id);
+        $transect = Transect::findOrFail($id);
         $this->authorize('edit-in', $transect);
 
         $this->validate($this->request, Image::$laserpointsRules);
