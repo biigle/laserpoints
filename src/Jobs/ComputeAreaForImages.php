@@ -7,6 +7,7 @@ use DB;
 use Dias\Modules\Laserpoints\Image;
 use Dias\Annotation;
 use Dias\Transect;
+use Dias\Shape;
 use Dias\Modules\Laserpoints\Support\Detect;
 use Exception;
 use Illuminate\Queue\SerializesModels;
@@ -83,6 +84,7 @@ class ComputeAreaForImages extends Job implements ShouldQueue
             ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
             ->whereIn('annotations.image_id', $images->pluck('id')->toArray())
             ->where('annotation_labels.label_id', $labelId)
+            ->where('annotations.shape_id', Shape::$pointId)
             ->select('annotations.points', 'annotations.image_id')
             ->get();
 

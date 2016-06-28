@@ -3,6 +3,7 @@
 use Dias\Modules\Laserpoints\Image;
 use Dias\Modules\Laserpoints\Jobs\ComputeAreaForImages;
 use Dias\Modules\Laserpoints\Support\Detect;
+use Dias\Shape;
 
 class LaserpointsModuleJobsComputeAreaForImagesTest extends TestCase {
 
@@ -52,6 +53,7 @@ class LaserpointsModuleJobsComputeAreaForImagesTest extends TestCase {
             $id = AnnotationTest::create([
                 'image_id' => $image->id,
                 'points' => [100 * $i, 100 * $i],
+                'shape_id' => Shape::$pointId,
             ])->id;
             AnnotationLabelTest::create([
                 'annotation_id' => $id,
