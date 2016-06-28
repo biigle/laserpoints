@@ -3,7 +3,7 @@
 namespace Dias\Modules\Laserpoints\Console\Commands;
 
 use Illuminate\Console\Command;
-use Dias\Modules\Laserpoints\LaserpointsProvider as ServiceProvider;
+use Dias\Modules\Laserpoints\LaserpointsServiceProvider as ServiceProvider;
 
 class Config extends Command {
 
