@@ -1,1 +1,1 @@
-<script src="{{ asset('vendor/laserpoints/scripts/main.js') }}"></script>
+<script src="{{ asset('vendor/laserpoints/scripts/transects.js') }}"></script>

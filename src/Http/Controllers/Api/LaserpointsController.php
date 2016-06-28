@@ -5,8 +5,7 @@ namespace Dias\Modules\Laserpoints\Http\Controllers\Api;
 use Dias\Modules\Laserpoints\Image;
 use Dias\Transect;
 use Dias\Http\Controllers\Api\Controller;
-use Dias\Modules\Laserpoints\Jobs\ComputeAreaForImage;
-use Dias\Modules\Laserpoints\Jobs\ComputeAreaForTransect;
+use Dias\Modules\Laserpoints\Jobs\ComputeAreaForImages;
 
 class LaserpointsController extends Controller
 {
@@ -32,7 +31,7 @@ class LaserpointsController extends Controller
         $this->validate($this->request, Image::$laserpointsRules);
         $distance = $this->request->input('distance');
 
-        $this->dispatch(new ComputeAreaForImage($image, $distance));
+        $this->dispatch(new ComputeAreaForImages($image->transect, $distance, [$image->id]));
     }
 
      /**
@@ -51,15 +50,13 @@ class LaserpointsController extends Controller
      */
     public function computeTransect($id)
     {
-        $transect = Transect::widht('images')->findOrFail($id);
+        $transect = Transect::with('images')->findOrFail($id);
         $this->authorize('edit-in', $transect);
 
         $this->validate($this->request, Image::$laserpointsRules);
         $distance = $this->request->input('distance');
 
-        foreach ($transect->images as $image) {
-            $this->dispatch(new ComputeAreaForTransect($transect, $distance));
-        }
+        $this->dispatch(new ComputeAreaForImages($transect, $distance));
     }
 
 

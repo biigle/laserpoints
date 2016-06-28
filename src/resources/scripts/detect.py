@@ -24,7 +24,7 @@ if (len(sys.argv) == 4) and (sys.argv[3] != "[]"):
 else:
     detection = "heuristic"
     # extract red points
-    thresholdr = 140
+    thresholdr = 240
     datar = np.vstack((img[:, :, 1] > thresholdr).nonzero()).T
     thresholdg = 240
     datag = np.vstack((img[:, :, 0] > thresholdg).nonzero()).T

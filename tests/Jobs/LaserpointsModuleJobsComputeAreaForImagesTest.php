@@ -1,10 +1,10 @@
 <?php
 
 use Dias\Modules\Laserpoints\Image;
-use Dias\Modules\Laserpoints\Jobs\ComputeAreaForImage;
+use Dias\Modules\Laserpoints\Jobs\ComputeAreaForImages;
 use Dias\Modules\Laserpoints\Support\Detect;
 
-class LaserpointsModuleJobsComputeAreaForImageTest extends TestCase {
+class LaserpointsModuleJobsComputeAreaForImagesTest extends TestCase {
 
     public function testHandleHeuristic()
     {
@@ -26,7 +26,7 @@ class LaserpointsModuleJobsComputeAreaForImageTest extends TestCase {
             return $mock;
         });
 
-        with(new ComputeAreaForImage($image, 20))->handle();
+        with(new ComputeAreaForImages($image->transect, 20))->handle();
 
         $expect = [
             'area' => 100,
@@ -38,7 +38,7 @@ class LaserpointsModuleJobsComputeAreaForImageTest extends TestCase {
             'distance' => 20,
         ];
 
-        $this->assertEquals($expect, $image->laserpoints);
+        $this->assertEquals($expect, $image->fresh()->laserpoints);
 
     }
 
@@ -80,7 +80,7 @@ class LaserpointsModuleJobsComputeAreaForImageTest extends TestCase {
         });
 
 
-        with(new ComputeAreaForImage($image, 30))->handle();
+        with(new ComputeAreaForImages($image->transect, 30))->handle();
 
         $expect = [
             'area' => 100,
@@ -92,7 +92,7 @@ class LaserpointsModuleJobsComputeAreaForImageTest extends TestCase {
             'distance' => 30,
         ];
 
-        $this->assertEquals($expect, $image->laserpoints);
+        $this->assertEquals($expect, $image->fresh()->laserpoints);
 
     }
 
@@ -109,14 +109,14 @@ class LaserpointsModuleJobsComputeAreaForImageTest extends TestCase {
             return $mock;
         });
 
-        with(new ComputeAreaForImage($image, 30))->handle();
+        with(new ComputeAreaForImages($image->transect, 30))->handle();
 
         $expect = [
             'error' => true,
             'distance' => 30,
         ];
 
-        $this->assertEquals($expect, $image->laserpoints);
+        $this->assertEquals($expect, $image->fresh()->laserpoints);
 
     }
 }
