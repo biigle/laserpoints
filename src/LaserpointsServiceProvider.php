@@ -36,8 +36,12 @@ class LaserpointsServiceProvider extends ServiceProvider {
         ], 'config');
 
         $modules->addMixin('laserpoints', 'imagesIndex');
+
         $modules->addMixin('laserpoints', 'transectsMenubar');
         $modules->addMixin('laserpoints', 'transectsScripts');
+
+        $modules->addMixin('laserpoints', 'annotationsSettings');
+        $modules->addMixin('laserpoints', 'annotationsScripts');
     }
 
     /**
