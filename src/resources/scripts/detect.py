@@ -71,4 +71,5 @@ else:
 pixelsize = width * height
 if (aqm < 0.1) or (aqm > 50):
     exit(5)
-print json.dumps({"area": aqm, "px": pixelsize, "count": laserpoints.shape[0], "method": detection, "points": laserpoints.tolist()})
+# use fliplr to print coordinates as [x, y] tuples instead of [y, x]
+print json.dumps({"area": aqm, "px": pixelsize, "count": laserpoints.shape[0], "method": detection, "points": np.fliplr(laserpoints).tolist()})
