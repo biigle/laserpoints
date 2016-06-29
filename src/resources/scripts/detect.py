@@ -19,7 +19,7 @@ data = None
 if (len(sys.argv) == 4) and (sys.argv[3] != "[]"):
     # work with provided data points
     coords = ast.literal_eval(sys.argv[3])
-    data = np.array(coords)
+    data = np.fliplr(np.array(coords))
     detection = "manual"
 else:
     detection = "heuristic"
