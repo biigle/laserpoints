@@ -5,7 +5,7 @@
  * @memberOf dias.annotations
  * @description Wrapper service the laserpoint information of an image
  */
-angular.module('dias.annotations').service('laserpoints', function (LaserpointsImage, map, images, styles) {
+angular.module('dias.annotations').service('laserpoints', function (LaserpointsImage, map, images) {
     "use strict";
 
     // maps image ID to the laserpoints object of the image
@@ -15,14 +15,34 @@ angular.module('dias.annotations').service('laserpoints', function (LaserpointsI
 
     var cancelUpdate;
 
-    var features = new ol.Collection();
-    var source = new ol.source.Vector({
-        features: features
-    });
+    // a circle with a red and white stroke
+    var style = [
+        new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 6,
+                stroke: new ol.style.Stroke({
+                    color: 'white',
+                    width: 4
+                })
+            })
+        }),
+        new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 6,
+                stroke: new ol.style.Stroke({
+                    color: '#ff0000',
+                    width: 2,
+                    lineDash: [1]
+                })
+            })
+        })
+    ];
+
+    var source = new ol.source.Vector();
     var layer = new ol.layer.Vector({
         source: source,
-        style: styles.highlight,
-        zIndex: 2
+        style: style,
+        zIndex: 3
     });
 
     map.addLayer(layer);
