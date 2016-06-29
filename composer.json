@@ -1,6 +1,8 @@
 {
     "name": "dias/laserpoints",
     "require": {
+        "dias/annotations": "~0.4",
+        "dias/transects": "~0.4"
     },
     "require-dev": {
     },
