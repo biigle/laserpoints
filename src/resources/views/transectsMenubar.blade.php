@@ -1,17 +1,20 @@
-<div>
-        <button class="btn btn-default transect-menubar__item" data-popover-placement="right" data-uib-popover-template="'laserpointsPopover.html'" type="button" title="Compute the area of each image in this transect.">
+@can('edit-in', $transect)
+    <div data-ng-controller="LaserpointsController">
+        <button class="btn btn-default transect-menubar__item" data-popover-placement="right" data-uib-popover-template="'laserpointsPopover.html'" type="button" title="Compute the area of each image in this transect">
             <span class="glyphicon glyphicon-sound-stereo" aria-hidden="true"></span>
         </button>
-        <script type="text/ng-template" id="laserpointsPopover.html">
-            <div class="background-segmentation-popup clearfix" data-ng-class="{help:show.help}" data-ng-controller="computeAreaControllerTransects">
-                    <form class="form" data-ng-if="!data.iscomputing">
-                        <label for="lpdistance">Laserpoint distance</label>
-                        <input data-ng-model="data.distance" type="number"  id="lpdistance" title="Choose a distance between two laserpoints">
-                    </form>
-                    <button data-ng-click="request({{$transect->id}})" data-ng-if="!data.iscomputing" class="btn btn-success pull-right" title="Compute the area of each image in this transect.">Submit</button>
-                    <div data-ng-if="data.iscomputing">
-                        <i class="glyphicon glyphicon-repeat glyphicon-spin"></i> Computing...
-                    </div>
+    </div>
+    <script type="text/ng-template" id="laserpointsPopover.html">
+        <form class="" data-ng-hide="isSubmitted()">
+            <div class="form-group">
+                <input data-ng-model="data.distance" type="number" id="distance" title="Distance between two laserpoints in cm" placeholder="Laser distance in cm" class="form-control" required>
             </div>
-        </script>
-</div>
+            <div class="form-group">
+                <button data-ng-click="newDetection()" class="btn btn-success" title="Compute the area of each image in this  transect." data-ng-disabled="isComputing()">Submit</button>
+            </div>
+        </form>
+        <div class="alert alert-success ng-hide" data-ng-show="isSubmitted()">
+            The laserpoint detection was submitted and will be available soon.
+        </div>
+    </script>
+@endcan

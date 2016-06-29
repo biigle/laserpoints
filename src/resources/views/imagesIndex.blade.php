@@ -2,68 +2,81 @@
     <script src="{{ asset('vendor/laserpoints/scripts/main.js') }}"></script>
 @endpush
 <div class="col-sm-6 col-lg-4">
-    <div class="panel panel-default" data-ng-app="dias.laserpoints" data-ng-controller="computeAreaController">
+    <div class="panel panel-default">
         <div class="panel-heading">
             <h3 class="panel-title">Laserpoints</h3>
         </div>
-        <table class="table">
-        @if (isset($image->metainfo))
-            @if (isset(json_decode($image->metainfo)->laserpointerror) && (json_decode($image->metainfo)->laserpointerror!=0))
-            <tr>
-                <th>Heuristics Error</th>
-                <td>The automatic laserpoint detection failed. Please set laserpoints manually.</td>
-            </tr>    
-            @endif
-            @if (isset(json_decode($image->metainfo)->px))
-            <tr>
-                <th>#Pixels</th>
-                <td>{{ json_decode($image->metainfo)->px }}</td>
-            </tr>
-            @endif
-            @if (isset(json_decode($image->metainfo)->area))
-            <tr>
-                <th>Area</th>
-                <td>{{ json_decode($image->metainfo)->area }} m<sup>2</sup></td>
-            </tr>
-            @endif
-            @if (isset(json_decode($image->metainfo)->numLaserpoints))
-            <tr>
-                <th>#Laserpoints</th>
-                <td>{{ json_decode($image->metainfo)->numLaserpoints }}</td>
-            </tr>
-            @endif
-            @if (isset(json_decode($image->metainfo)->detection))
-            <tr>
-                <th>Detection Type</th>
-                <td>{{ json_decode($image->metainfo)->detection }}</td>
-            </tr>
-            @endif
-            @if (isset(json_decode($image->metainfo)->laserdist))
-            <tr>
-                <th>Distance of laserpoints</th>
-                <td>{{ json_decode($image->metainfo)->laserdist }} cm</td>
-            </tr>
-            @endif
+        <?php $img = \Dias\Modules\Laserpoints\Image::convert($image) ?>
+        @if ($img->laserpoints)
+            <table class="table">
+                @if ($img->px)
+                    <tr>
+                        <th>Number of pixels</th>
+                        <td>{{ $img->px }}</td>
+                    </tr>
+                @endif
+
+                @if ($img->area)
+                    <tr>
+                        <th>Area covered by the image</th>
+                        <td>{{ round($img->area, 2) }} m²</td>
+                    </tr>
+                @endif
+
+                @if ($img->count)
+                    <tr>
+                        <th>Number of laserpoints</th>
+                        <td>{{ $img->count }}</td>
+                    </tr>
+                @endif
+
+                @if ($img->method)
+                    <tr>
+                        <th>Detection method</th>
+                        <td>{{ $img->method }}</td>
+                    </tr>
+                @endif
+
+                @if ($img->distance)
+                    <tr>
+                        <th>Distance between laserpoints</th>
+                        <td>{{ $img->distance }} cm</td>
+                    </tr>
+                @endif
+            </table>
         @endif
-            <tr>
-                <th>Operations</th>
-                <td></td>
-            </tr>
-            @if (isset(json_decode($image->metainfo)->laserdist))
-                <tr>
-                    <th>Compute Area</th>
-                    <td><button class="btn btn-success" data-ng-disabled="iscomputing" data-ng-click="request({{$image->id}},{{json_decode($image->metainfo)->laserdist}})">Compute Area</button></td>
-                </tr>
-            @else
-                <tr>
-                    <th>Compute Area</th>
-                    <td><input data-ng-model="distance" id="laserdist" type="number" placeholder="Laserdistance in cm"></input></td>
-                </tr>
-                <tr>
-                    <th></th>
-                    <td><button class="btn btn-success" data-ng-disabled="iscomputing" data-ng-click="request({{$image->id}})">Compute Area</button></td>
-                </tr>
+        <div class="panel-body" data-ng-app="dias.laserpoints" data-ng-controller="LaserpointsController">
+            @if (!$img->laserpoints)
+                <div class="alert alert-info" data-ng-hide="isSubmitted()">
+                    No laserpoint detection was performed yet.
+                </div>
+            @elseif($img->error)
+                <div class="alert alert-danger" data-ng-hide="isSubmitted()">
+                    The automatic laserpoint detection failed. Please annotate laserpoints manually.
+                </div>
             @endif
-        </table>
+            @can('add-annotation', $image)
+                <form class="form-inline" data-ng-hide="isSubmitted()">
+                    @if($img->laserpoints)
+                        <div class="form-group">
+                            <input class="form-control" data-ng-model="distance" id="distance" type="number" placeholder="New laser distance in cm" title="Distance between two laserpoints in cm. Leave empty to use the previously set distance ({{$img->distance}})"></input>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-success" data-ng-disabled="isComputing()" data-ng-click="reDetection({{$image->id}}, {{$img->distance}})" title="Restart the laserpoint detection">Submit</button>
+                        </div>
+                    @else
+                        <div class="form-group">
+                            <input class="form-control" data-ng-model="distance" id="distance" type="number" placeholder="Laser distance in cm" title="Distance between two laserpoints in cm" required></input>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-success" data-ng-disabled="isComputing()" data-ng-click="newDetection({{$image->id}})" title="Start a new laserpoint detection">Submit</button>
+                        </div>
+                    @endif
+                </form>
+                <div class="alert alert-success ng-cloak ng-hide" data-ng-show="isSubmitted()">
+                    The laserpoint detection was submitted and will be available soon.
+                </div>
+            @endcan
+        </div>
     </div>
 </div>

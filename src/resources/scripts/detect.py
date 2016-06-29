@@ -1,6 +1,6 @@
 import sys
 import numpy as np
-from scipy.misc import imread, imsave
+from scipy.misc import imread
 import sklearn.cluster
 import scipy.spatial.distance
 import ast
@@ -19,7 +19,7 @@ data = None
 if (len(sys.argv) == 4) and (sys.argv[3] != "[]"):
     # work with provided data points
     coords = ast.literal_eval(sys.argv[3])
-    data = np.array(coords)
+    data = np.fliplr(np.array(coords))
     detection = "manual"
 else:
     detection = "heuristic"
@@ -71,4 +71,5 @@ else:
 pixelsize = width * height
 if (aqm < 0.1) or (aqm > 50):
     exit(5)
-print json.dumps({"area": aqm, "px": pixelsize, "numLaserpoints": laserpoints.shape[0], "detection": detection, "laserpoints": laserpoints.tolist()})
+# use fliplr to print coordinates as [x, y] tuples instead of [y, x]
+print json.dumps({"area": aqm, "px": pixelsize, "count": laserpoints.shape[0], "method": detection, "points": np.fliplr(laserpoints).tolist()})
