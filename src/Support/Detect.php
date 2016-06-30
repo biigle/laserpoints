@@ -23,7 +23,8 @@ class Detect
         $code = 0;
         $python = config('laserpoints.python');
         $script = config('laserpoints.script');
-        $output = system("{$python} {$script} {$imageUrl} {$distance} \"{$points}\"", $code);
+        $dummy = [];
+        $output = exec("{$python} {$script} {$imageUrl} {$distance} \"{$points}\"",$dummy, $code);
 
         if ($code !== 0) {
             throw new Exception("Laserpoint detection script failed with exit code {$code}.");
