@@ -48,7 +48,7 @@ angular.module('dias.annotations').service('laserpoints', function (LaserpointsI
     map.addLayer(layer);
 
     var showPoints = function (laserpoints) {
-        if (laserpoints.method === 'manual' || laserpoints.points.length === 0) {
+        if (laserpoints.method === 'manual' || !laserpoints.points || laserpoints.points.length === 0) {
             return;
         }
 
