@@ -13,8 +13,8 @@ imgfile = sys.argv[1]
 laserdistparam = sys.argv[2]
 
 img = imread(imgfile)
-img[:, 0:img.shape[1] * 0.15, :] = 0
-img[:, img.shape[1] - img.shape[1] * 0.15:, :] = 0
+img[:, 0:int(img.shape[1] * 0.15), :] = 0
+img[:, int(img.shape[1] - img.shape[1] * 0.15):, :] = 0
 
 width = img.shape[0]
 height = img.shape[1]
