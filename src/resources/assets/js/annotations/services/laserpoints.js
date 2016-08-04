@@ -42,7 +42,9 @@ angular.module('dias.annotations').service('laserpoints', function (LaserpointsI
     var layer = new ol.layer.Vector({
         source: source,
         style: style,
-        zIndex: 3
+        zIndex: 3,
+        updateWhileAnimating: true,
+        updateWhileInteracting: true
     });
 
     map.addLayer(layer);
