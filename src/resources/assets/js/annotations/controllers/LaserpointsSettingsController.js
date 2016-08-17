@@ -5,14 +5,19 @@
  * @memberOf dias.annotations
  * @description Controller for the laserpoints settings
  */
-angular.module('dias.annotations').controller('LaserpointsSettingsController', function ($scope, laserpoints) {
+angular.module('dias.annotations').controller('LaserpointsSettingsController', function ($scope, laserpoints, settings) {
         "use strict";
 
-        $scope.setDefaultSettings('laserpoint_opacity', '1');
+        var key = 'laserpoint_opacity';
 
-        var pointsShown = $scope.settings.laserpoint_opacity != '0';
+        settings.setDefaultSettings(key, '1');
 
-        $scope.$watch('settings.laserpoint_opacity', function (opacity) {
+        $scope[key] = settings.getPermanentSettings(key);
+
+        var pointsShown = $scope[key] != '0';
+
+        $scope.$watch(key, function (opacity) {
+            settings.setPermanentSettings(key, opacity);
             laserpoints.setOpacity(opacity);
 
             if (!pointsShown && opacity > 0) {
@@ -25,7 +30,7 @@ angular.module('dias.annotations').controller('LaserpointsSettingsController', f
         });
 
         // immediately show mask if stored opacity is not 0
-        if ($scope.settings.laserpoint_opacity != '0') {
+        if (pointsShown) {
             laserpoints.show($scope);
         }
 
