@@ -2,8 +2,9 @@
 
 namespace Dias\Modules\Laserpoints\Http\Controllers\Api;
 
-use Dias\Modules\Laserpoints\Image;
 use Dias\Transect;
+use Illuminate\Http\Request;
+use Dias\Modules\Laserpoints\Image;
 use Dias\Http\Controllers\Api\Controller;
 use Dias\Modules\Laserpoints\Jobs\ComputeAreaForImages;
 
@@ -20,16 +21,17 @@ class LaserpointsController extends Controller
      * @apiParam {Number} id The image ID.
      * @apiParam (Required arguments) {Number} distance The distance between two laserpoints in cm.
      *
+     * @param Request $request
      * @param int $id image id
      * @return \Illuminate\Http\Response
      */
-    public function computeImage($id)
+    public function computeImage(Request $request, $id)
     {
         $image = Image::with('transect')->findOrFail($id);
         $this->authorize('edit-in', $image->transect);
 
-        $this->validate($this->request, Image::$laserpointsRules);
-        $distance = $this->request->input('distance');
+        $this->validate($request, Image::$laserpointsRules);
+        $distance = $request->input('distance');
 
         $this->dispatch(new ComputeAreaForImages($image->transect, $distance, [$image->id]));
     }
@@ -45,16 +47,17 @@ class LaserpointsController extends Controller
      * @apiParam {Number} id The transect ID.
      * @apiParam (Required arguments) {Number} distance The distance between two laserpoints in cm.
      *
+     * @param Request $request
      * @param int $id transect id
      * @return \Illuminate\Http\Response
      */
-    public function computeTransect($id)
+    public function computeTransect(Request $request, $id)
     {
         $transect = Transect::findOrFail($id);
         $this->authorize('edit-in', $transect);
 
-        $this->validate($this->request, Image::$laserpointsRules);
-        $distance = $this->request->input('distance');
+        $this->validate($request, Image::$laserpointsRules);
+        $distance = $request->input('distance');
 
         $this->dispatch(new ComputeAreaForImages($transect, $distance));
     }
