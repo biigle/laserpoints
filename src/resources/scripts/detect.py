@@ -26,6 +26,7 @@ if (len(sys.argv) == 4) and (sys.argv[3] != "[]"):
     coords = ast.literal_eval(sys.argv[3])
     data = np.fliplr(np.array(coords))
     detection = "manual"
+    COLOR_THRESHOLD = 0
 else:
     detection = "heuristic"
     # extract red points
