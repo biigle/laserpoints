@@ -44,12 +44,14 @@ else:
         # no red/green points found return error
         exit(1)
 
-km = sklearn.cluster.KMeans(n_clusters=3)
-km.fit(data)
-laserpoints = km.cluster_centers_.astype(np.int)
-
-dists = scipy.spatial.distance.pdist(laserpoints)
-if np.abs(dists[0] - dists[1]) > DISTANCE_THRESHOLD or np.abs(dists[1] - dists[2]) > DISTANCE_THRESHOLD or np.abs(dists[1] - dists[2]) > DISTANCE_THRESHOLD or np.any(img[[laserpoints[:, 0], laserpoints[:, 1], colorchannel]] < (COLOR_THRESHOLD * 0.9)):
+laserpoints = None
+dists = None
+if data.shape[0] > 2:
+    km = sklearn.cluster.KMeans(n_clusters=3)
+    km.fit(data)
+    laserpoints = km.cluster_centers_.astype(np.int)
+    dists = scipy.spatial.distance.pdist(laserpoints)
+if dists is None or (dists and np.abs(dists[0] - dists[1]) > DISTANCE_THRESHOLD or np.abs(dists[1] - dists[2]) > DISTANCE_THRESHOLD or np.abs(dists[1] - dists[2]) > DISTANCE_THRESHOLD or np.any(img[[laserpoints[:, 0], laserpoints[:, 1], colorchannel]] < (COLOR_THRESHOLD * 0.9))):
     # three laserpoints does not work try two
     km = sklearn.cluster.KMeans(n_clusters=2)
     km.fit(data)
