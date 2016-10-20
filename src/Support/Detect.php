@@ -2,6 +2,7 @@
 
 namespace Dias\Modules\Laserpoints\Support;
 
+use Log;
 use Exception;
 
 /**
@@ -23,11 +24,17 @@ class Detect
         $code = 0;
         $python = config('laserpoints.python');
         $script = config('laserpoints.script');
-        $dummy = [];
-        $output = exec("{$python} {$script} \"{$imageUrl}\" {$distance} \"{$points}\"", $dummy, $code);
+        $lines = [];
+        $command = "{$python} {$script} \"{$imageUrl}\" {$distance} \"{$points}\"";
+        $output = exec($command, $lines, $code);
 
         if ($code !== 0) {
-            throw new Exception("Laserpoint detection script failed with exit code {$code}.");
+            $message = "Laserpoint detection script failed with exit code {$code}.";
+            Log::error($message, [
+                'command' => $command,
+                'output' => $lines,
+            ]);
+            throw new Exception($message);
         }
 
         return json_decode($output, true);
