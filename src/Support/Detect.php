@@ -25,7 +25,7 @@ class Detect
         $python = config('laserpoints.python');
         $script = config('laserpoints.script');
         $lines = [];
-        $command = "{$python} {$script} \"{$imageUrl}\" {$distance} \"{$points}\"";
+        $command = "{$python} {$script} \"{$imageUrl}\" {$distance} \"{$points}\" 2>&1";
         $output = exec($command, $lines, $code);
 
         if ($code !== 0) {
