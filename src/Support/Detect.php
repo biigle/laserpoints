@@ -30,10 +30,14 @@ class Detect
 
         if ($code !== 0) {
             $message = "Laserpoint detection script failed with exit code {$code}.";
-            Log::error($message, [
-                'command' => $command,
-                'output' => $lines,
-            ]);
+
+            // code 1 just means no laserpoints found; all others are real errors
+            if ($code !== 1) {
+                Log::error($message, [
+                    'command' => $command,
+                    'output' => $lines,
+                ]);
+            }
             throw new Exception($message);
         }
 
