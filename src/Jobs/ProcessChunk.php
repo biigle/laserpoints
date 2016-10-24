@@ -2,28 +2,33 @@
 
 namespace Dias\Modules\Laserpoints\Jobs;
 
-use Dias\Jobs\Job;
 use DB;
-use Dias\Modules\Laserpoints\Image;
-use Dias\Annotation;
-use Dias\Transect;
-use Dias\Shape;
-use Dias\Modules\Laserpoints\Support\Detect;
 use Exception;
+use Dias\Shape;
+use Dias\Jobs\Job;
+use Dias\Modules\Laserpoints\Image;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Dias\Modules\Laserpoints\Support\Detect;
 
-class ComputeAreaForImages extends Job implements ShouldQueue
+class ProcessChunk extends Job implements ShouldQueue
 {
     use InteractsWithQueue, SerializesModels;
 
     /**
-     * The transect to compute the area for
+     * URL of the transect the images belong to.
      *
-     * @var Transect
+     * @var string
      */
-    private $transect;
+    protected $transectUrl;
+
+    /**
+     * IDs of all images that should be processed in this chunk.
+     *
+     * @var array
+     */
+    protected $ids;
 
     /**
      * Distance between laserpoints im cm to use for computation
@@ -33,26 +38,19 @@ class ComputeAreaForImages extends Job implements ShouldQueue
     private $distance;
 
     /**
-     * IDs of images to restrict this job to
-     *
-     * @var array
-     */
-    private $only;
-
-    /**
      * Create a new job instance.
      *
-     * @param Transect $transect
+     * @param string $transectUrl
+     * @param array $ids
      * @param float $distance
-     * @param array $only IDs of the images to restrict this job to
      *
      * @return void
      */
-    public function __construct(Transect $transect, $distance, array $only = [])
+    public function __construct($transectUrl, $ids, $distance)
     {
-        $this->transect = $transect;
+        $this->transectUrl = $transectUrl;
+        $this->ids = $ids;
         $this->distance = $distance;
-        $this->only = $only;
     }
 
     /**
@@ -65,24 +63,10 @@ class ComputeAreaForImages extends Job implements ShouldQueue
         $labelId = config('laserpoints.label_id');
         $detect = app()->make(Detect::class);
 
-        if (empty($this->only)) {
-            $query = Image::where('transect_id', $this->transect->id);
-        } else {
-            $query = Image::where('transect_id', $this->transect->id)
-                ->whereIn('id', $this->only);
-        }
-
-        $query->chunkById(500, function ($images) use ($detect, $labelId) {
-            $this->handleBatch($images, $detect, $labelId);
-        });
-    }
-
-    private function handleBatch($images, $detect, $labelId)
-    {
-        // get all laserpoint annotations of this batch
+        // get all laserpoint annotations of this chunk
         $points = DB::table('annotations')
             ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
-            ->whereIn('annotations.image_id', $images->pluck('id')->toArray())
+            ->whereIn('annotations.image_id', $this->ids)
             ->where('annotation_labels.label_id', $labelId)
             ->where('annotations.shape_id', Shape::$pointId)
             ->select('annotations.points', 'annotations.image_id')
@@ -91,19 +75,21 @@ class ComputeAreaForImages extends Job implements ShouldQueue
         // map of image IDs to all laserpoint coordinates on the image
         $points = collect($points)->groupBy('image_id');
 
+        $images = Image::whereIn('id', $this->ids)->select('id', 'filename')->get();
+
         foreach ($images as $image) {
 
+            $imagePoints = '[';
             if ($points->has($image->id)) {
-                $imagePoints = '['.$points[$image->id]->pluck('points')->implode(',').']';
-            } else {
-                $imagePoints = '[]';
+                $imagePoints .= $points[$image->id]->pluck('points')->implode(',');
             }
+            $imagePoints .= ']';
 
             $output = [];
 
             try {
                 $output = $detect->execute(
-                    "{$this->transect->url}/{$image->filename}",
+                    "{$this->transectUrl}/{$image->filename}",
                     $this->distance,
                     $imagePoints
                 );
@@ -118,6 +104,5 @@ class ComputeAreaForImages extends Job implements ShouldQueue
             $image->laserpoints = $output;
             $image->save();
         }
-
     }
 }

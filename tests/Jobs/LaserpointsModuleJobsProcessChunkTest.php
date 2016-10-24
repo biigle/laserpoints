@@ -1,11 +1,11 @@
 <?php
 
-use Dias\Modules\Laserpoints\Image;
-use Dias\Modules\Laserpoints\Jobs\ComputeAreaForImages;
-use Dias\Modules\Laserpoints\Support\Detect;
 use Dias\Shape;
+use Dias\Modules\Laserpoints\Image;
+use Dias\Modules\Laserpoints\Support\Detect;
+use Dias\Modules\Laserpoints\Jobs\ProcessChunk;
 
-class LaserpointsModuleJobsComputeAreaForImagesTest extends TestCase {
+class LaserpointsModuleJobsProcessChunkTest extends TestCase {
 
     public function testHandleHeuristic()
     {
@@ -27,7 +27,7 @@ class LaserpointsModuleJobsComputeAreaForImagesTest extends TestCase {
             return $mock;
         });
 
-        with(new ComputeAreaForImages($image->transect, 20))->handle();
+        with(new ProcessChunk($image->transect->url, [$image->id], 20))->handle();
 
         $expect = [
             'area' => 100,
@@ -82,7 +82,7 @@ class LaserpointsModuleJobsComputeAreaForImagesTest extends TestCase {
         });
 
 
-        with(new ComputeAreaForImages($image->transect, 30))->handle();
+        with(new ProcessChunk($image->transect->url, [$image->id], 30))->handle();
 
         $expect = [
             'area' => 100,
@@ -111,7 +111,7 @@ class LaserpointsModuleJobsComputeAreaForImagesTest extends TestCase {
             return $mock;
         });
 
-        with(new ComputeAreaForImages($image->transect, 30))->handle();
+        with(new ProcessChunk($image->transect->url, [$image->id], 30))->handle();
 
         $expect = [
             'error' => true,

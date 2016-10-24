@@ -1,6 +1,6 @@
 <?php
 
-use Dias\Modules\Laserpoints\Jobs\ComputeAreaForImages;
+use Dias\Modules\Laserpoints\Jobs\LaserpointDetection;
 
 class LaserpointsModuleHttpControllersApiLaserpointsControllerTest extends ApiTestCase {
 
@@ -18,7 +18,7 @@ class LaserpointsModuleHttpControllersApiLaserpointsControllerTest extends ApiTe
         $this->post("/api/v1/images/{$image->id}/laserpoints/area");
         $this->assertResponseStatus(302);
 
-        $this->expectsJobs(ComputeAreaForImages::class);
+        $this->expectsJobs(LaserpointDetection::class);
         $this->post("/api/v1/images/{$image->id}/laserpoints/area", ['distance' => 50]);
         $this->assertResponseOk();
     }
@@ -37,7 +37,7 @@ class LaserpointsModuleHttpControllersApiLaserpointsControllerTest extends ApiTe
         $this->post("/api/v1/transects/{$id}/laserpoints/area");
         $this->assertResponseStatus(302);
 
-        $this->expectsJobs(ComputeAreaForImages::class);
+        $this->expectsJobs(LaserpointDetection::class);
         $this->post("/api/v1/transects/{$id}/laserpoints/area", ['distance' => 50]);
         $this->assertResponseOk();
     }

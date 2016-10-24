@@ -6,7 +6,7 @@ use Dias\Transect;
 use Illuminate\Http\Request;
 use Dias\Modules\Laserpoints\Image;
 use Dias\Http\Controllers\Api\Controller;
-use Dias\Modules\Laserpoints\Jobs\ComputeAreaForImages;
+use Dias\Modules\Laserpoints\Jobs\LaserpointDetection;
 
 class LaserpointsController extends Controller
 {
@@ -33,7 +33,7 @@ class LaserpointsController extends Controller
         $this->validate($request, Image::$laserpointsRules);
         $distance = $request->input('distance');
 
-        $this->dispatch(new ComputeAreaForImages($image->transect, $distance, [$image->id]));
+        $this->dispatch(new LaserpointDetection($image->transect, $distance, [$image->id]));
     }
 
      /**
@@ -59,8 +59,6 @@ class LaserpointsController extends Controller
         $this->validate($request, Image::$laserpointsRules);
         $distance = $request->input('distance');
 
-        $this->dispatch(new ComputeAreaForImages($transect, $distance));
+        $this->dispatch(new LaserpointDetection($transect, $distance));
     }
-
-
 }
