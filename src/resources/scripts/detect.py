@@ -42,6 +42,10 @@ else:
         colorchannel = 0
     if not data.size:
         # no red/green points found return error
+        print json.dumps({
+            "error": True,
+            "message": "Could not detect any laserpoints."
+        })
         exit(1)
 
 laserpoints = None
@@ -59,9 +63,13 @@ if (dists is None) or (np.abs(dists[0] - dists[1]) > DISTANCE_THRESHOLD or np.ab
     dists = scipy.spatial.distance.pdist(laserpoints)
     # check if clustering was correct could by accident approximate 3 laserpoints with 2 and if cluster points are actually green/red
     if np.sqrt(km.inertia_ / dists.shape[0]) > DISTANCE_THRESHOLD or np.any(img[[laserpoints[:, 0], laserpoints[:, 1], colorchannel]] < (COLOR_THRESHOLD * 0.9)):
-        print laserpoints
-        print img[[laserpoints[:, 0], laserpoints[:, 1], colorchannel]]
-        exit(2)
+        # print laserpoints
+        # print img[[laserpoints[:, 0], laserpoints[:, 1], colorchannel]]
+        print json.dumps({
+            "error": True,
+            "message": "Error during laserpoint clustering."
+        })
+        exit(1)
 
 if laserpoints.shape[0] == 3:
     a = np.sqrt(np.power(float(laserpoints[0, 0]) - float(laserpoints[1, 0]), 2) + np.power(float(laserpoints[0, 1]) - float(laserpoints[1, 1]), 2))
@@ -73,7 +81,11 @@ if laserpoints.shape[0] == 3:
     s = (a + b + c) / 2.
     apx = np.sqrt(s * (s - a) * (s - b) * (s - c))
     if apx == 0:
-        exit(3)
+        print json.dumps({
+            "error": True,
+            "message": "Computed pixel area is zero."
+        })
+        exit(1)
     aqm = are * (float(width) * float(height)) / apx
 elif laserpoints.shape[0] == 2:
     a = np.sqrt(np.power(float(laserpoints[0, 0]) - float(laserpoints[1, 0]), 2) + np.power(float(laserpoints[0, 1]) - float(laserpoints[1, 1]), 2))
@@ -81,9 +93,31 @@ elif laserpoints.shape[0] == 2:
     aqm = (flen * width) / a * (flen * height) / a
 else:
     # actually this should never happen
-    exit(4)
+    print json.dumps({
+        "error": True,
+        "message": "Unsupported number of laserpoints."
+    })
+    exit(1)
 pixelsize = width * height
-if (aqm < 0.1) or (aqm > 50):
-    exit(5)
+if (aqm < 0.1):
+    print json.dumps({
+        "error": True,
+        "message": "The estimated image area is too small (min is 0.1 qm but was {} qm).".format(round(aqm))
+    })
+    exit(1)
+elif (aqm > 50):
+    print json.dumps({
+        "error": True,
+        "message": "The estimated image area is too large (max is 50 qm but was {} qm).".format(round(aqm))
+    })
+    exit(1)
+
 # use fliplr to print coordinates as [x, y] tuples instead of [y, x]
-print json.dumps({"area": aqm, "px": pixelsize, "count": laserpoints.shape[0], "method": detection, "points": np.fliplr(laserpoints).tolist()})
+print json.dumps({
+    "error": False,
+    "area": aqm,
+    "px": pixelsize,
+    "count": laserpoints.shape[0],
+    "method": detection,
+    "points": np.fliplr(laserpoints).tolist()
+})

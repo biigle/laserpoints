@@ -40,6 +40,7 @@ class Image extends BaseImage {
         'distance',
         'points',
         'error',
+        'message',
     ];
 
     /**
@@ -54,6 +55,7 @@ class Image extends BaseImage {
         $instance = new static;
         $instance->setRawAttributes($image->attributes);
         $instance->exists = $image->exists;
+
         return $instance->setRelations($image->relations);
     }
 
@@ -105,12 +107,7 @@ class Image extends BaseImage {
      */
     public function getAreaAttribute()
     {
-        $laserpoints = $this->laserpoints;
-        if (is_array($laserpoints) && array_key_exists('area', $laserpoints)) {
-            return $laserpoints['area'];
-        }
-
-        return null;
+        return $this->accessLaserpointsArray('area');
     }
 
     /**
@@ -120,12 +117,7 @@ class Image extends BaseImage {
      */
     public function getPxAttribute()
     {
-        $laserpoints = $this->laserpoints;
-        if (is_array($laserpoints) && array_key_exists('px', $laserpoints)) {
-            return $laserpoints['px'];
-        }
-
-        return null;
+        return $this->accessLaserpointsArray('px');
     }
 
     /**
@@ -135,12 +127,7 @@ class Image extends BaseImage {
      */
     public function getCountAttribute()
     {
-        $laserpoints = $this->laserpoints;
-        if (is_array($laserpoints) && array_key_exists('count', $laserpoints)) {
-            return $laserpoints['count'];
-        }
-
-        return null;
+        return $this->accessLaserpointsArray('count');
     }
 
     /**
@@ -150,12 +137,7 @@ class Image extends BaseImage {
      */
     public function getMethodAttribute()
     {
-        $laserpoints = $this->laserpoints;
-        if (is_array($laserpoints) && array_key_exists('method', $laserpoints)) {
-            return $laserpoints['method'];
-        }
-
-        return null;
+        return $this->accessLaserpointsArray('method');
     }
 
     /**
@@ -165,12 +147,7 @@ class Image extends BaseImage {
      */
     public function getDistanceAttribute()
     {
-        $laserpoints = $this->laserpoints;
-        if (is_array($laserpoints) && array_key_exists('distance', $laserpoints)) {
-            return $laserpoints['distance'];
-        }
-
-        return null;
+        return $this->accessLaserpointsArray('distance');
     }
 
     /**
@@ -180,12 +157,7 @@ class Image extends BaseImage {
      */
     public function getPointsAttribute()
     {
-        $laserpoints = $this->laserpoints;
-        if (is_array($laserpoints) && array_key_exists('points', $laserpoints)) {
-            return $laserpoints['points'];
-        }
-
-        return null;
+        return $this->accessLaserpointsArray('points');
     }
 
     /**
@@ -195,9 +167,30 @@ class Image extends BaseImage {
      */
     public function getErrorAttribute()
     {
+        return $this->accessLaserpointsArray('error');
+    }
+
+    /**
+     * Get the message attribute from the laserpoint detection
+     *
+     * @return bool
+     */
+    public function getMessageAttribute()
+    {
+        return $this->accessLaserpointsArray('message');
+    }
+
+    /**
+     * Get an attribute from the laserpoints array.
+     *
+     * @param  string $key
+     * @return mixed
+     */
+    protected function accessLaserpointsArray($key)
+    {
         $laserpoints = $this->laserpoints;
-        if (is_array($laserpoints) && array_key_exists('error', $laserpoints)) {
-            return $laserpoints['error'];
+        if (is_array($laserpoints) && array_key_exists($key, $laserpoints)) {
+            return $laserpoints[$key];
         }
 
         return null;

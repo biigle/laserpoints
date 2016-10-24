@@ -50,9 +50,12 @@
                 <div class="alert alert-info" data-ng-hide="isSubmitted()">
                     No laserpoint detection was performed yet.
                 </div>
-            @elseif($img->error)
+            @elseif ($img->error)
                 <div class="alert alert-danger" data-ng-hide="isSubmitted()">
-                    The automatic laserpoint detection failed. Please annotate laserpoints manually.
+                    @if ($img->message)
+                        <strong>{{$img->message}}</strong>
+                    @endif
+                    The automatic laserpoint detection failed. You can always annotate the laserpoints manually and restart the detection.
                 </div>
             @endif
             @can('add-annotation', $image)

@@ -16,6 +16,7 @@ class Detect
      * @param string $imageUrl Absolute path to the image file to detect laserpoints on
      * @param float $distance Distance of the laserpoints in cm
      * @param string $points Coordinates of all manually annotated laserpoints on the image as JSON encoded string (like `'[[100,100],[200,200]]'`)
+     * @throws Exception If the detection script crashed.
      *
      * @return array The JSON object returned by the detect script as array
      */
@@ -26,21 +27,20 @@ class Detect
         $script = config('laserpoints.script');
         $lines = [];
         $command = "{$python} {$script} \"{$imageUrl}\" {$distance} \"{$points}\" 2>&1";
-        $output = exec($command, $lines, $code);
+        $output = json_decode(exec($command, $lines, $code), true);
 
-        if ($code !== 0) {
-            $message = "Laserpoint detection script failed with exit code {$code}.";
+        // Common script errors are handled gracefully with JSON error output. If the
+        // output is no valid JSON with an 'error' property the script crashed fatally.
+        if ($output === null || !array_key_exists('error', $output)) {
+            $message = "Fatal error with laserpoint detection (code {$code}).";
+            Log::error($message, [
+                'command' => $command,
+                'output' => $lines,
+            ]);
 
-            // code 1 just means no laserpoints found; all others are real errors
-            if ($code !== 1) {
-                Log::error($message, [
-                    'command' => $command,
-                    'output' => $lines,
-                ]);
-            }
             throw new Exception($message);
         }
 
-        return json_decode($output, true);
+        return $output;
     }
 }

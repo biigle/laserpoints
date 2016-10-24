@@ -16,6 +16,7 @@ class LaserpointsModuleJobsProcessChunkTest extends TestCase {
             ->once()
             ->with("{$image->transect->url}/{$image->filename}", 20, '[]')
             ->andReturn([
+                'error' => false,
                 'area' => 100,
                 'px' => 50000,
                 'count' => 3,
@@ -70,12 +71,13 @@ class LaserpointsModuleJobsProcessChunkTest extends TestCase {
                 '[[100,100],[200,200],[300,300]]'
             )
             ->andReturn([
+                'error' => false,
                 'area' => 100,
                 'px' => 50000,
                 'count' => 3,
                 'method' => 'manual',
                 'points' => [[100, 100], [200, 200], [300, 300]],
-            ]);;
+            ]);
 
         App::singleton(Detect::class, function () use ($mock) {
             return $mock;
@@ -98,14 +100,17 @@ class LaserpointsModuleJobsProcessChunkTest extends TestCase {
 
     }
 
-    public function testHandleError()
+    public function testHandleGracefulError()
     {
         $image = Image::convert(ImageTest::create());
 
         $mock = Mockery::mock(Detect::class);
         $mock->shouldReceive('execute')
             ->once()
-            ->andThrow('Exception');
+            ->andReturn([
+                'error' => true,
+                'message' => 'Some expected error occurred.',
+            ]);
 
         App::singleton(Detect::class, function () use ($mock) {
             return $mock;
@@ -115,10 +120,46 @@ class LaserpointsModuleJobsProcessChunkTest extends TestCase {
 
         $expect = [
             'error' => true,
+            'message' => 'Some expected error occurred.',
             'distance' => 30,
         ];
 
         $this->assertEquals($expect, $image->fresh()->laserpoints);
+    }
 
+    public function testHandleFatalError()
+    {
+        $image = Image::convert(ImageTest::create());
+
+        // previous laserpoint detection results should be removed
+        $image->laserpoints = [
+            'area' => 100,
+            'px' => 50000,
+            'count' => 3,
+            'method' => 'manual',
+            'points' => [[100, 100], [200, 200], [300, 300]],
+            'error' => false,
+            'distance' => 30,
+        ];
+        $image->save();
+
+        $mock = Mockery::mock(Detect::class);
+        $mock->shouldReceive('execute')
+            ->once()
+            ->andThrow(new Exception('Fatal error message.'));
+
+        App::singleton(Detect::class, function () use ($mock) {
+            return $mock;
+        });
+
+        with(new ProcessChunk($image->transect->url, [$image->id], 30))->handle();
+
+        $expect = [
+            'error' => true,
+            'message' => 'Fatal error message.',
+            'distance' => 30,
+        ];
+
+        $this->assertEquals($expect, $image->fresh()->laserpoints);
     }
 }

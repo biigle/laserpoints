@@ -1,7 +1,7 @@
 <?php
 
-use Dias\Modules\Laserpoints\Image;
 use Dias\Shape;
+use Dias\Modules\Laserpoints\Image;
 
 class LaserpointsModuleImageTest extends TestCase {
 

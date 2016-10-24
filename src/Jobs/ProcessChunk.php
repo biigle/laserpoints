@@ -85,18 +85,17 @@ class ProcessChunk extends Job implements ShouldQueue
             }
             $imagePoints .= ']';
 
-            $output = [];
-
             try {
                 $output = $detect->execute(
                     "{$this->transectUrl}/{$image->filename}",
                     $this->distance,
                     $imagePoints
                 );
-
-                $output['error'] = false;
             } catch (Exception $e) {
-                $output['error'] = true;
+                $output = [
+                    'error' => true,
+                    'message' => $e->getMessage(),
+                ];
             }
 
             $output['distance'] = $this->distance;
