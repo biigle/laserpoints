@@ -64,6 +64,10 @@ class LaserpointDetection extends Job implements ShouldQueue
      */
     public function handle()
     {
+        if (!$this->transect) {
+            return;
+        }
+
         $query = $this->transect->images();
 
         if (!empty($this->only)) {
