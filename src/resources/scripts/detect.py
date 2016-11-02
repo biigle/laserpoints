@@ -44,7 +44,8 @@ else:
         # no red/green points found return error
         print json.dumps({
             "error": True,
-            "message": "Could not detect any laserpoints."
+            "message": "Could not detect any laserpoints.",
+            "method": detection
         })
         exit(1)
 
@@ -57,6 +58,13 @@ if data.shape[0] > 2:
     dists = scipy.spatial.distance.pdist(laserpoints)
 if (dists is None) or (np.abs(dists[0] - dists[1]) > DISTANCE_THRESHOLD or np.abs(dists[1] - dists[2]) > DISTANCE_THRESHOLD or np.abs(dists[1] - dists[2]) > DISTANCE_THRESHOLD or np.any(img[[laserpoints[:, 0], laserpoints[:, 1], colorchannel]] < (COLOR_THRESHOLD * 0.9))):
     # three laserpoints does not work try two
+    if data.shape[0] <= 1:
+        print json.dumps({
+            "error": True,
+            "message": "Two or more laserpoints are needed.",
+            "method": detection
+        })
+        exit(1)
     km = sklearn.cluster.KMeans(n_clusters=2)
     km.fit(data)
     laserpoints = km.cluster_centers_.astype(np.int)
@@ -67,7 +75,8 @@ if (dists is None) or (np.abs(dists[0] - dists[1]) > DISTANCE_THRESHOLD or np.ab
         # print img[[laserpoints[:, 0], laserpoints[:, 1], colorchannel]]
         print json.dumps({
             "error": True,
-            "message": "Error during laserpoint clustering."
+            "message": "Error during laserpoint clustering.",
+            "method": detection
         })
         exit(1)
 
@@ -83,7 +92,8 @@ if laserpoints.shape[0] == 3:
     if apx == 0:
         print json.dumps({
             "error": True,
-            "message": "Computed pixel area is zero."
+            "message": "Computed pixel area is zero.",
+            "method": detection
         })
         exit(1)
     aqm = are * (float(width) * float(height)) / apx
@@ -95,20 +105,23 @@ else:
     # actually this should never happen
     print json.dumps({
         "error": True,
-        "message": "Unsupported number of laserpoints."
+        "message": "Unsupported number of laserpoints.",
+        "method": detection
     })
     exit(1)
 pixelsize = width * height
 if (aqm < 0.1):
     print json.dumps({
         "error": True,
-        "message": "The estimated image area is too small (min is 0.1 qm but was {} qm).".format(round(aqm))
+        "message": "The estimated image area is too small (min is 0.1 qm but was {} qm).".format(round(aqm)),
+        "method": detection,
     })
     exit(1)
 elif (aqm > 50):
     print json.dumps({
         "error": True,
-        "message": "The estimated image area is too large (max is 50 qm but was {} qm).".format(round(aqm))
+        "message": "The estimated image area is too large (max is 50 qm but was {} qm).".format(round(aqm)),
+        "method": detection
     })
     exit(1)
 
