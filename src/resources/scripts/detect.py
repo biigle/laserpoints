@@ -113,14 +113,14 @@ pixelsize = width * height
 if (aqm < 0.1):
     print json.dumps({
         "error": True,
-        "message": "The estimated image area is too small (min is 0.1 qm but was {} qm).".format(round(aqm)),
+        "message": "The estimated image area is too small (min is 0.1 sqm but was {} sqm).".format(round(aqm)),
         "method": detection,
     })
     exit(1)
 elif (aqm > 50):
     print json.dumps({
         "error": True,
-        "message": "The estimated image area is too large (max is 50 qm but was {} qm).".format(round(aqm)),
+        "message": "The estimated image area is too large (max is 50 sqm but was {} sqm).".format(round(aqm)),
         "method": detection
     })
     exit(1)
