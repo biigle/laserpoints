@@ -13,6 +13,12 @@ imgfile = sys.argv[1]
 laserdistparam = sys.argv[2]
 
 img = imread(imgfile)
+if not len(img.shape):
+    print json.dumps({
+        "error": True,
+        "message": "Could not load image. The image file might be corrupt.",
+    })
+    exit(1)
 img[:, 0:int(img.shape[1] * 0.15), :] = 0
 img[:, int(img.shape[1] - img.shape[1] * 0.15):, :] = 0
 
