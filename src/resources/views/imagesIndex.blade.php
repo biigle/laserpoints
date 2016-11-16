@@ -1,12 +1,12 @@
 @push('scripts')
-    <script src="{{ asset('vendor/laserpoints/scripts/main.js') }}"></script>
+    <script src="{{ cachebust_asset('vendor/laserpoints/scripts/main.js') }}"></script>
 @endpush
 <div class="col-sm-6 col-lg-4">
     <div class="panel panel-default">
         <div class="panel-heading">
             <h3 class="panel-title">Laserpoints</h3>
         </div>
-        <?php $img = \Dias\Modules\Laserpoints\Image::convert($image) ?>
+        <?php $img = \Dias\Modules\Laserpoints\Image::convert($image); ?>
         @if ($img->laserpoints)
             <table class="table">
                 @if ($img->px)
