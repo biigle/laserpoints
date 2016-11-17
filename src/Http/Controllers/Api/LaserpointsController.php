@@ -17,6 +17,7 @@ class LaserpointsController extends Controller
      * @apiGroup Images
      * @apiName ImagesComputeArea
      * @apiPermission projectEditor
+     * @apiDescription This feature is not available for images of remote transects.
      *
      * @apiParam {Number} id The image ID.
      * @apiParam (Required arguments) {Number} distance The distance between two laserpoints in cm.
@@ -29,6 +30,12 @@ class LaserpointsController extends Controller
     {
         $image = Image::with('transect')->findOrFail($id);
         $this->authorize('edit-in', $image->transect);
+
+        if ($image->transect->isRemote()) {
+            return $this->buildFailedValidationResponse($request, [
+                'id' => 'Laserpoint detection is not available for images of remote transects.',
+            ]);
+        }
 
         $this->validate($request, Image::$laserpointsRules);
         $distance = $request->input('distance');
@@ -43,6 +50,7 @@ class LaserpointsController extends Controller
      * @apiGroup Transects
      * @apiName TransectsComputeImageArea
      * @apiPermission projectEditor
+     * @apiDescription This feature is not available for remote transects.
      *
      * @apiParam {Number} id The transect ID.
      * @apiParam (Required arguments) {Number} distance The distance between two laserpoints in cm.
@@ -55,6 +63,12 @@ class LaserpointsController extends Controller
     {
         $transect = Transect::findOrFail($id);
         $this->authorize('edit-in', $transect);
+
+        if ($transect->isRemote()) {
+            return $this->buildFailedValidationResponse($request, [
+                'id' => 'Laserpoint detection is not available for remote transects.',
+            ]);
+        }
 
         $this->validate($request, Image::$laserpointsRules);
         $distance = $request->input('distance');
