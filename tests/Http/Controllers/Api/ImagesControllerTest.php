@@ -1,12 +1,15 @@
 <?php
 
+namespace Dias\Tests\Modules\Laserpoints\Http\Controllers\Api;
+
+use ApiTestCase;
+use Dias\Tests\ImageTest;
 use Dias\Modules\Laserpoints\Image;
 
-class LaserpointsModuleHttpControllersApiImagesControllerTest extends ApiTestCase {
-
+class ImagesControllerTest extends ApiTestCase
+{
     public function testShowLaserpoints()
     {
-
         $image = ImageTest::create([
             'attrs' => [
                 'laserpoints' => [

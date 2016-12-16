@@ -1,9 +1,13 @@
 <?php
 
+namespace Dias\Tests\Modules\Laserpoints\Http\Controllers\Api;
+
+use ApiTestCase;
+use Dias\Tests\ImageTest;
 use Dias\Modules\Laserpoints\Jobs\LaserpointDetection;
 
-class LaserpointsModuleHttpControllersApiLaserpointsControllerTest extends ApiTestCase {
-
+class LaserpointsControllerTest extends ApiTestCase
+{
     public function testComputeImage()
     {
 

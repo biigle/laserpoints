@@ -1,12 +1,22 @@
 <?php
 
+namespace Dias\Tests\Modules\Laserpoints\Jobs;
+
+use App;
+use Mockery;
+use TestCase;
+use Exception;
 use Dias\Shape;
+use Dias\Tests\ImageTest;
+use Dias\Tests\LabelTest;
+use Dias\Tests\AnnotationTest;
+use Dias\Tests\AnnotationLabelTest;
 use Dias\Modules\Laserpoints\Image;
 use Dias\Modules\Laserpoints\Support\Detect;
 use Dias\Modules\Laserpoints\Jobs\ProcessChunk;
 
-class LaserpointsModuleJobsProcessChunkTest extends TestCase {
-
+class ProcessChunkTest extends TestCase
+{
     public function testHandleHeuristic()
     {
         $image = Image::convert(ImageTest::create());

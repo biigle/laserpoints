@@ -1,13 +1,17 @@
 <?php
 
+namespace Dias\Tests\Modules\Laserpoints;
+
+use TestCase;
 use Dias\Shape;
 use Dias\Modules\Laserpoints\Image;
+use Dias\Tests\ImageTest as BaseImageTest;
 
-class LaserpointsModuleImageTest extends TestCase {
-
+class ImageTest extends TestCase
+{
     public function testConvert()
     {
-        $image = ImageTest::create([
+        $image = BaseImageTest::create([
             'attrs' => [
                 Image::LASERPOINTS_ATTRIBUTE => [
                     'px' => 500
@@ -22,7 +26,7 @@ class LaserpointsModuleImageTest extends TestCase {
 
     public function testLaserpoints()
     {
-        $image = Image::convert(ImageTest::create());
+        $image = Image::convert(BaseImageTest::create());
         $image->laserpoints = [
             'px' => 500,
         ];
@@ -36,7 +40,7 @@ class LaserpointsModuleImageTest extends TestCase {
 
     public function testLaserpointsNotThere()
     {
-        $image = Image::convert(ImageTest::create(['attrs' => ['something' => 'else']]));
+        $image = Image::convert(BaseImageTest::create(['attrs' => ['something' => 'else']]));
         // no error is thrown
         $this->assertNull($image->laserpoints);
     }
