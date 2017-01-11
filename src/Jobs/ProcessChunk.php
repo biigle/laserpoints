@@ -1,16 +1,16 @@
 <?php
 
-namespace Dias\Modules\Laserpoints\Jobs;
+namespace Biigle\Modules\Laserpoints\Jobs;
 
 use DB;
 use Exception;
-use Dias\Shape;
-use Dias\Jobs\Job;
-use Dias\Modules\Laserpoints\Image;
+use Biigle\Shape;
+use Biigle\Jobs\Job;
+use Biigle\Modules\Laserpoints\Image;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Dias\Modules\Laserpoints\Support\Detect;
+use Biigle\Modules\Laserpoints\Support\Detect;
 
 class ProcessChunk extends Job implements ShouldQueue
 {

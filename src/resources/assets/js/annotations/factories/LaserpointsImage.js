@@ -1,7 +1,7 @@
 /**
  * @ngdoc factory
  * @name LaserpointsImage
- * @memberOf dias.annotations
+ * @memberOf biigle.annotations
  * @description Provides the resource for image laserpoints
  * @requires $resource
  * @returns {Object} A new [ngResource](https://docs.angularjs.org/api/ngResource/service/$resource) object
@@ -12,7 +12,7 @@ var laserpoints = LaserpointsImage.get({image_id: 1}, function () {
 });
  *
  */
-angular.module('dias.annotations').factory('LaserpointsImage', function ($resource, URL) {
+angular.module('biigle.annotations').factory('LaserpointsImage', function ($resource, URL) {
     "use strict";
 
     return $resource(URL + '/api/v1/images/:image_id/laserpoints');

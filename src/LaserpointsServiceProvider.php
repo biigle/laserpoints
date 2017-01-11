@@ -1,17 +1,17 @@
 <?php
 
-namespace Dias\Modules\Laserpoints;
+namespace Biigle\Modules\Laserpoints;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Routing\Router;
-use Dias\Services\Modules;
+use Biigle\Services\Modules;
 
 class LaserpointsServiceProvider extends ServiceProvider {
 
     /**
      * Bootstrap the application events.
      *
-     * @param  \Dias\Services\Modules  $modules
+     * @param  \Biigle\Services\Modules  $modules
      * @param  \Illuminate\Routing\Router  $router
      *
      * @return void
@@ -21,7 +21,7 @@ class LaserpointsServiceProvider extends ServiceProvider {
         $this->loadViewsFrom(__DIR__.'/resources/views', 'laserpoints');
 
         $router->group([
-            'namespace' => 'Dias\Modules\Laserpoints\Http\Controllers',
+            'namespace' => 'Biigle\Modules\Laserpoints\Http\Controllers',
             'middleware' => 'web',
         ], function ($router) {
             require __DIR__.'/Http/routes.php';
@@ -55,10 +55,10 @@ class LaserpointsServiceProvider extends ServiceProvider {
 
 
         $this->app->singleton('command.laserpoints.publish', function ($app) {
-            return new \Dias\Modules\Laserpoints\Console\Commands\Publish();
+            return new \Biigle\Modules\Laserpoints\Console\Commands\Publish();
         });
         $this->app->singleton('command.laserpoints.config', function ($app) {
-            return new \Dias\Modules\Laserpoints\Console\Commands\Config();
+            return new \Biigle\Modules\Laserpoints\Console\Commands\Config();
         });
 
         $this->commands([

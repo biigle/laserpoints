@@ -1,14 +1,14 @@
 {
-    "name": "dias/laserpoints",
+    "name": "biigle/laserpoints",
     "require": {
-        "dias/annotations": "~1.0",
-        "dias/transects": "~1.0"
+        "biigle/annotations": "~1.0",
+        "biigle/transects": "~1.0"
     },
     "require-dev": {
     },
     "autoload": {
         "psr-4": {
-            "Dias\\Modules\\Laserpoints\\": "src"
+            "Biigle\\Modules\\Laserpoints\\": "src"
         }
     }
 }

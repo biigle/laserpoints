@@ -1,10 +1,10 @@
 <?php
 
-namespace Dias\Modules\Laserpoints\Jobs;
+namespace Biigle\Modules\Laserpoints\Jobs;
 
 use Queue;
-use Dias\Transect;
-use Dias\Jobs\Job;
+use Biigle\Transect;
+use Biigle\Jobs\Job;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;

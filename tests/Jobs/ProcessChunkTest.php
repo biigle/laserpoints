@@ -1,19 +1,19 @@
 <?php
 
-namespace Dias\Tests\Modules\Laserpoints\Jobs;
+namespace Biigle\Tests\Modules\Laserpoints\Jobs;
 
 use App;
 use Mockery;
 use TestCase;
 use Exception;
-use Dias\Shape;
-use Dias\Tests\ImageTest;
-use Dias\Tests\LabelTest;
-use Dias\Tests\AnnotationTest;
-use Dias\Tests\AnnotationLabelTest;
-use Dias\Modules\Laserpoints\Image;
-use Dias\Modules\Laserpoints\Support\Detect;
-use Dias\Modules\Laserpoints\Jobs\ProcessChunk;
+use Biigle\Shape;
+use Biigle\Tests\ImageTest;
+use Biigle\Tests\LabelTest;
+use Biigle\Tests\AnnotationTest;
+use Biigle\Tests\AnnotationLabelTest;
+use Biigle\Modules\Laserpoints\Image;
+use Biigle\Modules\Laserpoints\Support\Detect;
+use Biigle\Modules\Laserpoints\Jobs\ProcessChunk;
 
 class ProcessChunkTest extends TestCase
 {

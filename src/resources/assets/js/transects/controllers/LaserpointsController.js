@@ -1,11 +1,11 @@
 /**
- * @namespace dias.transects
+ * @namespace biigle.transects
  * @ngdoc controller
  * @name LaserpointsController
- * @memberOf dias.transects
+ * @memberOf biigle.transects
  * @description Controller for the laserpoints popover
  */
-angular.module('dias.transects').controller('LaserpointsController', function ($scope,$http, URL, msg, TRANSECT_ID) {
+angular.module('biigle.transects').controller('LaserpointsController', function ($scope,$http, URL, msg, TRANSECT_ID) {
         "use strict";
 
         var computing = false;

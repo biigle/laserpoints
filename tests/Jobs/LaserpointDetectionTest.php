@@ -1,13 +1,13 @@
 <?php
 
-namespace Dias\Tests\Modules\Laserpoints\Jobs;
+namespace Biigle\Tests\Modules\Laserpoints\Jobs;
 
 use Queue;
 use TestCase;
-use Dias\Image;
-use Dias\Tests\TransectTest;
-use Dias\Modules\Laserpoints\Jobs\ProcessChunk;
-use Dias\Modules\Laserpoints\Jobs\LaserpointDetection;
+use Biigle\Image;
+use Biigle\Tests\TransectTest;
+use Biigle\Modules\Laserpoints\Jobs\ProcessChunk;
+use Biigle\Modules\Laserpoints\Jobs\LaserpointDetection;
 
 class LaserpointDetectionTest extends TestCase
 {

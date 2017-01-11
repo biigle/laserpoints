@@ -1,12 +1,12 @@
 <?php
 
-namespace Dias\Modules\Laserpoints;
+namespace Biigle\Modules\Laserpoints;
 
-use Dias\Image as BaseImage;
+use Biigle\Image as BaseImage;
 use Exception;
 
 /**
- * Extends the base Dias image
+ * Extends the base Biigle image
  */
 class Image extends BaseImage {
 
@@ -44,9 +44,9 @@ class Image extends BaseImage {
     ];
 
     /**
-     * Converts a regular Dias image to a Laserpoints image
+     * Converts a regular Biigle image to a Laserpoints image
      *
-     * @param BaseImage $image Regular Dias image instance
+     * @param BaseImage $image Regular Biigle image instance
      *
      * @return Image
      */

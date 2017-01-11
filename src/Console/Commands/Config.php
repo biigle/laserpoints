@@ -1,9 +1,9 @@
 <?php
 
-namespace Dias\Modules\Laserpoints\Console\Commands;
+namespace Biigle\Modules\Laserpoints\Console\Commands;
 
 use Illuminate\Console\Command;
-use Dias\Modules\Laserpoints\LaserpointsServiceProvider as ServiceProvider;
+use Biigle\Modules\Laserpoints\LaserpointsServiceProvider as ServiceProvider;
 
 class Config extends Command {
 

@@ -14,7 +14,7 @@
                 The laserpoint detection is not available for images of remote transects.
             </div>
         @else
-            <?php $img = \Dias\Modules\Laserpoints\Image::convert($image); ?>
+            <?php $img = \Biigle\Modules\Laserpoints\Image::convert($image); ?>
             @if ($img->laserpoints)
                 <table class="table">
                     @if ($img->px)
@@ -53,7 +53,7 @@
                     @endif
                 </table>
             @endif
-            <div class="panel-body" data-ng-app="dias.laserpoints" data-ng-controller="LaserpointsController">
+            <div class="panel-body" data-ng-app="biigle.laserpoints" data-ng-controller="LaserpointsController">
                 @if (!$img->laserpoints)
                     <div class="alert alert-info" data-ng-hide="isSubmitted()">
                         No laserpoint detection was performed yet.

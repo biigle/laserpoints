@@ -1,11 +1,11 @@
 /**
- * @namespace dias.annotations
+ * @namespace biigle.annotations
  * @ngdoc controller
  * @name LaserpointsSettingsController
- * @memberOf dias.annotations
+ * @memberOf biigle.annotations
  * @description Controller for the laserpoints settings
  */
-angular.module('dias.annotations').controller('LaserpointsSettingsController', function ($scope, laserpoints, settings) {
+angular.module('biigle.annotations').controller('LaserpointsSettingsController', function ($scope, laserpoints, settings) {
         "use strict";
 
         var key = 'laserpoint_opacity';

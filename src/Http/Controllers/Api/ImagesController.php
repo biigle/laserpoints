@@ -1,10 +1,10 @@
 <?php
 
-namespace Dias\Modules\Laserpoints\Http\Controllers\Api;
+namespace Biigle\Modules\Laserpoints\Http\Controllers\Api;
 
-use Dias\Image;
-use Dias\Modules\Laserpoints\Image as LaserImage;
-use Dias\Http\Controllers\Api\Controller;
+use Biigle\Image;
+use Biigle\Modules\Laserpoints\Image as LaserImage;
+use Biigle\Http\Controllers\Api\Controller;
 
 class ImagesController extends Controller
 {

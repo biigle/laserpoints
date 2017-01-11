@@ -1,11 +1,11 @@
 /**
- * @namespace dias.annotations
+ * @namespace biigle.annotations
  * @ngdoc service
  * @name laserpoints
- * @memberOf dias.annotations
+ * @memberOf biigle.annotations
  * @description Wrapper service the laserpoint information of an image
  */
-angular.module('dias.annotations').service('laserpoints', function (LaserpointsImage, map, images) {
+angular.module('biigle.annotations').service('laserpoints', function (LaserpointsImage, map, images) {
     "use strict";
 
     // maps image ID to the laserpoints object of the image

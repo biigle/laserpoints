@@ -1,12 +1,12 @@
 <?php
 
-namespace Dias\Modules\Laserpoints\Http\Controllers\Api;
+namespace Biigle\Modules\Laserpoints\Http\Controllers\Api;
 
-use Dias\Transect;
+use Biigle\Transect;
 use Illuminate\Http\Request;
-use Dias\Modules\Laserpoints\Image;
-use Dias\Http\Controllers\Api\Controller;
-use Dias\Modules\Laserpoints\Jobs\LaserpointDetection;
+use Biigle\Modules\Laserpoints\Image;
+use Biigle\Http\Controllers\Api\Controller;
+use Biigle\Modules\Laserpoints\Jobs\LaserpointDetection;
 
 class LaserpointsController extends Controller
 {

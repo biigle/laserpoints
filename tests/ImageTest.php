@@ -1,11 +1,11 @@
 <?php
 
-namespace Dias\Tests\Modules\Laserpoints;
+namespace Biigle\Tests\Modules\Laserpoints;
 
 use TestCase;
-use Dias\Shape;
-use Dias\Modules\Laserpoints\Image;
-use Dias\Tests\ImageTest as BaseImageTest;
+use Biigle\Shape;
+use Biigle\Modules\Laserpoints\Image;
+use Biigle\Tests\ImageTest as BaseImageTest;
 
 class ImageTest extends TestCase
 {

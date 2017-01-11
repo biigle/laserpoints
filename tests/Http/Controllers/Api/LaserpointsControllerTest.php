@@ -1,10 +1,10 @@
 <?php
 
-namespace Dias\Tests\Modules\Laserpoints\Http\Controllers\Api;
+namespace Biigle\Tests\Modules\Laserpoints\Http\Controllers\Api;
 
 use ApiTestCase;
-use Dias\Tests\ImageTest;
-use Dias\Modules\Laserpoints\Jobs\LaserpointDetection;
+use Biigle\Tests\ImageTest;
+use Biigle\Modules\Laserpoints\Jobs\LaserpointDetection;
 
 class LaserpointsControllerTest extends ApiTestCase
 {

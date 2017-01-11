@@ -1,6 +1,6 @@
 <?php
 
-namespace Dias\Modules\Laserpoints\Support;
+namespace Biigle\Modules\Laserpoints\Support;
 
 use Log;
 use Exception;

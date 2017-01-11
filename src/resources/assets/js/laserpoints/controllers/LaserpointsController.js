@@ -1,11 +1,11 @@
 /**
- * @namespace dias.laserpoints
+ * @namespace biigle.laserpoints
  * @ngdoc controller
  * @name LaserpointsController
- * @memberOf dias.laserpoints
+ * @memberOf biigle.laserpoints
  * @description Controller for the laserpoints panel
  */
-angular.module('dias.laserpoints').controller('LaserpointsController', function ($scope,$http, URL, msg) {
+angular.module('biigle.laserpoints').controller('LaserpointsController', function ($scope,$http, URL, msg) {
         "use strict";
 
         var computing = false;
