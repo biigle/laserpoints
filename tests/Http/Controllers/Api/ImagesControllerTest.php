@@ -16,7 +16,7 @@ class ImagesControllerTest extends ApiTestCase
                     'points' => [[10, 10], [20, 20], [30, 30]],
                 ]
             ],
-            'transect_id' => $this->transect()->id,
+            'volume_id' => $this->volume()->id,
         ]);
 
         $this->doTestApiRoute('GET', "/api/v1/images/{$image->id}/laserpoints");

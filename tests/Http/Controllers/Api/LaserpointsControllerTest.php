@@ -11,7 +11,7 @@ class LaserpointsControllerTest extends ApiTestCase
     public function testComputeImage()
     {
 
-        $image = ImageTest::create(['transect_id' => $this->transect()->id]);
+        $image = ImageTest::create(['volume_id' => $this->volume()->id]);
         $this->doTestApiRoute('POST', "/api/v1/images/{$image->id}/laserpoints/area");
 
         $this->beGuest();
@@ -29,9 +29,9 @@ class LaserpointsControllerTest extends ApiTestCase
 
     public function testComputeImageRemote()
     {
-        $this->transect()->url = 'http://localhost';
-        $this->transect()->save();
-        $image = ImageTest::create(['transect_id' => $this->transect()->id]);
+        $this->volume()->url = 'http://localhost';
+        $this->volume()->save();
+        $image = ImageTest::create(['volume_id' => $this->volume()->id]);
 
         $this->beEditor();
         $this->doesntExpectJobs(LaserpointDetection::class);
@@ -39,34 +39,34 @@ class LaserpointsControllerTest extends ApiTestCase
         $this->assertResponseStatus(422);
     }
 
-    public function testComputeTransect()
+    public function testComputeVolume()
     {
 
-        $id = $this->transect()->id;
-        $this->doTestApiRoute('POST', "/api/v1/transects/{$id}/laserpoints/area");
+        $id = $this->volume()->id;
+        $this->doTestApiRoute('POST', "/api/v1/volumes/{$id}/laserpoints/area");
 
         $this->beGuest();
-        $this->post("/api/v1/transects/{$id}/laserpoints/area");
+        $this->post("/api/v1/volumes/{$id}/laserpoints/area");
         $this->assertResponseStatus(403);
 
         $this->beEditor();
-        $this->post("/api/v1/transects/{$id}/laserpoints/area");
+        $this->post("/api/v1/volumes/{$id}/laserpoints/area");
         $this->assertResponseStatus(302);
 
         $this->expectsJobs(LaserpointDetection::class);
-        $this->post("/api/v1/transects/{$id}/laserpoints/area", ['distance' => 50]);
+        $this->post("/api/v1/volumes/{$id}/laserpoints/area", ['distance' => 50]);
         $this->assertResponseOk();
     }
 
-    public function testComputeTransectRemote()
+    public function testComputeVolumeRemote()
     {
-        $this->transect()->url = 'http://localhost';
-        $this->transect()->save();
-        $id = $this->transect()->id;
+        $this->volume()->url = 'http://localhost';
+        $this->volume()->save();
+        $id = $this->volume()->id;
 
         $this->beEditor();
         $this->doesntExpectJobs(LaserpointDetection::class);
-        $this->json('POST', "/api/v1/transects/{$id}/laserpoints/area", ['distance' => 50]);
+        $this->json('POST', "/api/v1/volumes/{$id}/laserpoints/area", ['distance' => 50]);
         $this->assertResponseStatus(422);
     }
 }

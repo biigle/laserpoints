@@ -1,11 +1,11 @@
 /**
- * @namespace biigle.transects
+ * @namespace biigle.volumes
  * @ngdoc controller
  * @name LaserpointsController
- * @memberOf biigle.transects
+ * @memberOf biigle.volumes
  * @description Controller for the laserpoints popover
  */
-angular.module('biigle.transects').controller('LaserpointsController', function ($scope,$http, URL, msg, TRANSECT_ID) {
+angular.module('biigle.volumes').controller('LaserpointsController', function ($scope,$http, URL, msg, VOLUME_ID) {
         "use strict";
 
         var computing = false;
@@ -38,7 +38,7 @@ angular.module('biigle.transects').controller('LaserpointsController', function 
             computing = true;
             $http({
                 method: 'POST',
-                url: URL + "/api/v1/transects/" + TRANSECT_ID + "/laserpoints/area",
+                url: URL + "/api/v1/volumes/" + VOLUME_ID + "/laserpoints/area",
                 data: {distance: $scope.data.distance}
             }).then(handleSuccess, handleError);
         };

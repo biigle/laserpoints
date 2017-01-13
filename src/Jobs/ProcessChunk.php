@@ -17,11 +17,11 @@ class ProcessChunk extends Job implements ShouldQueue
     use InteractsWithQueue, SerializesModels;
 
     /**
-     * URL of the transect the images belong to.
+     * URL of the volume the images belong to.
      *
      * @var string
      */
-    protected $transectUrl;
+    protected $volumeUrl;
 
     /**
      * IDs of all images that should be processed in this chunk.
@@ -40,15 +40,15 @@ class ProcessChunk extends Job implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param string $transectUrl
+     * @param string $volumeUrl
      * @param array $ids
      * @param float $distance
      *
      * @return void
      */
-    public function __construct($transectUrl, $ids, $distance)
+    public function __construct($volumeUrl, $ids, $distance)
     {
-        $this->transectUrl = $transectUrl;
+        $this->volumeUrl = $volumeUrl;
         $this->ids = $ids;
         $this->distance = $distance;
     }
@@ -87,7 +87,7 @@ class ProcessChunk extends Job implements ShouldQueue
 
             try {
                 $output = $detect->execute(
-                    "{$this->transectUrl}/{$image->filename}",
+                    "{$this->volumeUrl}/{$image->filename}",
                     $this->distance,
                     $imagePoints
                 );
