@@ -3,7 +3,7 @@
 namespace Biigle\Modules\Laserpoints\Jobs;
 
 use Queue;
-use Biigle\Transect;
+use Biigle\Volume;
 use Biigle\Jobs\Job;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -21,11 +21,11 @@ class LaserpointDetection extends Job implements ShouldQueue
     const CHUNK_SIZE = 10;
 
     /**
-     * The transect to compute the area for
+     * The volume to compute the area for
      *
-     * @var Transect
+     * @var Volume
      */
-    private $transect;
+    private $volume;
 
     /**
      * Distance between laserpoints im cm to use for computation
@@ -44,15 +44,15 @@ class LaserpointDetection extends Job implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param Transect $transect
+     * @param Volume $volume
      * @param float $distance
      * @param array $only IDs of the images to restrict this job to
      *
      * @return void
      */
-    public function __construct(Transect $transect, $distance, array $only = [])
+    public function __construct(Volume $volume, $distance, array $only = [])
     {
-        $this->transect = $transect;
+        $this->volume = $volume;
         $this->distance = $distance;
         $this->only = $only;
     }
@@ -64,11 +64,11 @@ class LaserpointDetection extends Job implements ShouldQueue
      */
     public function handle()
     {
-        if (!$this->transect) {
+        if (!$this->volume) {
             return;
         }
 
-        $query = $this->transect->images();
+        $query = $this->volume->images();
 
         if (!empty($this->only)) {
             $query = $query->whereIn('id', $this->only);
@@ -76,12 +76,12 @@ class LaserpointDetection extends Job implements ShouldQueue
 
         $ids = $query->pluck('id');
 
-        // We chunk this job into multiple smaller jobs because transects can become
+        // We chunk this job into multiple smaller jobs because volumes can become
         // really large. Multiple smaller jobs can be better parallelized with multiple
         // queue workers and each one does not run very long (in case there is a hard
         // limit on the runtime of a job).
         foreach ($ids->chunk(self::CHUNK_SIZE) as $chunk) {
-            Queue::push(new ProcessChunk($this->transect->url, $chunk, $this->distance));
+            Queue::push(new ProcessChunk($this->volume->url, $chunk, $this->distance));
         }
     }
 }

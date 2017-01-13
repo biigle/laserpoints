@@ -2,7 +2,7 @@
 
 namespace Biigle\Modules\Laserpoints\Http\Controllers\Api;
 
-use Biigle\Transect;
+use Biigle\Volume;
 use Illuminate\Http\Request;
 use Biigle\Modules\Laserpoints\Image;
 use Biigle\Http\Controllers\Api\Controller;
@@ -17,7 +17,7 @@ class LaserpointsController extends Controller
      * @apiGroup Images
      * @apiName ImagesComputeArea
      * @apiPermission projectEditor
-     * @apiDescription This feature is not available for images of remote transects.
+     * @apiDescription This feature is not available for images of remote volumes.
      *
      * @apiParam {Number} id The image ID.
      * @apiParam (Required arguments) {Number} distance The distance between two laserpoints in cm.
@@ -28,51 +28,51 @@ class LaserpointsController extends Controller
      */
     public function computeImage(Request $request, $id)
     {
-        $image = Image::with('transect')->findOrFail($id);
-        $this->authorize('edit-in', $image->transect);
+        $image = Image::with('volume')->findOrFail($id);
+        $this->authorize('edit-in', $image->volume);
 
-        if ($image->transect->isRemote()) {
+        if ($image->volume->isRemote()) {
             return $this->buildFailedValidationResponse($request, [
-                'id' => 'Laserpoint detection is not available for images of remote transects.',
+                'id' => 'Laserpoint detection is not available for images of remote volumes.',
             ]);
         }
 
         $this->validate($request, Image::$laserpointsRules);
         $distance = $request->input('distance');
 
-        $this->dispatch(new LaserpointDetection($image->transect, $distance, [$image->id]));
+        $this->dispatch(new LaserpointDetection($image->volume, $distance, [$image->id]));
     }
 
      /**
-     * Compute distance between laserpoints for a transect
+     * Compute distance between laserpoints for a volume
      *
-     * @api {post} transects/:id/laserpoints/area Compute image footprint for all images
-     * @apiGroup Transects
-     * @apiName TransectsComputeImageArea
+     * @api {post} volumes/:id/laserpoints/area Compute image footprint for all images
+     * @apiGroup Volumes
+     * @apiName VolumesComputeImageArea
      * @apiPermission projectEditor
-     * @apiDescription This feature is not available for remote transects.
+     * @apiDescription This feature is not available for remote volumes.
      *
-     * @apiParam {Number} id The transect ID.
+     * @apiParam {Number} id The volume ID.
      * @apiParam (Required arguments) {Number} distance The distance between two laserpoints in cm.
      *
      * @param Request $request
-     * @param int $id transect id
+     * @param int $id volume id
      * @return \Illuminate\Http\Response
      */
-    public function computeTransect(Request $request, $id)
+    public function computeVolume(Request $request, $id)
     {
-        $transect = Transect::findOrFail($id);
-        $this->authorize('edit-in', $transect);
+        $volume = Volume::findOrFail($id);
+        $this->authorize('edit-in', $volume);
 
-        if ($transect->isRemote()) {
+        if ($volume->isRemote()) {
             return $this->buildFailedValidationResponse($request, [
-                'id' => 'Laserpoint detection is not available for remote transects.',
+                'id' => 'Laserpoint detection is not available for remote volumes.',
             ]);
         }
 
         $this->validate($request, Image::$laserpointsRules);
         $distance = $request->input('distance');
 
-        $this->dispatch(new LaserpointDetection($transect, $distance));
+        $this->dispatch(new LaserpointDetection($volume, $distance));
     }
 }

@@ -24,7 +24,7 @@ class ProcessChunkTest extends TestCase
         $mock = Mockery::mock(Detect::class);
         $mock->shouldReceive('execute')
             ->once()
-            ->with("{$image->transect->url}/{$image->filename}", 20, '[]')
+            ->with("{$image->volume->url}/{$image->filename}", 20, '[]')
             ->andReturn([
                 'error' => false,
                 'area' => 100,
@@ -38,7 +38,7 @@ class ProcessChunkTest extends TestCase
             return $mock;
         });
 
-        with(new ProcessChunk($image->transect->url, [$image->id], 20))->handle();
+        with(new ProcessChunk($image->volume->url, [$image->id], 20))->handle();
 
         $expect = [
             'area' => 100,
@@ -76,7 +76,7 @@ class ProcessChunkTest extends TestCase
         $mock->shouldReceive('execute')
             ->once()
             ->with(
-                "{$image->transect->url}/{$image->filename}",
+                "{$image->volume->url}/{$image->filename}",
                 30,
                 '[[100,100],[200,200],[300,300]]'
             )
@@ -94,7 +94,7 @@ class ProcessChunkTest extends TestCase
         });
 
 
-        with(new ProcessChunk($image->transect->url, [$image->id], 30))->handle();
+        with(new ProcessChunk($image->volume->url, [$image->id], 30))->handle();
 
         $expect = [
             'area' => 100,
@@ -126,7 +126,7 @@ class ProcessChunkTest extends TestCase
             return $mock;
         });
 
-        with(new ProcessChunk($image->transect->url, [$image->id], 30))->handle();
+        with(new ProcessChunk($image->volume->url, [$image->id], 30))->handle();
 
         $expect = [
             'error' => true,
@@ -162,7 +162,7 @@ class ProcessChunkTest extends TestCase
             return $mock;
         });
 
-        with(new ProcessChunk($image->transect->url, [$image->id], 30))->handle();
+        with(new ProcessChunk($image->volume->url, [$image->id], 30))->handle();
 
         $expect = [
             'error' => true,

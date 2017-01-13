@@ -1,6 +1,6 @@
 /**
- * @namespace biigle.transects
- * @description The BIIGLE transects module.
+ * @namespace biigle.volumes
+ * @description The BIIGLE volumes module.
  */
 angular.module('biigle.laserpoints', ['biigle.api', 'biigle.ui']);
 

@@ -1,4 +1,4 @@
-@unless ($transect->isRemote())
+@unless ($volume->isRemote())
     @push('scripts')
         <script src="{{ cachebust_asset('vendor/laserpoints/scripts/main.js') }}"></script>
     @endpush
@@ -9,9 +9,9 @@
         <div class="panel-heading">
             <h3 class="panel-title">Laserpoints</h3>
         </div>
-        @if ($transect->isRemote())
+        @if ($volume->isRemote())
             <div class="panel-body text-muted">
-                The laserpoint detection is not available for images of remote transects.
+                The laserpoint detection is not available for images of remote volumes.
             </div>
         @else
             <?php $img = \Biigle\Modules\Laserpoints\Image::convert($image); ?>
@@ -66,7 +66,7 @@
                         The automatic laserpoint detection failed. You can always annotate the laserpoints manually and restart the detection.
                     </div>
                 @endif
-                @can('edit-in', $transect)
+                @can('edit-in', $volume)
                     <form class="form-inline" data-ng-hide="isSubmitted()">
                         @if($img->laserpoints)
                             <div class="form-group">

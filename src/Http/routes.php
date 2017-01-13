@@ -9,8 +9,8 @@ $router->group([
         'uses' => 'LaserpointsController@computeImage',
     ]);
 
-    $router->post('transects/{id}/laserpoints/area', [
-        'uses' => 'LaserpointsController@computeTransect',
+    $router->post('volumes/{id}/laserpoints/area', [
+        'uses' => 'LaserpointsController@computeVolume',
     ]);
 
     $router->get('images/{id}/laserpoints', [
