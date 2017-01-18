@@ -10,7 +10,6 @@ class LaserpointsControllerTest extends ApiTestCase
 {
     public function testComputeImage()
     {
-
         $image = ImageTest::create(['volume_id' => $this->volume()->id]);
         $this->doTestApiRoute('POST', "/api/v1/images/{$image->id}/laserpoints/area");
 
@@ -41,7 +40,6 @@ class LaserpointsControllerTest extends ApiTestCase
 
     public function testComputeVolume()
     {
-
         $id = $this->volume()->id;
         $this->doTestApiRoute('POST', "/api/v1/volumes/{$id}/laserpoints/area");
 

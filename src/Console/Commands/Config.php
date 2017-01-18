@@ -5,8 +5,8 @@ namespace Biigle\Modules\Laserpoints\Console\Commands;
 use Illuminate\Console\Command;
 use Biigle\Modules\Laserpoints\LaserpointsServiceProvider as ServiceProvider;
 
-class Config extends Command {
-
+class Config extends Command
+{
     /**
      * The console command name.
      *

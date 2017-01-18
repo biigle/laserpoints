@@ -21,21 +21,21 @@ class LaserpointDetection extends Job implements ShouldQueue
     const CHUNK_SIZE = 10;
 
     /**
-     * The volume to compute the area for
+     * The volume to compute the area for.
      *
      * @var Volume
      */
     private $volume;
 
     /**
-     * Distance between laserpoints im cm to use for computation
+     * Distance between laserpoints im cm to use for computation.
      *
      * @var float
      */
     private $distance;
 
     /**
-     * IDs of images to restrict this job to
+     * IDs of images to restrict this job to.
      *
      * @var array
      */

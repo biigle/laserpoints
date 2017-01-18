@@ -11,7 +11,7 @@ use Exception;
 class Detect
 {
     /**
-     * Execute a new laserpoint detection
+     * Execute a new laserpoint detection.
      *
      * @param string $imageUrl Absolute path to the image file to detect laserpoints on
      * @param float $distance Distance of the laserpoints in cm

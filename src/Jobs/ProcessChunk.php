@@ -31,7 +31,7 @@ class ProcessChunk extends Job implements ShouldQueue
     protected $ids;
 
     /**
-     * Distance between laserpoints im cm to use for computation
+     * Distance between laserpoints im cm to use for computation.
      *
      * @var float
      */
@@ -78,7 +78,6 @@ class ProcessChunk extends Job implements ShouldQueue
         $images = Image::whereIn('id', $this->ids)->select('id', 'filename')->get();
 
         foreach ($images as $image) {
-
             $imagePoints = '[';
             if ($points->has($image->id)) {
                 $imagePoints .= $points[$image->id]->pluck('points')->implode(',');

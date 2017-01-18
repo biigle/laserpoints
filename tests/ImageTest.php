@@ -3,7 +3,6 @@
 namespace Biigle\Tests\Modules\Laserpoints;
 
 use TestCase;
-use Biigle\Shape;
 use Biigle\Modules\Laserpoints\Image;
 use Biigle\Tests\ImageTest as BaseImageTest;
 
@@ -14,9 +13,9 @@ class ImageTest extends TestCase
         $image = BaseImageTest::create([
             'attrs' => [
                 Image::LASERPOINTS_ATTRIBUTE => [
-                    'px' => 500
-                ]
-            ]
+                    'px' => 500,
+                ],
+            ],
         ]);
         $laserpointsImage = Image::convert($image);
         $this->assertEquals($image->id, $laserpointsImage->id);

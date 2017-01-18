@@ -11,7 +11,7 @@ use Biigle\Modules\Laserpoints\Jobs\LaserpointDetection;
 class LaserpointsController extends Controller
 {
     /**
-     * Compute distance between laserpoints for an image
+     * Compute distance between laserpoints for an image.
      *
      * @api {post} images/:id/laserpoints/area Compute image footprint
      * @apiGroup Images
@@ -43,8 +43,8 @@ class LaserpointsController extends Controller
         $this->dispatch(new LaserpointDetection($image->volume, $distance, [$image->id]));
     }
 
-     /**
-     * Compute distance between laserpoints for a volume
+    /**
+     * Compute distance between laserpoints for a volume.
      *
      * @api {post} volumes/:id/laserpoints/area Compute image footprint for all images
      * @apiGroup Volumes

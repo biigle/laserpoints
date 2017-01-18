@@ -4,7 +4,6 @@ namespace Biigle\Tests\Modules\Laserpoints\Http\Controllers\Api;
 
 use ApiTestCase;
 use Biigle\Tests\ImageTest;
-use Biigle\Modules\Laserpoints\Image;
 
 class ImagesControllerTest extends ApiTestCase
 {
@@ -14,7 +13,7 @@ class ImagesControllerTest extends ApiTestCase
             'attrs' => [
                 'laserpoints' => [
                     'points' => [[10, 10], [20, 20], [30, 30]],
-                ]
+                ],
             ],
             'volume_id' => $this->volume()->id,
         ]);
@@ -29,7 +28,7 @@ class ImagesControllerTest extends ApiTestCase
         $this->get("/api/v1/images/{$image->id}/laserpoints");
         $this->assertResponseOk();
         $this->seeJsonEquals([
-            'points' => [[10, 10], [20, 20], [30, 30]]
+            'points' => [[10, 10], [20, 20], [30, 30]],
         ]);
     }
 }

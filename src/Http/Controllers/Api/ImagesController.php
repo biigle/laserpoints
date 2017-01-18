@@ -9,7 +9,7 @@ use Biigle\Http\Controllers\Api\Controller;
 class ImagesController extends Controller
 {
     /**
-     * Show laserpoint data for this image
+     * Show laserpoint data for this image.
      *
      * @api {get} images/:id/laserpoints Show laserpoints data
      * @apiGroup Images

@@ -6,10 +6,10 @@ use Biigle\Image as BaseImage;
 use Exception;
 
 /**
- * Extends the base Biigle image
+ * Extends the base Biigle image.
  */
-class Image extends BaseImage {
-
+class Image extends BaseImage
+{
     /**
      * Name of the attribute that stores the laserpoints information in the image
      * 'attrs' object.
@@ -19,7 +19,7 @@ class Image extends BaseImage {
     const LASERPOINTS_ATTRIBUTE = 'laserpoints';
 
     /**
-     * Validation rules for a new laserpoint computation
+     * Validation rules for a new laserpoint computation.
      *
      * @var array
      */
@@ -28,7 +28,7 @@ class Image extends BaseImage {
     ];
 
     /**
-     * Properties of the laserpoints object
+     * Properties of the laserpoints object.
      *
      * @var array
      */
@@ -44,7 +44,7 @@ class Image extends BaseImage {
     ];
 
     /**
-     * Converts a regular Biigle image to a Laserpoints image
+     * Converts a regular Biigle image to a Laserpoints image.
      *
      * @param BaseImage $image Regular Biigle image instance
      *
@@ -70,8 +70,6 @@ class Image extends BaseImage {
         if (is_array($attrs) && array_key_exists(self::LASERPOINTS_ATTRIBUTE, $attrs)) {
             return $this->attrs[self::LASERPOINTS_ATTRIBUTE];
         }
-
-        return null;
     }
 
     /**
@@ -82,7 +80,7 @@ class Image extends BaseImage {
     public function setLaserpointsAttribute($value)
     {
         if (!is_array($value) && !is_null($value)) {
-            throw new Exception("Laserpoints information must be an array!");
+            throw new Exception('Laserpoints information must be an array!');
         }
 
         if (!is_null($value)) {
@@ -101,7 +99,7 @@ class Image extends BaseImage {
     }
 
     /**
-     * Get the area attribute from the laserpoint detection
+     * Get the area attribute from the laserpoint detection.
      *
      * @return float
      */
@@ -111,7 +109,7 @@ class Image extends BaseImage {
     }
 
     /**
-     * Get the px attribute from the laserpoint detection
+     * Get the px attribute from the laserpoint detection.
      *
      * @return int
      */
@@ -121,7 +119,7 @@ class Image extends BaseImage {
     }
 
     /**
-     * Get the count attribute from the laserpoint detection
+     * Get the count attribute from the laserpoint detection.
      *
      * @return int
      */
@@ -131,7 +129,7 @@ class Image extends BaseImage {
     }
 
     /**
-     * Get the method attribute from the laserpoint detection
+     * Get the method attribute from the laserpoint detection.
      *
      * @return string
      */
@@ -141,7 +139,7 @@ class Image extends BaseImage {
     }
 
     /**
-     * Get the distance attribute from the laserpoint detection
+     * Get the distance attribute from the laserpoint detection.
      *
      * @return float
      */
@@ -151,7 +149,7 @@ class Image extends BaseImage {
     }
 
     /**
-     * Get the points attribute from the laserpoint detection
+     * Get the points attribute from the laserpoint detection.
      *
      * @return array
      */
@@ -161,7 +159,7 @@ class Image extends BaseImage {
     }
 
     /**
-     * Get the error attribute from the laserpoint detection
+     * Get the error attribute from the laserpoint detection.
      *
      * @return bool
      */
@@ -171,7 +169,7 @@ class Image extends BaseImage {
     }
 
     /**
-     * Get the message attribute from the laserpoint detection
+     * Get the message attribute from the laserpoint detection.
      *
      * @return bool
      */
@@ -192,7 +190,5 @@ class Image extends BaseImage {
         if (is_array($laserpoints) && array_key_exists($key, $laserpoints)) {
             return $laserpoints[$key];
         }
-
-        return null;
     }
 }

@@ -6,8 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Routing\Router;
 use Biigle\Services\Modules;
 
-class LaserpointsServiceProvider extends ServiceProvider {
-
+class LaserpointsServiceProvider extends ServiceProvider
+{
     /**
      * Bootstrap the application events.
      *
@@ -16,7 +16,7 @@ class LaserpointsServiceProvider extends ServiceProvider {
      *
      * @return void
      */
-    public function boot(Modules $modules,Router $router)
+    public function boot(Modules $modules, Router $router)
     {
         $this->loadViewsFrom(__DIR__.'/resources/views', 'laserpoints');
 
@@ -53,7 +53,6 @@ class LaserpointsServiceProvider extends ServiceProvider {
     {
         $this->mergeConfigFrom(__DIR__.'/config/laserpoints.php', 'laserpoints');
 
-
         $this->app->singleton('command.laserpoints.publish', function ($app) {
             return new \Biigle\Modules\Laserpoints\Console\Commands\Publish();
         });
@@ -66,7 +65,7 @@ class LaserpointsServiceProvider extends ServiceProvider {
             'command.laserpoints.config',
         ]);
     }
-     /**
+    /**
      * Get the services provided by the provider.
      *
      * @return array

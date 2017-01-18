@@ -51,7 +51,6 @@ class ProcessChunkTest extends TestCase
         ];
 
         $this->assertEquals($expect, $image->fresh()->laserpoints);
-
     }
 
     public function testHandleManual()
@@ -93,7 +92,6 @@ class ProcessChunkTest extends TestCase
             return $mock;
         });
 
-
         with(new ProcessChunk($image->volume->url, [$image->id], 30))->handle();
 
         $expect = [
@@ -107,7 +105,6 @@ class ProcessChunkTest extends TestCase
         ];
 
         $this->assertEquals($expect, $image->fresh()->laserpoints);
-
     }
 
     public function testHandleGracefulError()
