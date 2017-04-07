@@ -1,15 +1,18 @@
 import sys
 import numpy as np
 from scipy.misc import imread
-import ast
+import json
 
 delta1 = 25
 
-# get all laserpoints in this volume
-manLaserpoints = ast.literal_eval(sys.argv[1])
+f = open(sys.argv[1], 'r')
+js = json.load(f)
+f.close()
+
+manLaserpoints = js['manLaserpoints']
 manLaserpoints = np.fliplr(np.array(manLaserpoints))
-manLaserpointFiles = ast.literal_eval(sys.argv[2])
-output = sys.argv[3]
+manLaserpointFiles = js['manLaserpointFiles']
+output = js['tmpFile']
 
 # preprocess
 
