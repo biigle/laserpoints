@@ -34,7 +34,6 @@ lpMap = scipy.ndimage.morphology.binary_opening(lpMap, np.ones((3, 3)))
 
 # find contours
 lbls, nlabel = scipy.ndimage.measurements.label(lpMap)
-# cts = scipy.ndimage.measurements.find_objects(lbls)
 centers = np.array(scipy.ndimage.measurements.center_of_mass(lpMap, lbls, np.arange(1, nlabel + 1)))
 
 # find best geometry
