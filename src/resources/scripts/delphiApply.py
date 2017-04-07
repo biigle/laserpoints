@@ -48,7 +48,23 @@ for i in manLaserpoints:
         minDist = dist
         lpWinner = asort
 laserpoints = centers[lpWinner]
-if laserpoints.shape[0] == 3:
+
+
+if laserpoints.shape[0] == 4:
+    dists = scipy.spatial.distance.pdist(laserpoints)
+    dists.sort()
+    laserdist = float(laserdistparam) / 100.
+    apx = np.mean(dists[0:4])**2
+
+    if apx == 0:
+        print json.dumps({
+            "error": True,
+            "message": "Computed pixel area is zero.",
+            "method": detection
+        })
+        exit(1)
+    aqm = laserdist**2 * (float(width) * float(height)) / apx
+elif laserpoints.shape[0] == 3:
     a = np.sqrt(np.power(float(laserpoints[0, 0]) - float(laserpoints[1, 0]), 2) + np.power(float(laserpoints[0, 1]) - float(laserpoints[1, 1]), 2))
     b = np.sqrt(np.power(float(laserpoints[1, 0]) - float(laserpoints[2, 0]), 2) + np.power(float(laserpoints[1, 1]) - float(laserpoints[2, 1]), 2))
     c = np.sqrt(np.power(float(laserpoints[0, 0]) - float(laserpoints[2, 0]), 2) + np.power(float(laserpoints[0, 1]) - float(laserpoints[2, 1]), 2))
