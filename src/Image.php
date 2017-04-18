@@ -24,7 +24,7 @@ class Image extends BaseImage
      * @var array
      */
     public static $laserpointsRules = [
-        'distance' => 'required|numeric',
+        'distance' => 'required|numeric|min:1',
     ];
 
     /**
