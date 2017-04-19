@@ -53,13 +53,13 @@
                     @endif
                 </table>
             @endif
-            <div class="panel-body" data-ng-app="biigle.laserpoints" data-ng-controller="LaserpointsController">
+            <div id="laserpoints-panel" class="panel-body">
                 @if (!$img->laserpoints)
-                    <div class="alert alert-info" data-ng-hide="isSubmitted()">
+                    <div class="alert alert-info" v-if="!processing">
                         No laserpoint detection was performed yet.
                     </div>
                 @elseif ($img->error)
-                    <div class="alert alert-danger" data-ng-hide="isSubmitted()">
+                    <div class="alert alert-danger" v-if="!processing">
                         @if ($img->message)
                             <strong>{{$img->message}}</strong>
                         @endif
@@ -67,24 +67,24 @@
                     </div>
                 @endif
                 @can('edit-in', $volume)
-                    <form class="form-inline" data-ng-hide="isSubmitted()">
+                    <form class="form-inline" v-if="!processing">
                         @if($img->laserpoints)
                             <div class="form-group">
-                                <input class="form-control" data-ng-model="distance" id="distance" type="number" placeholder="New laser distance in cm" title="Distance between two laserpoints in cm. Leave empty to use the previously set distance ({{$img->distance}})"></input>
+                                <input class="form-control" v-model="distance" type="number" min="0" placeholder="New laser distance in cm" title="Distance between two laserpoints in cm. Leave empty to use the previously set distance ({{$img->distance}})"></input>
                             </div>
                             <div class="form-group">
-                                <button class="btn btn-success" data-ng-disabled="isComputing()" data-ng-click="reDetection({{$image->id}}, {{$img->distance}})" title="Restart the laserpoint detection">Submit</button>
+                                <button class="btn btn-success" :disabled="loading" v-on:click.prevent="detect({{$image->id}}, {{$img->distance}})" title="Restart the laserpoint detection">Submit</button>
                             </div>
                         @else
                             <div class="form-group">
-                                <input class="form-control" data-ng-model="distance" id="distance" type="number" placeholder="Laser distance in cm" title="Distance between two laserpoints in cm" required></input>
+                                <input class="form-control" v-model="distance" type="number" min="0" placeholder="Laser distance in cm" title="Distance between two laserpoints in cm" required></input>
                             </div>
                             <div class="form-group">
-                                <button class="btn btn-success" data-ng-disabled="isComputing()" data-ng-click="newDetection({{$image->id}})" title="Start a new laserpoint detection">Submit</button>
+                                <button class="btn btn-success" :disabled="loading || !distance" v-on:click.prevent="detect({{$image->id}})" title="Start a new laserpoint detection">Submit</button>
                             </div>
                         @endif
                     </form>
-                    <div class="alert alert-success ng-cloak ng-hide" data-ng-show="isSubmitted()">
+                    <div class="alert alert-success" v-cloak v-if="processing">
                         The laserpoint detection was submitted and will be available soon.
                     </div>
                 @endcan
