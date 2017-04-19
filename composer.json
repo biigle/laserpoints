@@ -2,7 +2,7 @@
     "name": "biigle/laserpoints",
     "require": {
         "biigle/annotations": "~1.0",
-        "biigle/volumes": "~1.0"
+        "biigle/volumes": "~1.5"
     },
     "require-dev": {
     },
