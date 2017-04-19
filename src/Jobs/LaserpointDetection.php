@@ -18,7 +18,7 @@ class LaserpointDetection extends Job implements ShouldQueue
      *
      * @var int
      */
-    const CHUNK_SIZE = 10;
+    const CHUNK_SIZE = 100;
 
     /**
      * The volume to compute the area for.

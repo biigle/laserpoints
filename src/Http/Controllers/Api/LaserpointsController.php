@@ -2,6 +2,9 @@
 
 namespace Biigle\Modules\Laserpoints\Http\Controllers\Api;
 
+use DB;
+use Exception;
+use Biigle\Shape;
 use Biigle\Volume;
 use Illuminate\Http\Request;
 use Biigle\Modules\Laserpoints\Image;
@@ -10,6 +13,14 @@ use Biigle\Modules\Laserpoints\Jobs\LaserpointDetection;
 
 class LaserpointsController extends Controller
 {
+    /**
+     * Minimum number of manually annotated images required for Delphi laserpoint
+     * detection.
+     *
+     * @var int
+     */
+    const MIN_DELPHI_IMAGES = 4;
+
     /**
      * Compute distance between laserpoints for an image.
      *
@@ -70,9 +81,48 @@ class LaserpointsController extends Controller
             ]);
         }
 
+        try {
+            $this->checkReadyForDelphi($volume);
+        } catch (Exception $e) {
+            return $this->buildFailedValidationResponse($request, [
+                'id' => 'Delphi laserpoint detection can\'t be performed. '.$e->getMessage(),
+            ]);
+        }
+
         $this->validate($request, Image::$laserpointsRules);
         $distance = $request->input('distance');
 
         $this->dispatch(new LaserpointDetection($volume, $distance));
+    }
+
+    /**
+     * Determines if the image of a volume can be processed with Delphi
+     *
+     * @param Volume $volume
+     * @throws Exception If the volume can't be processed with Delphi
+     */
+    protected function checkReadyForDelphi(Volume $volume)
+    {
+        $labelId = config('laserpoints.label_id');
+        $points = DB::table('annotations')
+            ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
+            ->join('images', 'annotations.image_id', '=', 'images.id')
+            ->where('images.volume_id', $volume->id)
+            ->where('annotation_labels.label_id', $labelId)
+            ->where('annotations.shape_id', Shape::$pointId)
+            ->select(DB::raw('count(annotation_labels.id) as count'))
+            ->groupBy('images.id')
+            ->pluck('count');
+
+        if ($points->count() < self::MIN_DELPHI_IMAGES) {
+            throw new Exception('Only '.$points->count().' images have manually annotated laserpoints. At least '.self::MIN_DELPHI_IMAGES.' are required.');
+        }
+
+        $reference = $points[0];
+        foreach ($points as $count) {
+            if ($reference !== $count) {
+                throw new Exception('Images must have equal count of manual laserpoint annotations.');
+            }
+        }
     }
 }
