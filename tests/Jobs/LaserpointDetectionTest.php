@@ -14,7 +14,7 @@ class LaserpointDetectionTest extends TestCase
     public function testHandle()
     {
         $volume = VolumeTest::create();
-        $images = factory(Image::class, 15)->create()
+        $images = factory(Image::class, 101)->create()
             ->each(function ($i) use ($volume) {
                 $i->filename = uniqid();
                 $i->volume_id = $volume->id;

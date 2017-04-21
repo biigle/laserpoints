@@ -24,7 +24,7 @@ class Detect
     {
         $code = 0;
         $python = config('laserpoints.python');
-        $script = config('laserpoints.script');
+        $script = config('laserpoints.detect_script');
         $lines = [];
         $command = "{$python} {$script} \"{$imageUrl}\" {$distance} \"{$points}\" 2>&1";
         $output = json_decode(exec($command, $lines, $code), true);

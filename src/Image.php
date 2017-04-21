@@ -2,8 +2,10 @@
 
 namespace Biigle\Modules\Laserpoints;
 
-use Biigle\Image as BaseImage;
+use DB;
 use Exception;
+use Biigle\Shape;
+use Biigle\Image as BaseImage;
 
 /**
  * Extends the base Biigle image.
@@ -17,6 +19,20 @@ class Image extends BaseImage
      * @var string
      */
     const LASERPOINTS_ATTRIBUTE = 'laserpoints';
+
+    /**
+     * Minimum number of required manual laserpoint annotations per image.
+     *
+     * @var int
+     */
+    const MIN_MANUAL_POINTS = 2;
+
+    /**
+     * Maximum number of supported manual laserpoint annotations per image.
+     *
+     * @var int
+     */
+    const MAX_MANUAL_POINTS = 4;
 
     /**
      * Validation rules for a new laserpoint computation.
@@ -176,6 +192,35 @@ class Image extends BaseImage
     public function getMessageAttribute()
     {
         return $this->accessLaserpointsArray('message');
+    }
+
+    /**
+     * Determines if this image has a valid number of manually annotated laserpoints.
+     *
+     * @param Image $image
+     * @throws Exception If the image has an invalid count of manually annotated laserpoints
+     *
+     * @return bool
+     */
+    public function readyForManualDetection()
+    {
+        $labelId = config('laserpoints.label_id');
+        $count = DB::table('annotations')
+            ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
+            ->where('annotations.image_id', $this->id)
+            ->where('annotation_labels.label_id', $labelId)
+            ->where('annotations.shape_id', Shape::$pointId)
+            ->count();
+
+        if ($count > 0) {
+            if ($count < self::MIN_MANUAL_POINTS) {
+                throw new Exception('An image must have at least '.self::MIN_MANUAL_POINTS.' manually annotated laserpoints (has '.$count.').');
+            } elseif ($count > self::MAX_MANUAL_POINTS) {
+                throw new Exception('An image can\'t have more than '.self::MAX_MANUAL_POINTS.' manually annotated laserpoints (has '.$count.').');
+            }
+        }
+
+        return $count > 0;
     }
 
     /**

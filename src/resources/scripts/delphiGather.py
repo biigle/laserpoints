@@ -1,4 +1,5 @@
 import sys
+import os
 import numpy as np
 from scipy.misc import imread
 import json
@@ -9,9 +10,26 @@ f = open(sys.argv[1], 'r')
 js = json.load(f)
 f.close()
 
+'''
+Expected input file format:
+{
+    filePrefix: "/path/to/files",
+    manLaserpoints: [
+        [[10,10],[20,20]],
+        [[40,40],[50,50]]
+    ],
+    manLaserpointFiles: [
+        "path/to/file1.jpg",
+        "path/to/file2.jpg"
+    ],
+    tmpFile: "/tmp/filepath"
+}
+'''
+
+filePrefix = js['filePrefix']
 manLaserpoints = js['manLaserpoints']
 manLaserpoints = np.fliplr(np.array(manLaserpoints))
-manLaserpointFiles = js['manLaserpointFiles']
+manLaserpointFiles = [filePrefix + '/' + file for file in js['manLaserpointFiles']]
 output = js['tmpFile']
 
 # preprocess
@@ -31,3 +49,5 @@ for idx, i in enumerate(manLaserpoints):
         # save color and x,y to array
         lps.append(lpimg[j[0], j[1]])
 np.savez_compressed(output, maskImage=maskImage, lps=lps, manLaserpoints=manLaserpoints)
+# rename the file because stupid numpy always appends a '.npz' to the file name
+os.rename(output + '.npz', output)
