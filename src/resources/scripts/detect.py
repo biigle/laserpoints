@@ -5,9 +5,6 @@ import scipy.spatial.distance
 import ast
 import json
 
-DISTANCE_THRESHOLD = 500
-COLOR_THRESHOLD = 230
-
 imgfile = sys.argv[1]
 laserdistparam = sys.argv[2]
 
@@ -23,15 +20,10 @@ img[:, int(img.shape[1] - img.shape[1] * 0.15):, :] = 0
 
 width = img.shape[0]
 height = img.shape[1]
-detection = ""
 data = None
-colorchannel = 0
-if (len(sys.argv) == 4) and (sys.argv[3] != "[]"):
-    # work with provided data points
-    coords = ast.literal_eval(sys.argv[3])
-    data = np.fliplr(np.array(coords))
-    detection = "manual"
-    COLOR_THRESHOLD = 0
+coords = ast.literal_eval(sys.argv[3])
+data = np.fliplr(np.array(coords))
+detection = "manual"
 
 laserpoints = coords
 if laserpoints.shape[0] == 4:
