@@ -20,12 +20,9 @@ img[:, int(img.shape[1] - img.shape[1] * 0.15):, :] = 0
 
 width = img.shape[0]
 height = img.shape[1]
-data = None
-coords = ast.literal_eval(sys.argv[3])
-data = np.fliplr(np.array(coords))
+laserpoints = np.array(ast.literal_eval(sys.argv[3]))
 detection = "manual"
 
-laserpoints = coords
 if laserpoints.shape[0] == 4:
     dists = scipy.spatial.distance.pdist(laserpoints)
     dists.sort()
