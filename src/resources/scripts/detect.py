@@ -1,7 +1,6 @@
 import sys
 import numpy as np
 from scipy.misc import imread
-import sklearn.cluster
 import scipy.spatial.distance
 import ast
 import json
@@ -33,60 +32,23 @@ if (len(sys.argv) == 4) and (sys.argv[3] != "[]"):
     data = np.fliplr(np.array(coords))
     detection = "manual"
     COLOR_THRESHOLD = 0
-else:
-    detection = "heuristic"
-    # extract red points
-    thresholdr = COLOR_THRESHOLD
-    datar = np.vstack((np.logical_and(img[:, :, 0] > thresholdr, img[:, :, 2] < 150)).nonzero()).T
-    thresholdg = COLOR_THRESHOLD
-    datag = np.vstack((np.logical_and(img[:, :, 1] > thresholdr, img[:, :, 2] < 150)).nonzero()).T
-    if datar.size < datag.size and datag.size < 5000:
-        data = datag
-        colorchannel = 1
-    else:
-        data = datar
-        colorchannel = 0
-    if not data.size:
-        # no red/green points found return error
-        print json.dumps({
-            "error": True,
-            "message": "Could not detect any laserpoints.",
-            "method": detection
-        })
-        exit(1)
 
-laserpoints = None
-dists = None
-if data.shape[0] > 2:
-    km = sklearn.cluster.KMeans(n_clusters=3)
-    km.fit(data)
-    laserpoints = km.cluster_centers_.astype(np.int)
+laserpoints = coords
+if laserpoints.shape[0] == 4:
     dists = scipy.spatial.distance.pdist(laserpoints)
-if (dists is None) or (np.abs(dists[0] - dists[1]) > DISTANCE_THRESHOLD or np.abs(dists[1] - dists[2]) > DISTANCE_THRESHOLD or np.abs(dists[1] - dists[2]) > DISTANCE_THRESHOLD or np.any(img[[laserpoints[:, 0], laserpoints[:, 1], colorchannel]] < (COLOR_THRESHOLD * 0.9))):
-    # three laserpoints does not work try two
-    if data.shape[0] <= 1:
-        print json.dumps({
-            "error": True,
-            "message": "Two or more laserpoints are needed.",
-            "method": detection
-        })
-        exit(1)
-    km = sklearn.cluster.KMeans(n_clusters=2)
-    km.fit(data)
-    laserpoints = km.cluster_centers_.astype(np.int)
-    dists = scipy.spatial.distance.pdist(laserpoints)
-    # check if clustering was correct could by accident approximate 3 laserpoints with 2 and if cluster points are actually green/red
-    if np.sqrt(km.inertia_ / dists.shape[0]) > DISTANCE_THRESHOLD or np.any(img[[laserpoints[:, 0], laserpoints[:, 1], colorchannel]] < (COLOR_THRESHOLD * 0.9)):
-        # print laserpoints
-        # print img[[laserpoints[:, 0], laserpoints[:, 1], colorchannel]]
-        print json.dumps({
-            "error": True,
-            "message": "Error during laserpoint clustering.",
-            "method": detection
-        })
-        exit(1)
+    dists.sort()
+    laserdist = float(laserdistparam) / 100.
+    apx = np.mean(dists[0:4])**2
 
-if laserpoints.shape[0] == 3:
+    if apx == 0:
+        print json.dumps({
+            "error": True,
+            "message": "Computed pixel area is zero.",
+            "method": detection
+        })
+        exit(1)
+    aqm = laserdist**2 * (float(width) * float(height)) / apx
+elif laserpoints.shape[0] == 3:
     a = np.sqrt(np.power(float(laserpoints[0, 0]) - float(laserpoints[1, 0]), 2) + np.power(float(laserpoints[0, 1]) - float(laserpoints[1, 1]), 2))
     b = np.sqrt(np.power(float(laserpoints[1, 0]) - float(laserpoints[2, 0]), 2) + np.power(float(laserpoints[1, 1]) - float(laserpoints[2, 1]), 2))
     c = np.sqrt(np.power(float(laserpoints[0, 0]) - float(laserpoints[2, 0]), 2) + np.power(float(laserpoints[0, 1]) - float(laserpoints[2, 1]), 2))
