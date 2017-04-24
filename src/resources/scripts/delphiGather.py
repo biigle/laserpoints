@@ -58,7 +58,7 @@ for idx, i in enumerate(manLaserpoints):
         lpnegativ.append(lpimg[j[1] + delta1 / 2, j[0] - delta1 / 2])
 lps = np.array(lps)
 lpnegativ = np.array(lpnegativ)
-lps = lps[np.logical_not(np.any(scipy.spatial.distance.cdist(lps, lpnegativ) < 49, 1))]
+lps = lps[np.logical_not(np.any(scipy.spatial.distance.cdist(lps, lpnegativ, 'cityblock') < 49, 1))]
 
 np.savez_compressed(output, maskImage=maskImage, lps=lps, manLaserpoints=manLaserpoints)
 # rename the file because stupid numpy always appends a '.npz' to the file name
