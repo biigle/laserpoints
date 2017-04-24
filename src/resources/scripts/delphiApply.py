@@ -29,7 +29,7 @@ sel = np.where(maskImage)
 sel2 = np.any(scipy.spatial.distance.cdist(img[maskImage], lps, 'cityblock') < min_dist, 1)
 lpMap[sel[0][sel2], sel[1][sel2]] = 1
 
-# closing of lp_map
+# opening of lp_map
 lpMap = scipy.ndimage.morphology.binary_opening(lpMap, np.ones((3, 3)))
 
 # find contours
