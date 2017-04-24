@@ -13,7 +13,7 @@ use Biigle\Tests\AnnotationTest;
 use Biigle\Tests\AnnotationLabelTest;
 use Biigle\Modules\Laserpoints\Image;
 use Biigle\Modules\Laserpoints\Support\DelphiGather;
-use Biigle\Modules\Laserpoints\Jobs\ProcessManualChunkJob;
+use Biigle\Modules\Laserpoints\Jobs\ProcessDelphiChunkJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageDelphiJob;
 
 class ProcessImageDelphiJobTest extends TestCase

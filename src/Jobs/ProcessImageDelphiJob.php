@@ -36,17 +36,16 @@ class ProcessImageDelphiJob extends ProcessImageJob
             });
 
         $gather = App::make(DelphiGather::class);
-        $file = $gather->execute(
+        $gatherFile = $gather->execute(
             $this->image->volume->url,
             $images->pluck('filename')->all(),
             $images->pluck('points')->all()
         );
 
-        \Log::info($file);
         // TODO: Figure out when to delete the ouput file. Maybe create another file that
         // keeps track of all the jobs that are still running? If the count becomes 0,
         // the last job deletes both files.
 
-        // Queue::push(new ProcessDelphiChunkJob($url, [$this->image->id], $this->distance));
+        Queue::push(new ProcessDelphiChunkJob($url, collect($this->image->id), $this->distance, $gatherFile));
     }
 }

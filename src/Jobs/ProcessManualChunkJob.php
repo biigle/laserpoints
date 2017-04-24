@@ -33,7 +33,7 @@ class ProcessManualChunkJob extends Job implements ShouldQueue
      *
      * @var float
      */
-    private $distance;
+    protected $distance;
 
     /**
      * Create a new job instance.
