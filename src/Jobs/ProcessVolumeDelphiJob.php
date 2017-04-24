@@ -15,7 +15,7 @@ class ProcessVolumeDelphiJob extends Job
      *
      * @var int
      */
-    const CHUNK_SIZE = 100;
+    const CHUNK_SIZE = 10;
 
     /**
      * Number of images to process in one chunk.
