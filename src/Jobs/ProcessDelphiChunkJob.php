@@ -44,11 +44,20 @@ class ProcessDelphiChunkJob extends Job implements ShouldQueue
     protected $distance;
 
     /**
-     * Path to the file tracking the number of running "sibling" jobs accessing the same gatherFile.
+     * Path to the file tracking the running "sibling" jobs accessing the same gatherFile.
      *
      * @var string
      */
-    protected $countFile;
+    protected $indexFile;
+
+    /**
+     * Index of this job among the "sibling" jobs
+     *
+     * @var int
+     */
+    protected $index;
+
+
 
     /**
      * Create a new job instance.
@@ -57,18 +66,20 @@ class ProcessDelphiChunkJob extends Job implements ShouldQueue
      * @param Collection $images
      * @param float $distance
      * @param string $gatherFile
-     * @param string $countFile
+     * @param string $indexFile
+     * @param int $index
      *
      * @return void
      */
-    public function __construct($volumeUrl, $images, $distance, $gatherFile, $countFile = null)
+    public function __construct($volumeUrl, $images, $distance, $gatherFile, $indexFile = null, $index = null)
     {
         $this->volumeUrl = $volumeUrl;
         $this->images = $images;
         $this->gatherFile = $gatherFile;
         $this->distance = $distance;
         // If null this job assumes it is the only one accessing the gatherFile.
-        $this->countFile = $countFile;
+        $this->indexFile = $indexFile;
+        $this->index = $index;
     }
 
     /**
@@ -132,19 +143,23 @@ class ProcessDelphiChunkJob extends Job implements ShouldQueue
     {
         $delete = true;
 
-        if ($this->countFile) {
-            $handle = fopen($this->countFile, 'r+');
+        if ($this->indexFile) {
+            $handle = fopen($this->indexFile, 'r+');
             // We need an exclusive lock for this because the "sibling" jobs may run in
             // parallel.
             if (flock($handle, LOCK_EX)) {
-                $count = intval(fgets($handle));
-                if ($count === 1) {
-                    File::delete($this->countFile);
+                $running = json_decode(fgets($handle), true);
+                $running = array_values(array_filter($running, function ($i) {
+                    return $i !== $this->index;
+                }));
+
+                if (empty($running)) {
+                    File::delete($this->indexFile);
                 } else {
                     $delete = false;
                     rewind($handle);
                     ftruncate($handle, 0);
-                    fwrite($handle, $count - 1);
+                    fwrite($handle, json_encode($running));
                 }
                 flock($handle, LOCK_UN);
                 fclose($handle);

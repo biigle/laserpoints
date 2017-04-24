@@ -97,11 +97,11 @@ class ProcessVolumeDelphiJob extends Job
             ->pluck('id')
             ->chunk($this->chunkSize);
 
-        $countFile = tempnam(sys_get_temp_dir(), 'biigle_delphi_job_count');
-        File::put($countFile, $imagesToProcess->count());
+        $indexFile = tempnam(sys_get_temp_dir(), 'biigle_delphi_job_indices');
+        File::put($indexFile, json_encode($imagesToProcess->keys()));
 
-        foreach ($imagesToProcess as $chunk) {
-            Queue::push(new ProcessDelphiChunkJob($url, $chunk, $this->distance, $gatherFile, $countFile));
+        foreach ($imagesToProcess as $index => $chunk) {
+            Queue::push(new ProcessDelphiChunkJob($url, $chunk, $this->distance, $gatherFile, $indexFile, $index));
         }
     }
 }

@@ -71,8 +71,8 @@ class ProcessDelphiChunkJobTest extends TestCase
 
     public function testHandleCountDecrease()
     {
-        $countFile = sys_get_temp_dir().'/biigle_delphi_chunk_job_test';
-        File::put($countFile, 10);
+        $indexFile = sys_get_temp_dir().'/biigle_delphi_chunk_job_test';
+        File::put($indexFile, '[0,1]');
 
         try {
             $mock = Mockery::mock(DelphiApply::class);
@@ -85,18 +85,18 @@ class ProcessDelphiChunkJobTest extends TestCase
             });
 
             File::shouldReceive('delete')->never();
-            with(new ProcessDelphiChunkJob($this->image->volume->url, $this->images, 30, $this->gatherFile, $countFile))->handle();
+            with(new ProcessDelphiChunkJob($this->image->volume->url, $this->images, 30, $this->gatherFile, $indexFile, 0))->handle();
 
-            $this->assertEquals('9', file_get_contents($countFile));
+            $this->assertEquals('[1]', file_get_contents($indexFile));
         } finally {
-            unlink($countFile);
+            unlink($indexFile);
         }
     }
 
     public function testHandleCountZero()
     {
-        $countFile = sys_get_temp_dir().'/biigle_delphi_chunk_job_test';
-        File::put($countFile, 1);
+        $indexFile = sys_get_temp_dir().'/biigle_delphi_chunk_job_test';
+        File::put($indexFile, '[1]');
 
         try {
             $mock = Mockery::mock(DelphiApply::class);
@@ -108,11 +108,11 @@ class ProcessDelphiChunkJobTest extends TestCase
                 return $mock;
             });
 
-            File::shouldReceive('delete')->once()->with($countFile);
+            File::shouldReceive('delete')->once()->with($indexFile);
             File::shouldReceive('delete')->once()->with($this->gatherFile);
-            with(new ProcessDelphiChunkJob($this->image->volume->url, $this->images, 30, $this->gatherFile, $countFile))->handle();
+            with(new ProcessDelphiChunkJob($this->image->volume->url, $this->images, 30, $this->gatherFile, $indexFile, 1))->handle();
         } finally {
-            unlink($countFile);
+            unlink($indexFile);
         }
     }
 

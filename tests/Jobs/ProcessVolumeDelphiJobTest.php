@@ -42,7 +42,7 @@ class ProcessVolumeDelphiJobTest extends TestCase
             // Use this validator function to delete the countFile after each test.
             unlink($path);
             return !!$path;
-        }), 1);
+        }), '[0]');
 
         Queue::shouldReceive('push')->once()->with(ProcessDelphiChunkJob::class);
         Queue::shouldReceive('push')->once()->with(ProcessManualChunkJob::class);
@@ -72,7 +72,7 @@ class ProcessVolumeDelphiJobTest extends TestCase
             // Use this validator function to delete the countFile after each test.
             unlink($path);
             return !!$path;
-        }), 2);
+        }), '[0,1]');
 
         Queue::shouldReceive('push')->twice()->with(ProcessDelphiChunkJob::class);
         Queue::shouldReceive('push')->twice()->with(ProcessManualChunkJob::class);
