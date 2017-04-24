@@ -3,10 +3,43 @@
 namespace Biigle\Modules\Laserpoints\Jobs;
 
 use DB;
+use Queue;
 use Biigle\Shape;
+use Biigle\Jobs\Job as BaseJob;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
-trait CollectsLaserpointAnnotations
+abstract class Job extends BaseJob implements ShouldQueue
 {
+    use InteractsWithQueue, SerializesModels;
+
+    /**
+     * Distance between laserpoints im cm to use for computation.
+     *
+     * @var float
+     */
+    protected $distance;
+
+    /**
+     * Create a new job instance.
+     *
+     * @param float $distance
+     *
+     * @return void
+     */
+    public function __construct($distance)
+    {
+        $this->distance = $distance;
+    }
+
+    /**
+     * Execute the job.
+     *
+     * @return void
+     */
+    abstract public function handle();
+
     /**
      * Collects of the given all images that contain laserpoint annotations
      *

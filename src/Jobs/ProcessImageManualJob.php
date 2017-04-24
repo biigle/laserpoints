@@ -3,11 +3,30 @@
 namespace Biigle\Modules\Laserpoints\Jobs;
 
 use Queue;
-use Biigle\Modules\Laserpoints\Jobs\CollectsLaserpointAnnotations;
+use Biigle\Image;
 
-class ProcessImageManualJob extends ProcessImageJob
+class ProcessImageManualJob extends Job
 {
-    use CollectsLaserpointAnnotations;
+    /**
+     * The image to compute the area for.
+     *
+     * @var Image
+     */
+    protected $image;
+
+    /**
+     * Create a new job instance.
+     *
+     * @param Image $image
+     * @param float $distance
+     *
+     * @return void
+     */
+    public function __construct(Image $image, $distance)
+    {
+        parent::__construct($distance);
+        $this->image = $image;
+    }
 
     /**
      * Execute the job.

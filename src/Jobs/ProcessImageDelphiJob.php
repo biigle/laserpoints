@@ -4,12 +4,31 @@ namespace Biigle\Modules\Laserpoints\Jobs;
 
 use App;
 use Queue;
+use Biigle\Image;
 use Biigle\Modules\Laserpoints\Support\DelphiGather;
-use Biigle\Modules\Laserpoints\Jobs\CollectsLaserpointAnnotations;
 
-class ProcessImageDelphiJob extends ProcessImageJob
+class ProcessImageDelphiJob extends Job
 {
-    use CollectsLaserpointAnnotations;
+    /**
+     * The image to compute the area for.
+     *
+     * @var Image
+     */
+    protected $image;
+
+    /**
+     * Create a new job instance.
+     *
+     * @param Image $image
+     * @param float $distance
+     *
+     * @return void
+     */
+    public function __construct(Image $image, $distance)
+    {
+        parent::__construct($distance);
+        $this->image = $image;
+    }
 
     /**
      * Execute the job.
@@ -37,14 +56,10 @@ class ProcessImageDelphiJob extends ProcessImageJob
 
         $gather = App::make(DelphiGather::class);
         $gatherFile = $gather->execute(
-            $this->image->volume->url,
+            $url,
             $images->pluck('filename')->all(),
             $images->pluck('points')->all()
         );
-
-        // TODO: Figure out when to delete the ouput file. Maybe create another file that
-        // keeps track of all the jobs that are still running? If the count becomes 0,
-        // the last job deletes both files.
 
         Queue::push(new ProcessDelphiChunkJob($url, collect($this->image->id), $this->distance, $gatherFile));
     }
