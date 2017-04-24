@@ -36,6 +36,14 @@ lpMap = scipy.ndimage.morphology.binary_opening(lpMap, np.ones((3, 3)))
 lbls, nlabel = scipy.ndimage.measurements.label(lpMap)
 centers = np.array(scipy.ndimage.measurements.center_of_mass(lpMap, lbls, np.arange(1, nlabel + 1)))
 
+if centers.shape == (0,):
+    print json.dumps({
+        "error": True,
+        "message": "No laserpoints could be detected.",
+        "method": detection,
+    })
+    exit(1)
+
 # find best geometry
 minDist = 10**6
 lpWinner = []
