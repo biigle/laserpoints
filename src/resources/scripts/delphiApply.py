@@ -30,7 +30,7 @@ sel2 = np.any(scipy.spatial.distance.cdist(img[maskImage], lps, 'cityblock') < m
 lpMap[sel[0][sel2], sel[1][sel2]] = 1
 
 # opening of lp_map
-lpMap = scipy.ndimage.morphology.binary_opening(lpMap, np.ones((3, 3)))
+# lpMap = scipy.ndimage.morphology.binary_opening(lpMap, np.ones((3, 3)))
 
 # find contours
 lbls, nlabel = scipy.ndimage.measurements.label(lpMap)
@@ -54,7 +54,7 @@ for i in manLaserpoints:
     if dist < minDist:
         minDist = dist
         lpWinner = asort
-laserpoints = centers[lpWinner]
+laserpoints = centers[lpWinner[0:numLaserpoints]]
 
 
 if laserpoints.shape[0] == 4:
