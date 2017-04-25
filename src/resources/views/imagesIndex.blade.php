@@ -67,6 +67,10 @@
                     </div>
                 @endif
                 @can('edit-in', $volume)
+                    <div class="alert alert-success" v-cloak v-if="processing">
+                        The laserpoint detection was submitted and will be available soon.
+                    </div>
+                    <div class="alert alert-danger" v-cloak v-else v-if="error" v-text="error"></div>
                     <form class="form-inline" v-if="!processing">
                         @if($img->laserpoints)
                             <div class="form-group">
@@ -84,9 +88,6 @@
                             </div>
                         @endif
                     </form>
-                    <div class="alert alert-success" v-cloak v-if="processing">
-                        The laserpoint detection was submitted and will be available soon.
-                    </div>
                 @endcan
             @endif
         </div>
