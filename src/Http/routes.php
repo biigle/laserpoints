@@ -16,4 +16,8 @@ $router->group([
     $router->get('images/{id}/laserpoints', [
         'uses' => 'ImagesController@showLaserpoints',
     ]);
+
+    $router->get('volumes/{id}/images/filter/laserpoints', [
+        'uses' => 'VolumeImageController@index',
+    ]);
 });
