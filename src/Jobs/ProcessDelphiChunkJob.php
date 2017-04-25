@@ -123,8 +123,6 @@ class ProcessDelphiChunkJob extends Job implements ShouldQueue
      */
     public function failed()
     {
-        // If this job failed, maybeDeleteGatherFile() wasn't called because it is the
-        // very last thing performed in handle(). So we call it here.
         $this->maybeDeleteGatherFile();
     }
 
@@ -132,9 +130,9 @@ class ProcessDelphiChunkJob extends Job implements ShouldQueue
      * Handles the deletion of the gatherFile once all "sibling" jobs finished.
      *
      * If more than one chunk is processed during a Delphi LP detection, the jobs use the
-     * count file to track how many of them are still running. They need to track this to
-     * determine when the gatherFile can be deleted. This function updates the count file
-     * when a job was finished and deletes the count and gather files if this is the
+     * index file to track how many of them are still running. They need to track this to
+     * determine when the gatherFile can be deleted. This function updates the index file
+     * when a job was finished and deletes the index and gather files if this is the
      * last job to finish.
      */
     protected function maybeDeleteGatherFile()
@@ -147,6 +145,7 @@ class ProcessDelphiChunkJob extends Job implements ShouldQueue
             // parallel.
             if (flock($handle, LOCK_EX)) {
                 $running = json_decode(fgets($handle), true);
+                // Remove the index of this job.
                 $running = array_values(array_filter($running, function ($i) {
                     return $i !== $this->index;
                 }));
