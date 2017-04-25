@@ -31,7 +31,7 @@ Expected input file format:
 
 filePrefix = js['filePrefix']
 manLaserpoints = js['manLaserpoints']
-manLaserpoints = np.flip(np.array(manLaserpoints, int), 2)
+manLaserpoints = np.array(manLaserpoints, int)[:, :, ::-1]
 manLaserpointFiles = [filePrefix + '/' + file for file in js['manLaserpointFiles']]
 output = js['tmpFile']
 
