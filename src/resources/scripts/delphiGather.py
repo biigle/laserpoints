@@ -31,7 +31,7 @@ Expected input file format:
 
 filePrefix = js['filePrefix']
 manLaserpoints = js['manLaserpoints']
-manLaserpoints = np.flip(np.array(manLaserpoints, int), 2)
+manLaserpoints = np.array(manLaserpoints, int)[:, :, ::-1]
 manLaserpointFiles = [filePrefix + '/' + file for file in js['manLaserpointFiles']]
 output = js['tmpFile']
 
@@ -51,7 +51,8 @@ for idx, i in enumerate(manLaserpoints):
         maskImage[max(0, j[0] - delta1):min(j[0] + delta1, maskImage.shape[0]), max(0, j[1] - delta1):min(j[1] + delta1, maskImage.shape[1])] = 1
         # get color of lp
         # save color and x,y to array
-        lps.append(np.mean(lpimg[j[0] - delta2:j[0] + delta2 + 1, j[1] - delta2:j[1] + delta2 + 1], axis=(0, 1)))
+        # lps.append(np.mean(lpimg[j[0] - delta2:j[0] + delta2 + 1, j[1] - delta2:j[1] + delta2 + 1], axis=(0, 1)))
+        lps.append(lpimg[j[0], j[1]])
         lpnegativ.append(lpimg[j[0] - delta1 / 2, j[1] - delta1 / 2])
         lpnegativ.append(lpimg[j[0] + delta1 / 2, j[1] + delta1 / 2])
         lpnegativ.append(lpimg[j[0] - delta1 / 2, j[1] + delta1 / 2])
