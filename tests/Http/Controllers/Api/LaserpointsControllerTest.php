@@ -16,7 +16,6 @@ use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeDelphiJob;
 
 class LaserpointsControllerTest extends ApiTestCase
 {
-
     public function testComputeImage()
     {
         $image = ImageTest::create(['volume_id' => $this->volume()->id]);

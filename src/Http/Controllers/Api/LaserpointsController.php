@@ -59,7 +59,6 @@ class LaserpointsController extends Controller
             }
         }
 
-
         $this->validate($request, Image::$laserpointsRules);
         $distance = $request->input('distance');
 

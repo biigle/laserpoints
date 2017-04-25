@@ -41,7 +41,7 @@ class ProcessImageDelphiJobTest extends TestCase
         $mock = Mockery::mock(DelphiGather::class);
         $mock->shouldReceive('execute')
             ->once()
-            ->with($image->volume->url, [$image->filename], [[[1,1], [2,2], [3,3]]])
+            ->with($image->volume->url, [$image->filename], [[[1, 1], [2, 2], [3, 3]]])
             ->andReturn('/tmp/file');
 
         App::singleton(DelphiGather::class, function () use ($mock) {

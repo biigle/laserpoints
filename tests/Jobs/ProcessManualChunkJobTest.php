@@ -6,11 +6,7 @@ use App;
 use Mockery;
 use TestCase;
 use Exception;
-use Biigle\Shape;
 use Biigle\Tests\ImageTest;
-use Biigle\Tests\LabelTest;
-use Biigle\Tests\AnnotationTest;
-use Biigle\Tests\AnnotationLabelTest;
 use Biigle\Modules\Laserpoints\Image;
 use Biigle\Modules\Laserpoints\Support\Detect;
 use Biigle\Modules\Laserpoints\Jobs\ProcessManualChunkJob;
@@ -51,7 +47,6 @@ class ProcessManualChunkJobTest extends TestCase
         App::singleton(Detect::class, function () use ($mock) {
             return $mock;
         });
-
 
         with(new ProcessManualChunkJob($this->image->volume->url, $this->points, 30))->handle();
 

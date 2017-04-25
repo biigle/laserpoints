@@ -10,7 +10,6 @@ use Biigle\Tests\LabelTest;
 use Biigle\Tests\AnnotationTest;
 use Biigle\Tests\AnnotationLabelTest;
 use Biigle\Modules\Laserpoints\Image;
-use Biigle\Modules\Laserpoints\Volume;
 use Biigle\Tests\ImageTest as BaseImageTest;
 
 class ImageTest extends TestCase

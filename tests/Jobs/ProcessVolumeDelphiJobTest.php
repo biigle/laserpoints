@@ -32,7 +32,7 @@ class ProcessVolumeDelphiJobTest extends TestCase
         $mock = Mockery::mock(DelphiGather::class);
         $mock->shouldReceive('execute')
             ->once()
-            ->with($image->volume->url, [$image->filename], [[[1,1], [2,2], [3,3]]]);
+            ->with($image->volume->url, [$image->filename], [[[1, 1], [2, 2], [3, 3]]]);
 
         App::singleton(DelphiGather::class, function () use ($mock) {
             return $mock;
@@ -41,6 +41,7 @@ class ProcessVolumeDelphiJobTest extends TestCase
         File::shouldReceive('put')->once()->with(Mockery::on(function ($path) {
             // Use this validator function to delete the countFile after each test.
             unlink($path);
+
             return !!$path;
         }), '[0]');
 
@@ -71,6 +72,7 @@ class ProcessVolumeDelphiJobTest extends TestCase
         File::shouldReceive('put')->once()->with(Mockery::on(function ($path) {
             // Use this validator function to delete the countFile after each test.
             unlink($path);
+
             return !!$path;
         }), '[0,1]');
 

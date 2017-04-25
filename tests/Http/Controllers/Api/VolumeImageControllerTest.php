@@ -8,7 +8,6 @@ use Biigle\Modules\Laserpoints\Image;
 
 class VolumeImageControllerTest extends ApiTestCase
 {
-
     public function testIndex()
     {
         ImageTest::create(['volume_id' => $this->volume()->id, 'filename' => 'abc']);

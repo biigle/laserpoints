@@ -3,7 +3,6 @@
 namespace Biigle\Modules\Laserpoints\Jobs;
 
 use DB;
-use Queue;
 use Biigle\Shape;
 use Biigle\Jobs\Job as BaseJob;
 use Illuminate\Queue\SerializesModels;
@@ -41,7 +40,7 @@ abstract class Job extends BaseJob implements ShouldQueue
     abstract public function handle();
 
     /**
-     * Collects of the given all images that contain laserpoint annotations
+     * Collects of the given all images that contain laserpoint annotations.
      *
      * @param array $ids Image IDs to restrict the lookup to
      *
@@ -65,7 +64,7 @@ abstract class Job extends BaseJob implements ShouldQueue
     }
 
     /**
-     * Collects all images of a volume that contain laserpoint annotations
+     * Collects all images of a volume that contain laserpoint annotations.
      *
      * @param int $id Volume ID
      *

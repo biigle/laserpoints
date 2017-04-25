@@ -51,13 +51,11 @@ class ProcessDelphiChunkJob extends Job implements ShouldQueue
     protected $indexFile;
 
     /**
-     * Index of this job among the "sibling" jobs
+     * Index of this job among the "sibling" jobs.
      *
      * @var int
      */
     protected $index;
-
-
 
     /**
      * Create a new job instance.
@@ -164,9 +162,9 @@ class ProcessDelphiChunkJob extends Job implements ShouldQueue
                 flock($handle, LOCK_UN);
                 fclose($handle);
             } else {
-               // Should not happen. Either way we can't do anything meaningful if this
-               // happens except not deleting the file so it can't break any other jobs.
-               $delete = false;
+                // Should not happen. Either way we can't do anything meaningful if this
+                // happens except not deleting the file so it can't break any other jobs.
+                $delete = false;
             }
         }
 

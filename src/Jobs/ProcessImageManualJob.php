@@ -36,7 +36,9 @@ class ProcessImageManualJob extends Job
     public function handle()
     {
         // The image may be deleted in the meantime.
-        if (!$this->image) return;
+        if (!$this->image) {
+            return;
+        }
 
         $url = $this->image->volume->url;
         $points = $this->getLaserpointsForImages([$this->image->id]);

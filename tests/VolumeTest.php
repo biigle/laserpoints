@@ -8,7 +8,6 @@ use Biigle\Image;
 use Biigle\Annotation;
 use Biigle\Modules\Laserpoints\Volume;
 use Biigle\Tests\VolumeTest as BaseVolumeTest;
-use Biigle\Tests\Modules\Laserpoints\ImageTest;
 
 class VolumeTest extends TestCase
 {
