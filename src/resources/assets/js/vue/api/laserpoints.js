@@ -1,15 +1,15 @@
 /**
- * Resource for the laserpoint detection.
+ * Resource for the laser point detection.
  *
  * var resource = biigle.$require('api.laserpoints');
  *
- * Perform the laserpoint detection on all images of a volume:
+ * Perform the laser point detection on all images of a volume:
  * resource.processVolume({volume_id: 1}, {distance: 50}).then(...);
  *
- * Perform the laserpoint detection on a single image:
+ * Perform the laser point detection on a single image:
  * resource.processImage({image_id: 1}, {distance: 50}).then(...);
  *
- * Get the laserpoint information for an image
+ * Get the laser point information for an image
  * resource.get({image_id: 1}).then(...);
  *
  * @type {Vue.resource}

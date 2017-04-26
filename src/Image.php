@@ -13,7 +13,7 @@ use Biigle\Image as BaseImage;
 class Image extends BaseImage
 {
     /**
-     * Name of the attribute that stores the laserpoints information in the image
+     * Name of the attribute that stores the laser points information in the image
      * 'attrs' object.
      *
      * @var string
@@ -21,21 +21,21 @@ class Image extends BaseImage
     const LASERPOINTS_ATTRIBUTE = 'laserpoints';
 
     /**
-     * Minimum number of required manual laserpoint annotations per image.
+     * Minimum number of required manual laser point annotations per image.
      *
      * @var int
      */
     const MIN_MANUAL_POINTS = 2;
 
     /**
-     * Maximum number of supported manual laserpoint annotations per image.
+     * Maximum number of supported manual laser point annotations per image.
      *
      * @var int
      */
     const MAX_MANUAL_POINTS = 4;
 
     /**
-     * Validation rules for a new laserpoint computation.
+     * Validation rules for a new laser point computation.
      *
      * @var array
      */
@@ -44,7 +44,7 @@ class Image extends BaseImage
     ];
 
     /**
-     * Properties of the laserpoints object.
+     * Properties of the laser points object.
      *
      * @var array
      */
@@ -76,7 +76,7 @@ class Image extends BaseImage
     }
 
     /**
-     * Return the dynamic attribute for the laserpoints information.
+     * Return the dynamic attribute for the laser points information.
      *
      * @return array
      */
@@ -89,7 +89,7 @@ class Image extends BaseImage
     }
 
     /**
-     * Set or update the dynamic attribute for the laserpoints information.
+     * Set or update the dynamic attribute for the laser points information.
      *
      * @param array $value The value to set
      */
@@ -115,7 +115,7 @@ class Image extends BaseImage
     }
 
     /**
-     * Get the area attribute from the laserpoint detection.
+     * Get the area attribute from the laser point detection.
      *
      * @return float
      */
@@ -125,7 +125,7 @@ class Image extends BaseImage
     }
 
     /**
-     * Get the px attribute from the laserpoint detection.
+     * Get the px attribute from the laser point detection.
      *
      * @return int
      */
@@ -135,7 +135,7 @@ class Image extends BaseImage
     }
 
     /**
-     * Get the count attribute from the laserpoint detection.
+     * Get the count attribute from the laser point detection.
      *
      * @return int
      */
@@ -145,7 +145,7 @@ class Image extends BaseImage
     }
 
     /**
-     * Get the method attribute from the laserpoint detection.
+     * Get the method attribute from the laser point detection.
      *
      * @return string
      */
@@ -155,7 +155,7 @@ class Image extends BaseImage
     }
 
     /**
-     * Get the distance attribute from the laserpoint detection.
+     * Get the distance attribute from the laser point detection.
      *
      * @return float
      */
@@ -165,7 +165,7 @@ class Image extends BaseImage
     }
 
     /**
-     * Get the points attribute from the laserpoint detection.
+     * Get the points attribute from the laser point detection.
      *
      * @return array
      */
@@ -175,7 +175,7 @@ class Image extends BaseImage
     }
 
     /**
-     * Get the error attribute from the laserpoint detection.
+     * Get the error attribute from the laser point detection.
      *
      * @return bool
      */
@@ -185,7 +185,7 @@ class Image extends BaseImage
     }
 
     /**
-     * Get the message attribute from the laserpoint detection.
+     * Get the message attribute from the lase point detection.
      *
      * @return bool
      */
@@ -195,10 +195,10 @@ class Image extends BaseImage
     }
 
     /**
-     * Determines if this image has a valid number of manually annotated laserpoints.
+     * Determines if this image has a valid number of manually annotated laser points.
      *
      * @param Image $image
-     * @throws Exception If the image has an invalid count of manually annotated laserpoints
+     * @throws Exception If the image has an invalid count of manually annotated laser points
      *
      * @return bool
      */
@@ -214,9 +214,9 @@ class Image extends BaseImage
 
         if ($count > 0) {
             if ($count < self::MIN_MANUAL_POINTS) {
-                throw new Exception('An image must have at least '.self::MIN_MANUAL_POINTS.' manually annotated laserpoints (has '.$count.').');
+                throw new Exception('An image must have at least '.self::MIN_MANUAL_POINTS.' manually annotated laser points (has '.$count.').');
             } elseif ($count > self::MAX_MANUAL_POINTS) {
-                throw new Exception('An image can\'t have more than '.self::MAX_MANUAL_POINTS.' manually annotated laserpoints (has '.$count.').');
+                throw new Exception('An image can\'t have more than '.self::MAX_MANUAL_POINTS.' manually annotated laser points (has '.$count.').');
             }
         }
 
@@ -224,7 +224,7 @@ class Image extends BaseImage
     }
 
     /**
-     * Get an attribute from the laserpoints array.
+     * Get an attribute from the laser points array.
      *
      * @param  string $key
      * @return mixed

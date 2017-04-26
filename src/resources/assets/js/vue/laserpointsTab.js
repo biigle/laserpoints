@@ -1,5 +1,5 @@
 /**
- * Content of the laserpoints tab in the volume overview sidebar
+ * Content of the laser points tab in the volume overview sidebar
  */
 Vue.component('laserpoints-form', {
     mixins: [biigle.$require('core.mixins.loader')],

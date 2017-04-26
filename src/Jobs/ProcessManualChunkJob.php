@@ -22,14 +22,14 @@ class ProcessManualChunkJob extends Job implements ShouldQueue
     protected $volumeUrl;
 
     /**
-     * Array mapping image IDs to laserpoint coordinates.
+     * Array mapping image IDs to laser point coordinates.
      *
      * @var Collection
      */
     protected $points;
 
     /**
-     * Distance between laserpoints im cm to use for computation.
+     * Distance between laser points im cm to use for computation.
      *
      * @var float
      */

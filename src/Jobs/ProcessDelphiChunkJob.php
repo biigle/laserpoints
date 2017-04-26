@@ -37,7 +37,7 @@ class ProcessDelphiChunkJob extends Job implements ShouldQueue
     protected $gatherFile;
 
     /**
-     * Distance between laserpoints im cm to use for computation.
+     * Distance between laser points im cm to use for computation.
      *
      * @var float
      */

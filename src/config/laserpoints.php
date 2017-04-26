@@ -3,7 +3,7 @@
 return [
 
     /*
-    | label_id of a laserpoint
+    | label_id of a laser point
     */
     'label_id' => null,
 

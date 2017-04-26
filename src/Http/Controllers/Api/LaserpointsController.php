@@ -15,7 +15,7 @@ use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeDelphiJob;
 class LaserpointsController extends Controller
 {
     /**
-     * Compute distance between laserpoints for an image.
+     * Compute distance between laser points for an image.
      *
      * @api {post} images/:id/laserpoints/area Compute image footprint
      * @apiGroup Images
@@ -24,7 +24,7 @@ class LaserpointsController extends Controller
      * @apiDescription This feature is not available for images of remote volumes.
      *
      * @apiParam {Number} id The image ID.
-     * @apiParam (Required arguments) {Number} distance The distance between two laserpoints in cm.
+     * @apiParam (Required arguments) {Number} distance The distance between two laser points in cm.
      *
      * @param Request $request
      * @param int $id image id
@@ -37,7 +37,7 @@ class LaserpointsController extends Controller
 
         if ($image->volume->isRemote()) {
             return $this->buildFailedValidationResponse($request, [
-                'id' => 'Laserpoint detection is not available for images of remote volumes.',
+                'id' => 'Laser point detection is not available for images of remote volumes.',
             ]);
         }
 
@@ -45,7 +45,7 @@ class LaserpointsController extends Controller
             $manual = $image->readyForManualDetection();
         } catch (Exception $e) {
             return $this->buildFailedValidationResponse($request, [
-                'id' => 'Laserpoint detection can\'t be performed. '.$e->getMessage(),
+                'id' => 'Laser point detection can\'t be performed. '.$e->getMessage(),
             ]);
         }
 
@@ -54,7 +54,7 @@ class LaserpointsController extends Controller
                 Volume::convert($image->volume)->readyForDelphiDetection();
             } catch (Exception $e) {
                 return $this->buildFailedValidationResponse($request, [
-                    'id' => 'Delphi laserpoint detection can\'t be performed. '.$e->getMessage(),
+                    'id' => 'Delphi laser point detection can\'t be performed. '.$e->getMessage(),
                 ]);
             }
         }
@@ -70,7 +70,7 @@ class LaserpointsController extends Controller
     }
 
     /**
-     * Compute distance between laserpoints for a volume.
+     * Compute distance between laser points for a volume.
      *
      * @api {post} volumes/:id/laserpoints/area Compute image footprint for all images
      * @apiGroup Volumes
@@ -79,7 +79,7 @@ class LaserpointsController extends Controller
      * @apiDescription This feature is not available for remote volumes.
      *
      * @apiParam {Number} id The volume ID.
-     * @apiParam (Required arguments) {Number} distance The distance between two laserpoints in cm.
+     * @apiParam (Required arguments) {Number} distance The distance between two laser points in cm.
      *
      * @param Request $request
      * @param int $id volume id
@@ -92,7 +92,7 @@ class LaserpointsController extends Controller
 
         if ($volume->isRemote()) {
             return $this->buildFailedValidationResponse($request, [
-                'id' => 'Laserpoint detection is not available for remote volumes.',
+                'id' => 'Laser point detection is not available for remote volumes.',
             ]);
         }
 
@@ -100,7 +100,7 @@ class LaserpointsController extends Controller
             Volume::convert($volume)->readyForDelphiDetection();
         } catch (Exception $e) {
             return $this->buildFailedValidationResponse($request, [
-                'id' => 'Delphi laserpoint detection can\'t be performed. '.$e->getMessage(),
+                'id' => 'Delphi laser point detection can\'t be performed. '.$e->getMessage(),
             ]);
         }
 

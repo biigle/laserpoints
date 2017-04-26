@@ -13,7 +13,7 @@ use Biigle\Volume as BaseVolume;
 class Volume extends BaseVolume
 {
     /**
-     * Minimum number of manually annotated images required for Delphi laserpoint
+     * Minimum number of manually annotated images required for Delphi laser point
      * detection.
      *
      * @var int
@@ -55,21 +55,21 @@ class Volume extends BaseVolume
             ->pluck('count');
 
         if ($points->count() < self::MIN_DELPHI_IMAGES) {
-            throw new Exception('Only '.$points->count().' images have manually annotated laserpoints. At least '.self::MIN_DELPHI_IMAGES.' are required.');
+            throw new Exception('Only '.$points->count().' images have manually annotated laser points. At least '.self::MIN_DELPHI_IMAGES.' are required.');
         }
 
         $reference = $points[0];
         if ($reference < Image::MIN_MANUAL_POINTS) {
-            throw new Exception('There must be at least '.Image::MIN_MANUAL_POINTS.' manually annotated laserpoints per image ('.$reference.' found).');
+            throw new Exception('There must be at least '.Image::MIN_MANUAL_POINTS.' manually annotated laser points per image ('.$reference.' found).');
         }
 
         if ($reference > Image::MAX_MANUAL_POINTS) {
-            throw new Exception('There can\'t be more than '.Image::MAX_MANUAL_POINTS.' manually annotated laserpoints per image ('.$reference.' found).');
+            throw new Exception('There can\'t be more than '.Image::MAX_MANUAL_POINTS.' manually annotated laser points per image ('.$reference.' found).');
         }
 
         foreach ($points as $count) {
             if ($reference !== $count) {
-                throw new Exception('Images must have equal count of manually annotated laserpoints.');
+                throw new Exception('Images must have equal count of manually annotated laser points.');
             }
         }
     }

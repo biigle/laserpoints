@@ -3,16 +3,16 @@
 namespace Biigle\Modules\Laserpoints\Support;
 
 /**
- * Wrapper for the manual laserpoints detection script.
+ * Wrapper for the manual laser points detection script.
  */
 class Detect extends LaserpointsScript
 {
     /**
-     * Execute a new manual laserpoint detection.
+     * Execute a new manual laser point detection.
      *
      * @param string $imageUrl Absolute path to the image file to detect laserpoints on
-     * @param float $distance Distance of the laserpoints in cm
-     * @param string $points Coordinates of all manually annotated laserpoints on the image as JSON encoded string (like `'[[100,100],[200,200]]'`)
+     * @param float $distance Distance of the laser points in cm
+     * @param string $points Coordinates of all manually annotated laser points on the image as JSON encoded string (like `'[[100,100],[200,200]]'`)
      * @throws Exception If the detection script crashed.
      *
      * @return array The JSON object returned by the detect script as array

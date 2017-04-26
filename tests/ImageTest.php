@@ -80,7 +80,7 @@ class ImageTest extends TestCase
             $image->readyForManualDetection();
             $this->assertFalse(true);
         } catch (Exception $e) {
-            $this->assertContains('must have at least 2 manually annotated laserpoints', $e->getMessage());
+            $this->assertContains('must have at least 2 manually annotated laser points', $e->getMessage());
         }
 
         self::addLaserpoints($image);
@@ -94,7 +94,7 @@ class ImageTest extends TestCase
             $image->readyForManualDetection();
             $this->assertFalse(true);
         } catch (Exception $e) {
-            $this->assertContains('can\'t have more than 4 manually annotated laserpoints', $e->getMessage());
+            $this->assertContains('can\'t have more than 4 manually annotated laser points', $e->getMessage());
         }
     }
 }

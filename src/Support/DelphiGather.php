@@ -16,7 +16,7 @@ class DelphiGather
      *
      * @param string $volumeUrl URL of the volume images
      * @param array $filenames Array of image filenames
-     * @param array $points Array of laserpoint coordinates for each image
+     * @param array $points Array of laser point coordinates for each image
      * @throws Exception If the script crashed.
      *
      * @return string Path to the temporary output file of the script

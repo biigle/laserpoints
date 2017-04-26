@@ -8,7 +8,7 @@ use Exception;
 class LaserpointsScript
 {
     /**
-     * Execute a laserpoint detection command.
+     * Execute a laser point detection command.
      *
      * @param string $command Command to execute
      * @throws Exception If the detection script crashed.
@@ -24,7 +24,7 @@ class LaserpointsScript
         // Common script errors are handled gracefully with JSON error output. If the
         // output is no valid JSON with an 'error' property the script crashed fatally.
         if ($output === null || !array_key_exists('error', $output)) {
-            $message = "Fatal error with laserpoint detection (code {$code}).";
+            $message = "Fatal error with laser point detection (code {$code}).";
             Log::error($message, [
                 'command' => $command,
                 'output' => $lines,

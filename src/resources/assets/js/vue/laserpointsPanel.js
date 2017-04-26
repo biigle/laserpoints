@@ -1,5 +1,5 @@
 /**
- * The panel requesting a laserpoint detection on an individual image
+ * The panel requesting a laser point detection on an individual image
  */
 biigle.$viewModel('laserpoints-panel', function (element) {
 

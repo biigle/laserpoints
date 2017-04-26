@@ -8,9 +8,9 @@ use Biigle\Http\Controllers\Api\Controller;
 class VolumeImageController extends Controller
 {
     /**
-     * List the IDs of images having automatically detected laserpoints.
+     * List the IDs of images having automatically detected laser points.
      *
-     * @api {get} volumes/:id/images/filter/laserpoints Get all images automatically detected laserpoints
+     * @api {get} volumes/:id/images/filter/laserpoints Get all images automatically detected laser points
      * @apiGroup Volumes
      * @apiName VolumeImagesHasDetectedLaserpoint
      * @apiPermission projectMember

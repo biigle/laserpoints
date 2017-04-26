@@ -14,7 +14,7 @@ abstract class Job extends BaseJob implements ShouldQueue
     use InteractsWithQueue, SerializesModels;
 
     /**
-     * Distance between laserpoints im cm to use for computation.
+     * Distance between laser points im cm to use for computation.
      *
      * @var float
      */
@@ -40,11 +40,11 @@ abstract class Job extends BaseJob implements ShouldQueue
     abstract public function handle();
 
     /**
-     * Collects of the given all images that contain laserpoint annotations.
+     * Collects of the given all images that contain laser point annotations.
      *
      * @param array $ids Image IDs to restrict the lookup to
      *
-     * @return Collection Laserpoint coordinates indexed by image ID
+     * @return Collection Laser point coordinates indexed by image ID
      */
     protected function getLaserpointsForImages($ids)
     {
@@ -64,11 +64,11 @@ abstract class Job extends BaseJob implements ShouldQueue
     }
 
     /**
-     * Collects all images of a volume that contain laserpoint annotations.
+     * Collects all images of a volume that contain laser point annotations.
      *
      * @param int $id Volume ID
      *
-     * @return Collection Laserpoint coordinates indexed by image ID
+     * @return Collection Laser point coordinates indexed by image ID
      */
     protected function getLaserpointsForVolume($id)
     {
