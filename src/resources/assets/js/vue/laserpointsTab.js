@@ -1,5 +1,5 @@
 /**
- * Content of the laserpoints tab in the volume overview sidebar
+ * Content of the laser points tab in the volume overview sidebar
  */
 Vue.component('laserpoints-form', {
     mixins: [biigle.$require('core.mixins.loader')],
@@ -8,6 +8,7 @@ Vue.component('laserpoints-form', {
             volumeId: biigle.$require('volumes.volumeId'),
             distance: 1,
             processing: false,
+            error: false,
         };
     },
     computed: {
@@ -21,11 +22,19 @@ Vue.component('laserpoints-form', {
             biigle.$require('api.laserpoints')
                 .processVolume({volume_id: this.volumeId}, {distance: this.distance})
                 .then(this.volumeProcessing)
-                .catch(biigle.$require('messages.store').handleErrorResponse)
+                .catch(this.handleError)
                 .finally(this.finishLoading);
+        },
+        handleError: function (response) {
+            if (response.status === 422 && response.data.id) {
+                this.error = response.data.id;
+            } else {
+                biigle.$require('messages.store').handleErrorResponse(response);
+            }
         },
         volumeProcessing: function () {
             this.processing = true;
+            this.error = false;
         },
     },
 });

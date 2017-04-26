@@ -3,7 +3,7 @@
 return [
 
     /*
-    | label_id of a laserpoint
+    | label_id of a laser point
     */
     'label_id' => null,
 
@@ -15,5 +15,15 @@ return [
     /*
     | Path to the detect script.
     */
-    'script' => __DIR__.'/../resources/scripts/detect.py',
+    'detect_script' => __DIR__.'/../resources/scripts/detect.py',
+
+    /*
+    | Path to the Delphi gather script.
+    */
+    'delphi_gather_script' => __DIR__.'/../resources/scripts/delphiGather.py',
+
+    /*
+    | Path to the Delphi apply script.
+    */
+    'delphi_apply_script' => __DIR__.'/../resources/scripts/delphiApply.py',
 ];

@@ -1,14 +1,14 @@
 /**
- * The panel requesting a laserpoint detection on an individual image
+ * The panel requesting a laser point detection on an individual image
  */
 biigle.$viewModel('laserpoints-panel', function (element) {
-    var messages = biigle.$require('messages.store');
 
     new Vue({
         el: element,
         mixins: [biigle.$require('core.mixins.loader')],
         data: {
             processing: false,
+            error: false,
             distance: null,
         },
         methods: {
@@ -20,11 +20,19 @@ biigle.$viewModel('laserpoints-panel', function (element) {
                 biigle.$require('api.laserpoints')
                     .processImage({image_id: id}, {distance: distance})
                     .then(this.imageProcessing)
-                    .catch(messages.handleErrorResponse)
+                    .catch(this.handleError)
                     .finally(this.finishLoading);
+            },
+            handleError: function (response) {
+                if (response.status === 422 && response.data.id) {
+                    this.error = response.data.id;
+                } else {
+                    biigle.$require('messages.store').handleErrorResponse(response);
+                }
             },
             imageProcessing: function () {
                 this.processing = true;
+                this.error = false;
             },
         },
     });

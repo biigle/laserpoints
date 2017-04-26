@@ -2,9 +2,7 @@
 
 namespace Biigle\Modules\Laserpoints\Jobs;
 
-use DB;
 use Exception;
-use Biigle\Shape;
 use Biigle\Jobs\Job;
 use Biigle\Modules\Laserpoints\Image;
 use Illuminate\Queue\SerializesModels;
@@ -12,7 +10,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Biigle\Modules\Laserpoints\Support\Detect;
 
-class ProcessChunk extends Job implements ShouldQueue
+class ProcessManualChunkJob extends Job implements ShouldQueue
 {
     use InteractsWithQueue, SerializesModels;
 
@@ -24,32 +22,32 @@ class ProcessChunk extends Job implements ShouldQueue
     protected $volumeUrl;
 
     /**
-     * IDs of all images that should be processed in this chunk.
+     * Array mapping image IDs to laser point coordinates.
      *
-     * @var array
+     * @var Collection
      */
-    protected $ids;
+    protected $points;
 
     /**
-     * Distance between laserpoints im cm to use for computation.
+     * Distance between laser points im cm to use for computation.
      *
      * @var float
      */
-    private $distance;
+    protected $distance;
 
     /**
      * Create a new job instance.
      *
      * @param string $volumeUrl
-     * @param array $ids
+     * @param Collection $points
      * @param float $distance
      *
      * @return void
      */
-    public function __construct($volumeUrl, $ids, $distance)
+    public function __construct($volumeUrl, $points, $distance)
     {
         $this->volumeUrl = $volumeUrl;
-        $this->ids = $ids;
+        $this->points = $points;
         $this->distance = $distance;
     }
 
@@ -63,28 +61,13 @@ class ProcessChunk extends Job implements ShouldQueue
         $labelId = config('laserpoints.label_id');
         $detect = app()->make(Detect::class);
 
-        // get all laserpoint annotations of this chunk
-        $points = DB::table('annotations')
-            ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
-            ->whereIn('annotations.image_id', $this->ids)
-            ->where('annotation_labels.label_id', $labelId)
-            ->where('annotations.shape_id', Shape::$pointId)
-            ->select('annotations.points', 'annotations.image_id')
+        $images = Image::whereIn('id', $this->points->keys())
+            ->select('id', 'filename')
             ->get();
 
-        // map of image IDs to all laserpoint coordinates on the image
-        $points = collect($points)->groupBy('image_id');
-
-        $images = Image::whereIn('id', $this->ids)->select('id', 'filename')->get();
-
         foreach ($images as $image) {
-            $imagePoints = '[';
-            if ($points->has($image->id)) {
-                $imagePoints .= $points[$image->id]->pluck('points')->implode(',');
-            }
-            $imagePoints .= ']';
-
             try {
+                $imagePoints = '['.$this->points[$image->id]->implode(',').']';
                 $output = $detect->execute(
                     "{$this->volumeUrl}/{$image->filename}",
                     $this->distance,
