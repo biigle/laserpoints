@@ -40,7 +40,7 @@ class LaserpointsServiceProvider extends ServiceProvider
         $modules->addMixin('laserpoints', 'volumesScripts');
         $modules->addMixin('laserpoints', 'volumesSidebar');
 
-        $modules->addMixin('laserpoints', 'annotationsSettings');
+        $modules->addMixin('laserpoints', 'annotationsSettingsTab');
         $modules->addMixin('laserpoints', 'annotationsScripts');
 
         $modules->addMixin('laserpoints', 'manualTutorial');

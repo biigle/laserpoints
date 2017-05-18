@@ -71,4 +71,38 @@ class VolumeTest extends TestCase
             $this->assertContains('must have equal count of manually annotated laser points', $e->getMessage());
         }
     }
+
+    public function testHasDetectedLaserpoints()
+    {
+        $volume = Volume::convert(BaseVolumeTest::create());
+        $images = factory(Image::class, 4)->create()
+            ->each(function ($i) use ($volume) {
+                $i->filename = uniqid();
+                $i->volume_id = $volume->id;
+                $i->save();
+            });
+
+        $this->assertFalse($volume->hasDetectedLaserpoints());
+
+        $image = $images[0];
+        $image->attrs = ['laserpoints' => [
+            'error' => true,
+        ]];
+        $image->save();
+        $this->assertFalse($volume->hasDetectedLaserpoints());
+
+        $image->attrs = ['laserpoints' => [
+            'error' => false,
+            'method' => 'manual',
+        ]];
+        $image->save();
+        $this->assertFalse($volume->hasDetectedLaserpoints());
+
+        $image->attrs = ['laserpoints' => [
+            'error' => false,
+            'method' => 'delphi',
+        ]];
+        $image->save();
+        $this->assertTrue($volume->hasDetectedLaserpoints());
+    }
 }

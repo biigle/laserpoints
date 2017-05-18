@@ -73,4 +73,18 @@ class Volume extends BaseVolume
             }
         }
     }
+
+    /**
+     * Determines whether there are images with automatically detected laser points in
+     * this volume.
+     *
+     * @return boolean
+     */
+    public function hasDetectedLaserpoints()
+    {
+        return $this->images()
+            ->where('attrs->laserpoints->error', 'false')
+            ->where('attrs->laserpoints->method', '!=', 'manual')
+            ->exists();
+    }
 }
