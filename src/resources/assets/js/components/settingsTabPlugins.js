@@ -1,5 +1,6 @@
 /**
- * The plugin component to change the settings for the laser points
+ * The plugin component to change the settings for the laser points in the annotation
+ * tool.
  *
  * @type {Object}
  */
