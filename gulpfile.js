@@ -1,18 +1,20 @@
-"use strict";
-process.env.DISABLE_NOTIFIER = true;
+"use strict"
 
-var gulp    = require('gulp');
-var elixir  = require('laravel-elixir');
-var angular = require('laravel-elixir-angular');
-var shell   = require('gulp-shell');
+var gulp = require('gulp');
+var h = require('gulp-helpers');
+var publish = h.publish('Biigle\\Modules\\Laserpoints\\LaserpointsServiceProvider', 'public');
 
-elixir(function (mix) {
-   process.chdir('src');
-   // mix.sass('main.scss', 'public/assets/styles/main.css');
-    mix.angular('resources/assets/js/', 'public/assets/scripts', 'main.js');
-    mix.task('publish', 'public/assets/**/*');
+h.paths.sass = 'src/resources/assets/sass/';
+h.paths.js = 'src/resources/assets/js/';
+h.paths.public = 'src/public/assets/';
+
+gulp.task('js', function (cb) {
+    h.js('**/*.js', 'main.js', cb);
 });
 
-gulp.task('publish', function () {
-    gulp.src('').pipe(shell('php ../../../../artisan vendor:publish --provider="Biigle\\Modules\\Laserpoints\\LaserpointsServiceProvider" --tag public --force'));
+gulp.task('watch', function () {
+    gulp.watch(h.paths.js + '**/*.js', ['js']);
+    gulp.watch(h.paths.public + '**/*', publish);
 });
+
+gulp.task('default', ['js'], publish)
