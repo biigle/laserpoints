@@ -117,7 +117,7 @@ biigle.$require('annotations.components.settingsTabPlugins').laserPoints = {
             this.opacityValue = this.settings.get('laserpointOpacity');
         }
 
-        var events = biigle.$require('biigle.events');
+        var events = biigle.$require('events');
         events.$on('images.fetching', this.maybeFetchLaserpoints);
         events.$on('images.change', this.updateCurrentImage);
 
