@@ -41,24 +41,23 @@ output = js['tmpFile']
 # load image
 # create mask image with 50 px x 50 px positive around lps
 tmpimg = imread(manLaserpointFiles[0])
-lps = []
-lpnegativ = []
+
+lps = np.zeros((manLaserpoints.shape[0] * manLaserpoints.shape[1], 3))
+lpnegativ = np.zeros((manLaserpoints.shape[0] * manLaserpoints.shape[1] * 4, 3))
+
+
 maskImage = np.zeros([tmpimg.shape[0], tmpimg.shape[1]], bool)
-# lpConf = np.zeros([img.shape[0], img.shape[1]], np.uint8)
 for idx, i in enumerate(manLaserpoints):
     lpimg = imread(manLaserpointFiles[idx])
-    for j in i:
+    for idx2, j in enumerate(i):
         maskImage[max(0, j[0] - delta1):min(j[0] + delta1, maskImage.shape[0]), max(0, j[1] - delta1):min(j[1] + delta1, maskImage.shape[1])] = 1
         # get color of lp
         # save color and x,y to array
-        # lps.append(np.mean(lpimg[j[0] - delta2:j[0] + delta2 + 1, j[1] - delta2:j[1] + delta2 + 1], axis=(0, 1)))
-        lps.append(lpimg[j[0], j[1]])
-        lpnegativ.append(lpimg[j[0] - delta1 / 2, j[1] - delta1 / 2])
-        lpnegativ.append(lpimg[j[0] + delta1 / 2, j[1] + delta1 / 2])
-        lpnegativ.append(lpimg[j[0] - delta1 / 2, j[1] + delta1 / 2])
-        lpnegativ.append(lpimg[j[0] + delta1 / 2, j[1] - delta1 / 2])
-lps = np.array(lps)
-lpnegativ = np.array(lpnegativ)
+        lps[idx * 4 + idx2] = lpimg[j[0], j[1]]
+        lpnegativ[idx * 4 + idx2 * 4] = lpimg[j[0] - delta1 / 2, j[1] - delta1 / 2]
+        lpnegativ[idx * 4 + idx2 * 4 + 1] = lpimg[j[0] + delta1 / 2, j[1] + delta1 / 2]
+        lpnegativ[idx * 4 + idx2 * 4 + 2] = lpimg[j[0] - delta1 / 2, j[1] + delta1 / 2]
+        lpnegativ[idx * 4 + idx2 * 4 + 3] = lpimg[j[0] + delta1 / 2, j[1] - delta1 / 2]
 lps = lps[np.logical_not(np.any(scipy.spatial.distance.cdist(lps, lpnegativ, 'cityblock') < 49, 1))]
 
 np.savez_compressed(output, maskImage=maskImage, lps=lps, manLaserpoints=manLaserpoints)
