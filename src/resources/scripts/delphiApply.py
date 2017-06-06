@@ -26,7 +26,7 @@ lpMap = np.zeros([img.shape[0], img.shape[1]], bool)
 
 
 sel = np.where(maskImage)
-sel2 = np.zeros(img[maskImage].shape[0])
+sel2 = np.zeros(img[maskImage].shape[0], bool)
 for idx, i in enumerate(img[maskImage]):
     sel2[idx] = np.any(scipy.spatial.distance.cdist(np.atleast_2d(i), lps, 'cityblock') < min_dist)
 lpMap[sel[0][sel2], sel[1][sel2]] = 1
