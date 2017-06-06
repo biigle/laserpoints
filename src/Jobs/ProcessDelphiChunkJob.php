@@ -123,7 +123,8 @@ class ProcessDelphiChunkJob extends Job implements ShouldQueue
      */
     public function failed()
     {
-        $this->maybeDeleteGatherFile();
+        // DON'T delete the gather and index files in this case. We want to be able to
+        // re-run this job if it failed!
     }
 
     /**

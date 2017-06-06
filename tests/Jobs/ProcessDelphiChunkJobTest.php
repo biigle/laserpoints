@@ -172,4 +172,10 @@ class ProcessDelphiChunkJobTest extends TestCase
 
         $this->assertEquals($expect, $this->image->fresh()->laserpoints);
     }
+
+    public function testFailed()
+    {
+        File::shouldReceive('delete')->never();
+        with(new ProcessDelphiChunkJob($this->image->volume->url, $this->images, 30, $this->gatherFile))->failed();
+    }
 }
