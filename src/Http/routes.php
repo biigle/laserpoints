@@ -3,7 +3,7 @@
 $router->group([
     'namespace' => 'Api',
     'prefix' => 'api/v1',
-    'middleware' => 'auth.api',
+    'middleware' => 'auth:web,api',
 ], function ($router) {
     $router->post('images/{id}/laserpoints/area', [
         'uses' => 'LaserpointsController@computeImage',
