@@ -3,5 +3,5 @@
 </h3>
 
 <p>
-    Learn how to perform an automatic laser point detection and how to determine the visual footprint of an image.
+    The automatic laser point detection is used to determine the visual footprint of images.
 </p>
