@@ -17,31 +17,31 @@ class VolumeImageControllerTest extends ApiTestCase
         $this->doTestApiRoute('GET', "/api/v1/volumes/{$id}/images/filter/laserpoints");
 
         $this->beUser();
-        $this->get("/api/v1/volumes/{$id}/images/filter/laserpoints");
-        $this->assertResponseStatus(403);
+        $response = $this->get("/api/v1/volumes/{$id}/images/filter/laserpoints");
+        $response->assertStatus(403);
 
         $this->beGuest();
-        $this->json('GET', "/api/v1/volumes/{$id}/images/filter/laserpoints")
-            ->seeJsonEquals([]);
-        $this->assertResponseOk();
+        $response = $this->json('GET', "/api/v1/volumes/{$id}/images/filter/laserpoints")
+            ->assertExactJson([]);
+        $response->assertStatus(200);
 
         $image->laserpoints = ['error' => true, 'message' => 'abc'];
         $image->save();
         $image->save();
-        $this->json('GET', "/api/v1/volumes/{$id}/images/filter/laserpoints")
-            ->seeJsonEquals([]);
-        $this->assertResponseOk();
+        $response = $this->json('GET', "/api/v1/volumes/{$id}/images/filter/laserpoints")
+            ->assertExactJson([]);
+        $response->assertStatus(200);
 
         $image->laserpoints = ['error' => false, 'method' => 'manual'];
         $image->save();
-        $this->json('GET', "/api/v1/volumes/{$id}/images/filter/laserpoints")
-            ->seeJsonEquals([]);
-        $this->assertResponseOk();
+        $response = $this->json('GET', "/api/v1/volumes/{$id}/images/filter/laserpoints")
+            ->assertExactJson([]);
+        $response->assertStatus(200);
 
         $image->laserpoints = ['error' => false, 'method' => 'delphi'];
         $image->save();
-        $this->json('GET', "/api/v1/volumes/{$id}/images/filter/laserpoints")
-            ->seeJsonEquals([$image->id]);
-        $this->assertResponseOk();
+        $response = $this->json('GET', "/api/v1/volumes/{$id}/images/filter/laserpoints")
+            ->assertExactJson([$image->id]);
+        $response->assertStatus(200);
     }
 }

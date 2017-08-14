@@ -22,47 +22,47 @@ class LaserpointsControllerTest extends ApiTestCase
         $this->doTestApiRoute('POST', "/api/v1/images/{$image->id}/laserpoints/area");
 
         $this->beGuest();
-        $this->post("/api/v1/images/{$image->id}/laserpoints/area");
-        $this->assertResponseStatus(403);
+        $response = $this->post("/api/v1/images/{$image->id}/laserpoints/area");
+        $response->assertStatus(403);
 
         $this->beEditor();
-        $this->json('POST', "/api/v1/images/{$image->id}/laserpoints/area");
+        $response = $this->json('POST', "/api/v1/images/{$image->id}/laserpoints/area");
         // Distance is required.
-        $this->assertResponseStatus(422);
+        $response->assertStatus(422);
 
-        $this->json('POST', "/api/v1/images/{$image->id}/laserpoints/area", ['distance' => 50]);
+        $response = $this->json('POST', "/api/v1/images/{$image->id}/laserpoints/area", ['distance' => 50]);
         // Not enough manually annotated images for Delphi.
-        $this->assertResponseStatus(422);
+        $response->assertStatus(422);
 
         $this->makeManualAnnotations(3);
 
         $this->expectsJobs(ProcessImageDelphiJob::class);
-        $this->json('POST', "/api/v1/images/{$image->id}/laserpoints/area", ['distance' => 50]);
-        $this->assertResponseOk();
+        $response = $this->json('POST', "/api/v1/images/{$image->id}/laserpoints/area", ['distance' => 50]);
+        $response->assertStatus(200);
 
         Image::truncate();
         $this->makeManualAnnotations(1, 1);
         $image = Image::first();
 
-        $this->json('POST', "/api/v1/images/{$image->id}/laserpoints/area", ['distance' => 50]);
+        $response = $this->json('POST', "/api/v1/images/{$image->id}/laserpoints/area", ['distance' => 50]);
         // Not enough manual annotations on this image.
-        $this->assertResponseStatus(422);
+        $response->assertStatus(422);
 
         Image::truncate();
         $this->makeManualAnnotations(5, 1);
         $image = Image::first();
 
-        $this->json('POST', "/api/v1/images/{$image->id}/laserpoints/area", ['distance' => 50]);
+        $response = $this->json('POST', "/api/v1/images/{$image->id}/laserpoints/area", ['distance' => 50]);
         // Too many manual annotations on this image.
-        $this->assertResponseStatus(422);
+        $response->assertStatus(422);
 
         Image::truncate();
         $this->makeManualAnnotations(2, 1);
         $image = Image::first();
 
         $this->expectsJobs(ProcessImageManualJob::class);
-        $this->post("/api/v1/images/{$image->id}/laserpoints/area", ['distance' => 50]);
-        $this->assertResponseOk();
+        $response = $this->post("/api/v1/images/{$image->id}/laserpoints/area", ['distance' => 50]);
+        $response->assertStatus(200);
     }
 
     public function testComputeImageRemote()
@@ -74,8 +74,8 @@ class LaserpointsControllerTest extends ApiTestCase
 
         $this->beEditor();
         $this->doesntExpectJobs(ProcessImageDelphiJob::class);
-        $this->json('POST', "/api/v1/images/{$image->id}/laserpoints/area", ['distance' => 50]);
-        $this->assertResponseStatus(422);
+        $response = $this->json('POST', "/api/v1/images/{$image->id}/laserpoints/area", ['distance' => 50]);
+        $response->assertStatus(422);
     }
 
     public function testComputeVolume()
@@ -84,41 +84,41 @@ class LaserpointsControllerTest extends ApiTestCase
         $this->doTestApiRoute('POST', "/api/v1/volumes/{$id}/laserpoints/area");
 
         $this->beGuest();
-        $this->post("/api/v1/volumes/{$id}/laserpoints/area");
-        $this->assertResponseStatus(403);
+        $response = $this->post("/api/v1/volumes/{$id}/laserpoints/area");
+        $response->assertStatus(403);
 
         $this->beEditor();
-        $this->json('POST', "/api/v1/volumes/{$id}/laserpoints/area");
+        $response = $this->json('POST', "/api/v1/volumes/{$id}/laserpoints/area");
         // Missing distance
-        $this->assertResponseStatus(422);
+        $response->assertStatus(422);
 
-        $this->json('POST', "/api/v1/volumes/{$id}/laserpoints/area", ['distance' => 50]);
+        $response = $this->json('POST', "/api/v1/volumes/{$id}/laserpoints/area", ['distance' => 50]);
         // Not enough manually annotated images for Delphi
-        $this->assertResponseStatus(422);
+        $response->assertStatus(422);
 
         $this->makeManualAnnotations(1);
-        $this->json('POST', "/api/v1/volumes/{$id}/laserpoints/area", ['distance' => 50]);
+        $response = $this->json('POST', "/api/v1/volumes/{$id}/laserpoints/area", ['distance' => 50]);
         // Images must have at least 2 laserpoint annotations
-        $this->assertResponseStatus(422);
+        $response->assertStatus(422);
         Image::truncate();
 
         $this->makeManualAnnotations(5);
-        $this->json('POST', "/api/v1/volumes/{$id}/laserpoints/area", ['distance' => 50]);
+        $response = $this->json('POST', "/api/v1/volumes/{$id}/laserpoints/area", ['distance' => 50]);
         // Images cant have more than 4 laserpoint annotations
-        $this->assertResponseStatus(422);
+        $response->assertStatus(422);
         Image::truncate();
 
         $this->makeManualAnnotations(3);
 
         $this->expectsJobs(ProcessVolumeDelphiJob::class);
-        $this->post("/api/v1/volumes/{$id}/laserpoints/area", ['distance' => 50]);
-        $this->assertResponseOk();
+        $response = $this->post("/api/v1/volumes/{$id}/laserpoints/area", ['distance' => 50]);
+        $response->assertStatus(200);
 
         $this->makeManualAnnotations(2, 1);
 
-        $this->json('POST', "/api/v1/volumes/{$id}/laserpoints/area", ['distance' => 50]);
+        $response = $this->json('POST', "/api/v1/volumes/{$id}/laserpoints/area", ['distance' => 50]);
         // Images don't have equal count of LP annotations
-        $this->assertResponseStatus(422);
+        $response->assertStatus(422);
     }
 
     public function testComputeVolumeRemote()
@@ -130,8 +130,8 @@ class LaserpointsControllerTest extends ApiTestCase
 
         $this->beEditor();
         $this->doesntExpectJobs(ProcessVolumeDelphiJob::class);
-        $this->json('POST', "/api/v1/volumes/{$id}/laserpoints/area", ['distance' => 50]);
-        $this->assertResponseStatus(422);
+        $response = $this->json('POST', "/api/v1/volumes/{$id}/laserpoints/area", ['distance' => 50]);
+        $response->assertStatus(422);
     }
 
     protected function makeManualAnnotations($annotations, $images = 4)
