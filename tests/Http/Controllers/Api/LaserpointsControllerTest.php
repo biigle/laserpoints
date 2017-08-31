@@ -78,6 +78,17 @@ class LaserpointsControllerTest extends ApiTestCase
         $response->assertStatus(422);
     }
 
+    public function testComputeImageTiled()
+    {
+        $image = ImageTest::create(['tiled' => true, 'volume_id' => $this->volume()->id]);
+        $this->makeManualAnnotations(3);
+
+        $this->beEditor();
+        $this->doesntExpectJobs(ProcessImageDelphiJob::class);
+        $response = $this->json('POST', "/api/v1/images/{$image->id}/laserpoints/area", ['distance' => 50]);
+        $response->assertStatus(422);
+    }
+
     public function testComputeVolume()
     {
         $id = $this->volume()->id;
@@ -126,6 +137,18 @@ class LaserpointsControllerTest extends ApiTestCase
         $this->volume()->url = 'http://localhost';
         $this->volume()->save();
         $id = $this->volume()->id;
+        $this->makeManualAnnotations(3);
+
+        $this->beEditor();
+        $this->doesntExpectJobs(ProcessVolumeDelphiJob::class);
+        $response = $this->json('POST', "/api/v1/volumes/{$id}/laserpoints/area", ['distance' => 50]);
+        $response->assertStatus(422);
+    }
+
+    public function testComputeVolumeTiled()
+    {
+        $id = $this->volume()->id;
+        $image = ImageTest::create(['tiled' => true, 'volume_id' => $id]);
         $this->makeManualAnnotations(3);
 
         $this->beEditor();
