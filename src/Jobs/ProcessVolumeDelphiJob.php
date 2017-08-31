@@ -97,7 +97,11 @@ class ProcessVolumeDelphiJob extends Job
             ->pluck('id')
             ->chunk($this->chunkSize);
 
-        $indexFile = tempnam(sys_get_temp_dir(), 'biigle_delphi_job_indices');
+        $tmpDir = config('laserpoints.tmp_dir');
+        if (!File::isDirectory($tmpDir)) {
+            File::makeDirectory($tmpDir, 0755, true);
+        }
+        $indexFile = tempnam($tmpDir, 'biigle_delphi_job_indices');
         File::put($indexFile, json_encode($imagesToProcess->keys()));
 
         foreach ($imagesToProcess as $index => $chunk) {

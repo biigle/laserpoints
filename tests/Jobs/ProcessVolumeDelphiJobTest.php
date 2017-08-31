@@ -23,6 +23,7 @@ class ProcessVolumeDelphiJobTest extends TestCase
 {
     public function testHandle()
     {
+        config(['laserpoints.tmp_dir' => '/tmp']);
         $image = $this->createAnnotatedImage();
         $image2 = ImageTest::create([
             'filename' => 'xyz',
@@ -38,11 +39,20 @@ class ProcessVolumeDelphiJobTest extends TestCase
             return $mock;
         });
 
+        File::shouldReceive('isDirectory')
+            ->once()
+            ->with('/tmp')
+            ->andReturn(false);
+
+        File::shouldReceive('makeDirectory')
+            ->once()
+            ->with('/tmp', 0755, true);
+
         File::shouldReceive('put')->once()->with(Mockery::on(function ($path) {
             // Use this validator function to delete the countFile after each test.
             unlink($path);
 
-            return !!$path;
+            return starts_with($path, '/tmp/');
         }), '[0]');
 
         Queue::shouldReceive('push')->once()->with(ProcessDelphiChunkJob::class);
@@ -52,6 +62,7 @@ class ProcessVolumeDelphiJobTest extends TestCase
 
     public function testHandleChunking()
     {
+        config(['laserpoints.tmp_dir' => '/tmp']);
         $volume = VolumeTest::create();
         for ($i = 0; $i < 2; $i++) {
             $this->createAnnotatedImage($volume->id);
@@ -69,11 +80,16 @@ class ProcessVolumeDelphiJobTest extends TestCase
             return $mock;
         });
 
+        File::shouldReceive('isDirectory')
+            ->once()
+            ->with('/tmp')
+            ->andReturn(true);
+
         File::shouldReceive('put')->once()->with(Mockery::on(function ($path) {
             // Use this validator function to delete the countFile after each test.
             unlink($path);
 
-            return !!$path;
+            return starts_with($path, '/tmp/');
         }), '[0,1]');
 
         Queue::shouldReceive('push')->twice()->with(ProcessDelphiChunkJob::class);

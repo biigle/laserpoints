@@ -26,8 +26,12 @@ class DelphiGather
         $code = 0;
         $python = config('laserpoints.python');
         $script = config('laserpoints.delphi_gather_script');
-        $inputFile = tempnam(sys_get_temp_dir(), 'biigle_delphi_gather_input');
-        $outputFile = tempnam(sys_get_temp_dir(), 'biigle_delphi_gather_output');
+        $tmpDir = config('laserpoints.tmp_dir');
+        if (!File::isDirectory($tmpDir)) {
+            File::makeDirectory($tmpDir, 0755, true);
+        }
+        $inputFile = tempnam($tmpDir, 'biigle_delphi_gather_input');
+        $outputFile = tempnam($tmpDir, 'biigle_delphi_gather_output');
         $inputContent = [
             'filePrefix' => $volumeUrl,
             'manLaserpoints' => $points,
