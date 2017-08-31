@@ -44,32 +44,32 @@ tmpimg = imread(manLaserpointFiles[0])
 
 lps = np.zeros((manLaserpoints.shape[0] * manLaserpoints.shape[1], 3))
 lpnegativ = np.zeros((manLaserpoints.shape[0] * manLaserpoints.shape[1] * 4, 3))
-
+lps_index = 0
 
 maskImage = np.zeros([tmpimg.shape[0], tmpimg.shape[1]], bool)
 for idx, i in enumerate(manLaserpoints):
     lpimg = imread(manLaserpointFiles[idx])
     for idx2, j in enumerate(i):
         maskImage[max(0, j[0] - delta1):min(j[0] + delta1, maskImage.shape[0]), max(0, j[1] - delta1):min(j[1] + delta1, maskImage.shape[1])] = 1
-        # get color of lp
-        # save color and x,y to array
-        lps[idx * 4 + idx2] = lpimg[j[0], j[1]]
+        # save color of lp to array
+        lps[lps_index] = lpimg[j[0], j[1]]
         try:
-            lpnegativ[idx * 4 + idx2 * 4] = lpimg[j[0] - delta1 / 2, j[1] - delta1 / 2]
+            lpnegativ[lps_index * 4] = lpimg[j[0] - delta1 / 2, j[1] - delta1 / 2]
         except IndexError:
             pass
         try:
-            lpnegativ[idx * 4 + idx2 * 4 + 1] = lpimg[j[0] + delta1 / 2, j[1] + delta1 / 2]
+            lpnegativ[lps_index * 4 + 1] = lpimg[j[0] + delta1 / 2, j[1] + delta1 / 2]
         except IndexError:
             pass
         try:
-            lpnegativ[idx * 4 + idx2 * 4 + 2] = lpimg[j[0] - delta1 / 2, j[1] + delta1 / 2]
+            lpnegativ[lps_index * 4 + 2] = lpimg[j[0] - delta1 / 2, j[1] + delta1 / 2]
         except IndexError:
             pass
         try:
-            lpnegativ[idx * 4 + idx2 * 4 + 3] = lpimg[j[0] + delta1 / 2, j[1] - delta1 / 2]
+            lpnegativ[lps_index * 4 + 3] = lpimg[j[0] + delta1 / 2, j[1] - delta1 / 2]
         except IndexError:
             pass
+        lps_index += 1
 
 lps = lps[np.logical_not(np.any(scipy.spatial.distance.cdist(lps, lpnegativ, 'cityblock') < 49, 1))]
 
