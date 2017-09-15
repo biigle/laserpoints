@@ -35,16 +35,18 @@ class LaserpointsServiceProvider extends ServiceProvider
             __DIR__.'/config/laserpoints.php' => config_path('laserpoints.php'),
         ], 'config');
 
-        $modules->addMixin('laserpoints', 'imagesIndex');
-
-        $modules->addMixin('laserpoints', 'volumesScripts');
-        $modules->addMixin('laserpoints', 'volumesSidebar');
-
-        $modules->addMixin('laserpoints', 'annotationsSettingsTab');
-        $modules->addMixin('laserpoints', 'annotationsScripts');
-
-        $modules->addMixin('laserpoints', 'manualTutorial');
-        $modules->addMixin('laserpoints', 'annotationsManualSidebarSettings');
+        $modules->register('laserpoints', [
+            'viewMixins' => [
+                'imagesIndex',
+                'volumesScripts',
+                'volumesSidebar',
+                'annotationsSettingsTab',
+                'annotationsScripts',
+                'manualTutorial',
+                'annotationsManualSidebarSettings',
+                'volumesManualRemoteVolumes',
+            ],
+        ]);
     }
 
     /**
