@@ -40,7 +40,7 @@ class LaserpointsControllerTest extends ApiTestCase
         $response = $this->json('POST', "/api/v1/images/{$image->id}/laserpoints/area", ['distance' => 50]);
         $response->assertStatus(200);
 
-        Image::truncate();
+        Image::getQuery()->delete();
         $this->makeManualAnnotations(1, 1);
         $image = Image::first();
 
@@ -48,7 +48,7 @@ class LaserpointsControllerTest extends ApiTestCase
         // Not enough manual annotations on this image.
         $response->assertStatus(422);
 
-        Image::truncate();
+        Image::getQuery()->delete();
         $this->makeManualAnnotations(5, 1);
         $image = Image::first();
 
@@ -56,7 +56,7 @@ class LaserpointsControllerTest extends ApiTestCase
         // Too many manual annotations on this image.
         $response->assertStatus(422);
 
-        Image::truncate();
+        Image::getQuery()->delete();
         $this->makeManualAnnotations(2, 1);
         $image = Image::first();
 
@@ -111,13 +111,13 @@ class LaserpointsControllerTest extends ApiTestCase
         $response = $this->json('POST', "/api/v1/volumes/{$id}/laserpoints/area", ['distance' => 50]);
         // Images must have at least 2 laserpoint annotations
         $response->assertStatus(422);
-        Image::truncate();
+        Image::getQuery()->delete();
 
         $this->makeManualAnnotations(5);
         $response = $this->json('POST', "/api/v1/volumes/{$id}/laserpoints/area", ['distance' => 50]);
         // Images cant have more than 4 laserpoint annotations
         $response->assertStatus(422);
-        Image::truncate();
+        Image::getQuery()->delete();
 
         $this->makeManualAnnotations(3);
 

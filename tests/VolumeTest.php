@@ -63,7 +63,12 @@ class VolumeTest extends TestCase
             $this->assertContains('can\'t be more than 4 manually annotated laser points per image', $e->getMessage());
         }
 
-        Annotation::first()->delete();
+        Annotation::getQuery()->delete();
+        $images->each(function ($i) {
+            ImageTest::addLaserpoints($i, 3);
+        });
+        ImageTest::addLaserpoints($images[0], 1);
+
         try {
             $volume->readyForDelphiDetection();
             $this->assertFalse(true);
@@ -74,9 +79,6 @@ class VolumeTest extends TestCase
 
     public function testHasDetectedLaserpoints()
     {
-        if ($this->isSqlite()) {
-            $this->markTestSkipped('Can\'t test with SQLite because JSON selectors are not supported.');
-        }
         $volume = Volume::convert(BaseVolumeTest::create());
         $images = factory(Image::class, 4)->create()
             ->each(function ($i) use ($volume) {
