@@ -4,14 +4,14 @@ namespace Biigle\Modules\Laserpoints\Jobs;
 
 use File;
 use Exception;
-use Biigle\Jobs\Job;
+use Biigle\Jobs\Job as BaseJob;
 use Biigle\Modules\Laserpoints\Image;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Biigle\Modules\Laserpoints\Support\DelphiApply;
 
-class ProcessDelphiChunkJob extends Job implements ShouldQueue
+class ProcessDelphiChunkJob extends BaseJob implements ShouldQueue
 {
     use InteractsWithQueue, SerializesModels;
 
