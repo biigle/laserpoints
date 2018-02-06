@@ -2,7 +2,9 @@
 
 namespace Biigle\Modules\Laserpoints\Jobs;
 
+use App;
 use Exception;
+use ImageCache;
 use Biigle\Jobs\Job as BaseJob;
 use Biigle\Modules\Laserpoints\Image;
 use Illuminate\Queue\SerializesModels;
@@ -13,13 +15,6 @@ use Biigle\Modules\Laserpoints\Support\Detect;
 class ProcessManualChunkJob extends BaseJob implements ShouldQueue
 {
     use InteractsWithQueue, SerializesModels;
-
-    /**
-     * URL of the volume the images belong to.
-     *
-     * @var string
-     */
-    protected $volumeUrl;
 
     /**
      * Array mapping image IDs to laser point coordinates.
@@ -38,15 +33,13 @@ class ProcessManualChunkJob extends BaseJob implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param string $volumeUrl
      * @param Collection $points
      * @param float $distance
      *
      * @return void
      */
-    public function __construct($volumeUrl, $points, $distance)
+    public function __construct($points, $distance)
     {
-        $this->volumeUrl = $volumeUrl;
         $this->points = $points;
         $this->distance = $distance;
     }
@@ -59,20 +52,20 @@ class ProcessManualChunkJob extends BaseJob implements ShouldQueue
     public function handle()
     {
         $labelId = config('laserpoints.label_id');
-        $detect = app()->make(Detect::class);
+        $detect = App::make(Detect::class);
 
         $images = Image::whereIn('id', $this->points->keys())
-            ->select('id', 'filename')
+            ->with('volume')
+            ->select('id', 'filename', 'volume_id')
             ->get();
+
+        $callback = function ($image, $path) use ($detect) {
+            return $detect->execute($path, $this->distance, $this->points->get($image->id));
+        };
 
         foreach ($images as $image) {
             try {
-                $imagePoints = '['.$this->points[$image->id]->implode(',').']';
-                $output = $detect->execute(
-                    "{$this->volumeUrl}/{$image->filename}",
-                    $this->distance,
-                    $imagePoints
-                );
+                $output = ImageCache::getOnce($image, $callback);
             } catch (Exception $e) {
                 $output = [
                     'error' => true,

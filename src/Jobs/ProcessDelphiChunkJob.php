@@ -2,8 +2,10 @@
 
 namespace Biigle\Modules\Laserpoints\Jobs;
 
+use App;
 use File;
 use Exception;
+use ImageCache;
 use Biigle\Jobs\Job as BaseJob;
 use Biigle\Modules\Laserpoints\Image;
 use Illuminate\Queue\SerializesModels;
@@ -16,16 +18,9 @@ class ProcessDelphiChunkJob extends BaseJob implements ShouldQueue
     use InteractsWithQueue, SerializesModels;
 
     /**
-     * URL of the volume the images belong to.
-     *
-     * @var string
-     */
-    protected $volumeUrl;
-
-    /**
      * IDs of the images to process.
      *
-     * @var Collection
+     * @var array
      */
     protected $images;
 
@@ -61,7 +56,7 @@ class ProcessDelphiChunkJob extends BaseJob implements ShouldQueue
      * Create a new job instance.
      *
      * @param string $volumeUrl
-     * @param Collection $images
+     * @param array $images
      * @param float $distance
      * @param string $gatherFile
      * @param string $indexFile
@@ -69,9 +64,8 @@ class ProcessDelphiChunkJob extends BaseJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($volumeUrl, $images, $distance, $gatherFile, $indexFile = null, $index = null)
+    public function __construct($images, $distance, $gatherFile, $indexFile = null, $index = null)
     {
-        $this->volumeUrl = $volumeUrl;
         $this->images = $images;
         $this->gatherFile = $gatherFile;
         $this->distance = $distance;
@@ -87,19 +81,19 @@ class ProcessDelphiChunkJob extends BaseJob implements ShouldQueue
      */
     public function handle()
     {
-        $delphi = app()->make(DelphiApply::class);
-
+        $delphi = App::make(DelphiApply::class);
         $images = Image::whereIn('id', $this->images)
-            ->select('id', 'filename')
+            ->with('volume')
+            ->select('id', 'filename', 'volume_id')
             ->get();
+
+        $callback = function ($image, $path) use ($delphi) {
+            return $delphi->execute($this->gatherFile, $path, $this->distance);
+        };
 
         foreach ($images as $image) {
             try {
-                $output = $delphi->execute(
-                    $this->gatherFile,
-                    "{$this->volumeUrl}/{$image->filename}",
-                    $this->distance
-                );
+                $output = ImageCache::getOnce($image, $callback);
             } catch (Exception $e) {
                 $output = [
                     'error' => true,

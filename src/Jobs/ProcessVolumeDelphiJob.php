@@ -2,14 +2,14 @@
 
 namespace Biigle\Modules\Laserpoints\Jobs;
 
-use App;
 use File;
-use Queue;
 use Biigle\Volume;
-use Biigle\Modules\Laserpoints\Support\DelphiGather;
+use Illuminate\Foundation\Bus\DispatchesJobs;
 
 class ProcessVolumeDelphiJob extends Job
 {
+    use DispatchesJobs;
+
     /**
      * Number of images to process in one chunk.
      *
@@ -60,7 +60,6 @@ class ProcessVolumeDelphiJob extends Job
             return;
         }
 
-        $url = $this->volume->url;
         $points = $this->getLaserpointsForVolume($this->volume->id);
 
         // We chunk this job into multiple smaller jobs because volumes can become
@@ -68,40 +67,25 @@ class ProcessVolumeDelphiJob extends Job
         // queue workers and each one does not run very long (in case there is a hard
         // limit on the runtime of a job).
         foreach ($points->chunk($this->chunkSize) as $chunk) {
-            Queue::push(new ProcessManualChunkJob($url, $chunk, $this->distance));
+            $this->dispatch(new ProcessManualChunkJob($chunk, $this->distance));
         }
 
-        // After submitting the images for manual detection, prepare the jobs for Delphi
-        // detection.
-
-        $points = $points->map(function ($pts) {
-            return json_decode('['.$pts->implode(',').']');
-        });
-
-        $images = $this->volume->images()
-            ->whereIn('id', $points->keys())
-            ->pluck('filename', 'id')
-            ->map(function ($i, $id) use ($points) {
-                return ['filename' => $i, 'points' => $points->get($id)];
-            });
-
-        $gather = App::make(DelphiGather::class);
-        $gatherFile = $gather->execute(
-            $url,
-            $images->pluck('filename')->all(),
-            $images->pluck('points')->all()
-        );
+        $gatherFile = $this->gather($points);
 
         $imagesToProcess = $this->volume->images()
             ->whereNotIn('id', $points->keys())
             ->pluck('id')
             ->chunk($this->chunkSize);
 
-        $indexFile = tempnam(sys_get_temp_dir(), 'biigle_delphi_job_indices');
+        $tmpDir = config('laserpoints.tmp_dir');
+        if (!File::isDirectory($tmpDir)) {
+            File::makeDirectory($tmpDir, 0755, true);
+        }
+        $indexFile = tempnam($tmpDir, 'biigle_delphi_job_indices');
         File::put($indexFile, json_encode($imagesToProcess->keys()));
 
         foreach ($imagesToProcess as $index => $chunk) {
-            Queue::push(new ProcessDelphiChunkJob($url, $chunk, $this->distance, $gatherFile, $indexFile, $index));
+            $this->dispatch(new ProcessDelphiChunkJob($chunk, $this->distance, $gatherFile, $indexFile, $index));
         }
     }
 }

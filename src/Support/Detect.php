@@ -21,7 +21,7 @@ class Detect extends LaserpointsScript
     {
         $python = config('laserpoints.python');
         $script = config('laserpoints.detect_script');
-        $command = "{$python} {$script} \"{$imageUrl}\" {$distance} \"{$points}\" 2>&1";
+        $command = "{$python} {$script} '{$imageUrl}' '{$distance}' '{$points}' 2>&1";
 
         return $this->exec($command);
     }

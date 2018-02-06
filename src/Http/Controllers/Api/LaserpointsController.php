@@ -41,6 +41,12 @@ class LaserpointsController extends Controller
             ]);
         }
 
+        if ($image->tiled === true) {
+            return $this->buildFailedValidationResponse($request, [
+                'id' => 'Laser point detection is not available for very large images.',
+            ]);
+        }
+
         try {
             $manual = $image->readyForManualDetection();
         } catch (Exception $e) {
@@ -93,6 +99,12 @@ class LaserpointsController extends Controller
         if ($volume->isRemote()) {
             return $this->buildFailedValidationResponse($request, [
                 'id' => 'Laser point detection is not available for remote volumes.',
+            ]);
+        }
+
+        if ($volume->hasTiledImages()) {
+            return $this->buildFailedValidationResponse($request, [
+                'id' => 'Laser point detection is not available for volumes with very large images.',
             ]);
         }
 

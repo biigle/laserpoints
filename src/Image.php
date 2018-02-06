@@ -82,10 +82,7 @@ class Image extends BaseImage
      */
     public function getLaserpointsAttribute()
     {
-        $attrs = $this->attrs;
-        if (is_array($attrs) && array_key_exists(self::LASERPOINTS_ATTRIBUTE, $attrs)) {
-            return $this->attrs[self::LASERPOINTS_ATTRIBUTE];
-        }
+        return $this->getJsonAttr(self::LASERPOINTS_ATTRIBUTE);
     }
 
     /**
@@ -103,15 +100,7 @@ class Image extends BaseImage
             $value = array_only($value, static::$infoParams);
         }
 
-        $attrs = $this->attrs;
-
-        if ($value === null) {
-            unset($attrs[self::LASERPOINTS_ATTRIBUTE]);
-        } else {
-            $attrs[self::LASERPOINTS_ATTRIBUTE] = $value;
-        }
-
-        $this->attrs = $attrs;
+        $this->setJsonAttr(self::LASERPOINTS_ATTRIBUTE, $value);
     }
 
     /**
@@ -231,9 +220,6 @@ class Image extends BaseImage
      */
     protected function accessLaserpointsArray($key)
     {
-        $laserpoints = $this->laserpoints;
-        if (is_array($laserpoints) && array_key_exists($key, $laserpoints)) {
-            return $laserpoints[$key];
-        }
+        return array_get($this->laserpoints, $key);
     }
 }

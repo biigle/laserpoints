@@ -12,46 +12,80 @@ use Exception;
 class DelphiGather
 {
     /**
+     * Path to the temporary ouput file of the Delphi gather script.
+     *
+     * @var string
+     */
+    protected $outputPath;
+
+    public function __construct()
+    {
+        $tmpDir = config('laserpoints.tmp_dir');
+        if (!File::isDirectory($tmpDir)) {
+            File::makeDirectory($tmpDir, 0755, true);
+        }
+        $tmpFile = uniqid('biigle_delphi_gather_output_');
+        $this->outputPath = "{$tmpDir}/{$tmpFile}";
+    }
+
+    /**
      * Execute a new Delphi preprocessing.
      *
-     * @param string $volumeUrl URL of the volume images
-     * @param array $filenames Array of image filenames
-     * @param array $points Array of laser point coordinates for each image
+     * @param string $path Path to the image file
+     * @param string $points JSON encoded array of laser point coordinates for the image
      * @throws Exception If the script crashed.
-     *
-     * @return string Path to the temporary output file of the script
      */
-    public function execute($volumeUrl, $filenames, $points)
+    public function execute($path, $points)
+    {
+        $script = config('laserpoints.delphi_gather_script');
+
+        return $this->python("{$script} '{$path}' '{$points}' '{$this->outputPath}'");
+    }
+
+    /**
+     * Finish the Delphi preprocessing after all images have been processed.
+     *
+     * @throws Exception If the script crashed.
+     */
+    public function finish()
+    {
+        $script = config('laserpoints.delphi_gather_finish_script');
+
+        return $this->python("{$script} '{$this->outputPath}'");
+    }
+
+    /**
+     * Get the path to the temporary ouput file of the Delphi gather script.
+     *
+     * @return string
+     */
+    public function getOutputPath()
+    {
+        return $this->outputPath;
+    }
+
+    /**
+     * Execute a python script.
+     *
+     * @param string $command Script and arguments.
+     * @throws Exception If the script crashed.
+     */
+    protected function python($command)
     {
         $code = 0;
         $python = config('laserpoints.python');
-        $script = config('laserpoints.delphi_gather_script');
-        $inputFile = tempnam(sys_get_temp_dir(), 'biigle_delphi_gather_input');
-        $outputFile = tempnam(sys_get_temp_dir(), 'biigle_delphi_gather_output');
-        $inputContent = [
-            'filePrefix' => $volumeUrl,
-            'manLaserpoints' => $points,
-            'manLaserpointFiles' => $filenames,
-            'tmpFile' => $outputFile,
-        ];
         $lines = [];
-        $command = "{$python} {$script} \"{$inputFile}\" 2>&1";
-        File::put($inputFile, json_encode($inputContent));
-        $output = exec($command, $lines, $code);
-        File::delete($inputFile);
+        $output = exec("{$python} {$command} 2>&1", $lines, $code);
 
         if ($output || $code !== 0) {
             $message = "Fatal error with Delphi gather script (code {$code}).";
             Log::error($message, [
                 'command' => $command,
-                'input' => $inputContent,
                 'output' => $lines,
             ]);
-            File::delete($outputFile);
+            File::delete($this->outputPath);
 
             throw new Exception($message);
         }
-
-        return $outputFile;
     }
 }

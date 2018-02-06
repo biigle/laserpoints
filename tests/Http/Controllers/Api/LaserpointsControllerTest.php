@@ -40,7 +40,7 @@ class LaserpointsControllerTest extends ApiTestCase
         $response = $this->json('POST', "/api/v1/images/{$image->id}/laserpoints/area", ['distance' => 50]);
         $response->assertStatus(200);
 
-        Image::truncate();
+        Image::getQuery()->delete();
         $this->makeManualAnnotations(1, 1);
         $image = Image::first();
 
@@ -48,7 +48,7 @@ class LaserpointsControllerTest extends ApiTestCase
         // Not enough manual annotations on this image.
         $response->assertStatus(422);
 
-        Image::truncate();
+        Image::getQuery()->delete();
         $this->makeManualAnnotations(5, 1);
         $image = Image::first();
 
@@ -56,7 +56,7 @@ class LaserpointsControllerTest extends ApiTestCase
         // Too many manual annotations on this image.
         $response->assertStatus(422);
 
-        Image::truncate();
+        Image::getQuery()->delete();
         $this->makeManualAnnotations(2, 1);
         $image = Image::first();
 
@@ -70,6 +70,17 @@ class LaserpointsControllerTest extends ApiTestCase
         $this->volume()->url = 'http://localhost';
         $this->volume()->save();
         $image = ImageTest::create(['volume_id' => $this->volume()->id]);
+        $this->makeManualAnnotations(3);
+
+        $this->beEditor();
+        $this->doesntExpectJobs(ProcessImageDelphiJob::class);
+        $response = $this->json('POST', "/api/v1/images/{$image->id}/laserpoints/area", ['distance' => 50]);
+        $response->assertStatus(422);
+    }
+
+    public function testComputeImageTiled()
+    {
+        $image = ImageTest::create(['tiled' => true, 'volume_id' => $this->volume()->id]);
         $this->makeManualAnnotations(3);
 
         $this->beEditor();
@@ -100,13 +111,13 @@ class LaserpointsControllerTest extends ApiTestCase
         $response = $this->json('POST', "/api/v1/volumes/{$id}/laserpoints/area", ['distance' => 50]);
         // Images must have at least 2 laserpoint annotations
         $response->assertStatus(422);
-        Image::truncate();
+        Image::getQuery()->delete();
 
         $this->makeManualAnnotations(5);
         $response = $this->json('POST', "/api/v1/volumes/{$id}/laserpoints/area", ['distance' => 50]);
         // Images cant have more than 4 laserpoint annotations
         $response->assertStatus(422);
-        Image::truncate();
+        Image::getQuery()->delete();
 
         $this->makeManualAnnotations(3);
 
@@ -126,6 +137,18 @@ class LaserpointsControllerTest extends ApiTestCase
         $this->volume()->url = 'http://localhost';
         $this->volume()->save();
         $id = $this->volume()->id;
+        $this->makeManualAnnotations(3);
+
+        $this->beEditor();
+        $this->doesntExpectJobs(ProcessVolumeDelphiJob::class);
+        $response = $this->json('POST', "/api/v1/volumes/{$id}/laserpoints/area", ['distance' => 50]);
+        $response->assertStatus(422);
+    }
+
+    public function testComputeVolumeTiled()
+    {
+        $id = $this->volume()->id;
+        $image = ImageTest::create(['tiled' => true, 'volume_id' => $id]);
         $this->makeManualAnnotations(3);
 
         $this->beEditor();
