@@ -13,7 +13,8 @@ class ProcessImageManualJobTest extends TestCase
     public function testHandle()
     {
         $image = ImageTest::create();
-        Queue::shouldReceive('push')->once()->with(ProcessManualChunkJob::class);
+        Queue::fake();
         with(new ProcessImageManualJob($image, 50))->handle();
+        Queue::assertPushed(ProcessManualChunkJob::class);
     }
 }
