@@ -41,14 +41,16 @@ class ProcessImageDelphiJobTest extends TestCase
         $mock = Mockery::mock(DelphiGather::class);
         $mock->shouldReceive('execute')
             ->once()
-            ->with($image->volume->url, [$image->filename], [[[1, 1], [2, 2], [3, 3]]])
-            ->andReturn('/tmp/file');
+            ->with(Mockery::any(), '[[1,1],[2,2],[3,3]]');
+        $mock->shouldReceive('finish')->once();
+        $mock->shouldReceive('getOutputPath')->once();
 
         App::singleton(DelphiGather::class, function () use ($mock) {
             return $mock;
         });
 
-        Queue::shouldReceive('push')->once()->with(ProcessDelphiChunkJob::class);
+        Queue::fake();
         with(new ProcessImageDelphiJob($image2, 50))->handle();
+        Queue::assertPushed(ProcessDelphiChunkJob::class);
     }
 }

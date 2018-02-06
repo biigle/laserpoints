@@ -21,7 +21,7 @@ class ProcessManualChunkJobTest extends TestCase
         parent::setUp();
         $this->image = Image::convert(ImageTest::create());
         $this->points = collect([
-            $this->image->id => collect(['[100,100]', '[200,200]', '[300,300]']),
+            $this->image->id => '[[100,100],[200,200],[300,300]]',
         ]);
     }
 
@@ -30,11 +30,7 @@ class ProcessManualChunkJobTest extends TestCase
         $mock = Mockery::mock(Detect::class);
         $mock->shouldReceive('execute')
             ->once()
-            ->with(
-                "{$this->image->volume->url}/{$this->image->filename}",
-                30,
-                '[[100,100],[200,200],[300,300]]'
-            )
+            ->with(Mockery::any(), 30, '[[100,100],[200,200],[300,300]]')
             ->andReturn([
                 'error' => false,
                 'area' => 100,
@@ -48,7 +44,7 @@ class ProcessManualChunkJobTest extends TestCase
             return $mock;
         });
 
-        with(new ProcessManualChunkJob($this->image->volume->url, $this->points, 30))->handle();
+        with(new ProcessManualChunkJob($this->points, 30))->handle();
 
         $expect = [
             'area' => 100,
@@ -77,7 +73,7 @@ class ProcessManualChunkJobTest extends TestCase
             return $mock;
         });
 
-        with(new ProcessManualChunkJob($this->image->volume->url, $this->points, 30))->handle();
+        with(new ProcessManualChunkJob($this->points, 30))->handle();
 
         $expect = [
             'error' => true,
@@ -111,7 +107,7 @@ class ProcessManualChunkJobTest extends TestCase
             return $mock;
         });
 
-        with(new ProcessManualChunkJob($this->image->volume->url, $this->points, 30))->handle();
+        with(new ProcessManualChunkJob($this->points, 30))->handle();
 
         $expect = [
             'error' => true,

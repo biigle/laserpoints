@@ -2,11 +2,15 @@
 
 namespace Biigle\Modules\Laserpoints\Jobs;
 
-use Queue;
+use DB;
+use Biigle\Shape;
 use Biigle\Image;
+use Illuminate\Foundation\Bus\DispatchesJobs;
 
 class ProcessImageManualJob extends Job
 {
+    use DispatchesJobs;
+
     /**
      * The image to compute the area for.
      *
@@ -40,8 +44,30 @@ class ProcessImageManualJob extends Job
             return;
         }
 
-        $url = $this->image->volume->url;
-        $points = $this->getLaserpointsForImages([$this->image->id]);
-        Queue::push(new ProcessManualChunkJob($url, $points, $this->distance));
+        $points = $this->getLaserpointsForImage($this->image->id);
+        $points = collect([$this->image->id => $points]);
+        $this->dispatch(new ProcessManualChunkJob($points, $this->distance));
+    }
+
+    /**
+     * Collects the laser point annotations of the given image.
+     *
+     * @param int $id Image ID
+     *
+     * @return string JSON encoded array of annotation coordinates
+     */
+    protected function getLaserpointsForImage($id)
+    {
+        $labelId = config('laserpoints.label_id');
+
+        $points = DB::table('annotations')
+            ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
+            ->where('annotations.image_id', $id)
+            ->where('annotation_labels.label_id', $labelId)
+            ->where('annotations.shape_id', Shape::$pointId)
+            ->select('annotations.points', 'annotations.image_id')
+            ->pluck('annotations.points');
+
+        return '['.$points->implode(',').']';
     }
 }

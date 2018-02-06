@@ -1,10 +1,9 @@
-import sys
+import sys, json
 import numpy as np
 from scipy.misc import imread
 import scipy.ndimage.morphology
 import scipy.ndimage.measurements
 import scipy.spatial.distance
-import json
 
 min_dist = 49.
 detection = 'delphi'
@@ -13,10 +12,10 @@ inputFile = sys.argv[1]
 imgfile = sys.argv[2]
 laserdistparam = sys.argv[3]
 data = np.load(inputFile)
-maskImage = data['maskImage']
-lps = data['lps']
-manLaserpoints = data['manLaserpoints']
-numLaserpoints = manLaserpoints.shape[1]
+mask_image = data['mask_image']
+lp_prototypes = data['lp_prototypes']
+all_laserpoints = data['all_laserpoints']
+numLaserpoints = all_laserpoints.shape[1]
 
 # apply
 # load current image
@@ -25,10 +24,10 @@ width, height, _ = img.shape
 lpMap = np.zeros([img.shape[0], img.shape[1]], bool)
 
 
-sel = np.where(maskImage)
-sel2 = np.zeros(img[maskImage].shape[0], bool)
-for idx, i in enumerate(img[maskImage]):
-    sel2[idx] = np.any(scipy.spatial.distance.cdist(np.atleast_2d(i), lps, 'cityblock') < min_dist)
+sel = np.where(mask_image)
+sel2 = np.zeros(img[mask_image].shape[0], bool)
+for idx, i in enumerate(img[mask_image]):
+    sel2[idx] = np.any(scipy.spatial.distance.cdist(np.atleast_2d(i), lp_prototypes, 'cityblock') < min_dist)
 lpMap[sel[0][sel2], sel[1][sel2]] = 1
 
 # opening of lp_map
@@ -49,7 +48,7 @@ if centers.shape == (0,):
 # find best geometry
 minDist = 10**6
 lpWinner = []
-for i in manLaserpoints:
+for i in all_laserpoints:
     res = np.min(scipy.spatial.distance.cdist(centers, i), 1)
     asort = res.argsort()
     dist = np.sum(res[asort[0:numLaserpoints]])
