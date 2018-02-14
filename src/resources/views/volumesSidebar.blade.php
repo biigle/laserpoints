@@ -1,7 +1,5 @@
 @can('edit-in', $volume)
-    @if ($volume->isRemote())
-        <sidebar-tab name="laserpoints" icon="sound-stereo" title="Laser point detection is not available for remote volumes" :disabled="true"></sidebar-tab>
-    @elseif($volume->hasTiledImages())
+    @if($volume->hasTiledImages())
         <sidebar-tab name="laserpoints" icon="sound-stereo" title="Laser point detection is not available for volumes with very large images" :disabled="true"></sidebar-tab>
     @else
         <sidebar-tab v-cloak name="laserpoints" icon="sound-stereo" title="Compute the area of each image in this volume">

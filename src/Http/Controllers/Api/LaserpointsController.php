@@ -21,7 +21,7 @@ class LaserpointsController extends Controller
      * @apiGroup Images
      * @apiName ImagesComputeArea
      * @apiPermission projectEditor
-     * @apiDescription This feature is not available for images of remote volumes.
+     * @apiDescription This feature is not available for very large images.
      *
      * @apiParam {Number} id The image ID.
      * @apiParam (Required arguments) {Number} distance The distance between two laser points in cm.
@@ -34,12 +34,6 @@ class LaserpointsController extends Controller
     {
         $image = Image::with('volume')->findOrFail($id);
         $this->authorize('edit-in', $image->volume);
-
-        if ($image->volume->isRemote()) {
-            return $this->buildFailedValidationResponse($request, [
-                'id' => 'Laser point detection is not available for images of remote volumes.',
-            ]);
-        }
 
         if ($image->tiled === true) {
             return $this->buildFailedValidationResponse($request, [
@@ -82,7 +76,7 @@ class LaserpointsController extends Controller
      * @apiGroup Volumes
      * @apiName VolumesComputeImageArea
      * @apiPermission projectEditor
-     * @apiDescription This feature is not available for remote volumes.
+     * @apiDescription This feature is not available for very large images.
      *
      * @apiParam {Number} id The volume ID.
      * @apiParam (Required arguments) {Number} distance The distance between two laser points in cm.
@@ -95,12 +89,6 @@ class LaserpointsController extends Controller
     {
         $volume = BaseVolume::findOrFail($id);
         $this->authorize('edit-in', $volume);
-
-        if ($volume->isRemote()) {
-            return $this->buildFailedValidationResponse($request, [
-                'id' => 'Laser point detection is not available for remote volumes.',
-            ]);
-        }
 
         if ($volume->hasTiledImages()) {
             return $this->buildFailedValidationResponse($request, [

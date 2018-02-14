@@ -1,4 +1,4 @@
-@unless ($volume->isRemote())
+@unless ($volume->hasTiledImages())
     @push('scripts')
         <script src="{{ cachebust_asset('vendor/laserpoints/scripts/main.js') }}"></script>
     @endpush
@@ -9,9 +9,9 @@
         <div class="panel-heading">
             <h3 class="panel-title">Laser points</h3>
         </div>
-        @if ($volume->isRemote())
+        @if ($volume->hasTiledImages())
             <div class="panel-body text-muted">
-                The laser point detection is not available for images of remote volumes.
+                The laser point detection is not available for very large images.
             </div>
         @else
             <?php $img = \Biigle\Modules\Laserpoints\Image::convert($image); ?>
