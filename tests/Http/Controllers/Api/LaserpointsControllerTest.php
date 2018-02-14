@@ -160,10 +160,8 @@ class LaserpointsControllerTest extends ApiTestCase
     protected function makeManualAnnotations($annotations, $images = 4)
     {
         $annotations = $annotations ?: rand(1, 10);
-        $labelId = config('laserpoints.label_id');
-        if (!Label::where('id', $labelId)->exists()) {
-            LabelTest::create(['id' => $labelId, 'name' => 'Laserpoint']);
-        }
+        $labelId = LabelTest::create(['name' => 'Laserpoint'])->id;
+        config(['laserpoints.label_id' => $labelId]);
 
         for ($i = 0; $i < $images; $i++) {
             $image = ImageTest::create([

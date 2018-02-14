@@ -14,11 +14,13 @@ use Biigle\Tests\ImageTest as BaseImageTest;
 
 class ImageTest extends TestCase
 {
+    protected static $labelId;
+
     public static function addLaserpoints(\Biigle\Image $image, $count = 1)
     {
-        $labelId = config('laserpoints.label_id');
-        if (!Label::where('id', $labelId)->exists()) {
-            LabelTest::create(['id' => $labelId, 'name' => 'Laserpoint']);
+        if (!static::$labelId || !Label::where('id', static::$labelId)->exists()) {
+            static::$labelId = LabelTest::create(['name' => 'Laserpoint'])->id;
+            config(['laserpoints.label_id' => static::$labelId]);
         }
 
         for ($i = 0; $i < $count; $i++) {
@@ -28,7 +30,7 @@ class ImageTest extends TestCase
             ])->id;
             AnnotationLabelTest::create([
                 'annotation_id' => $id,
-                'label_id' => $labelId,
+                'label_id' => static::$labelId,
             ]);
         }
     }

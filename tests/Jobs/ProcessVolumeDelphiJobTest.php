@@ -19,6 +19,7 @@ use Biigle\Modules\Laserpoints\Support\DelphiGather;
 use Biigle\Modules\Laserpoints\Jobs\ProcessDelphiChunkJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessManualChunkJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeDelphiJob;
+use Biigle\Tests\Modules\Laserpoints\ImageTest as LpImageTest;
 
 class ProcessVolumeDelphiJobTest extends TestCase
 {
@@ -40,7 +41,7 @@ class ProcessVolumeDelphiJobTest extends TestCase
         $mock = Mockery::mock(DelphiGather::class);
         $mock->shouldReceive('execute')
             ->once()
-            ->with(Mockery::any(), '[[1,1],[2,2],[3,3]]');
+            ->with(Mockery::any(), '[[0,0],[0,0],[0,0]]');
         $mock->shouldReceive('finish')->once();
         $mock->shouldReceive('getOutputPath')->once();
 
@@ -97,9 +98,6 @@ class ProcessVolumeDelphiJobTest extends TestCase
             ->andReturn(true);
 
         File::shouldReceive('put')->once()->with(Mockery::on(function ($path) {
-            // Use this validator function to delete the countFile after each test.
-            unlink($path);
-
             return starts_with($path, '/tmp/');
         }), '[0,1]');
 
@@ -113,10 +111,6 @@ class ProcessVolumeDelphiJobTest extends TestCase
 
     protected function createAnnotatedImage($volumeId = null)
     {
-        $labelId = config('laserpoints.label_id');
-        if (!Label::where('id', $labelId)->exists()) {
-            LabelTest::create(['id' => $labelId]);
-        }
         if ($volumeId) {
             $image = ImageTest::create([
                 'volume_id' => $volumeId,
@@ -126,17 +120,7 @@ class ProcessVolumeDelphiJobTest extends TestCase
             $image = ImageTest::create(['filename' => uniqid()]);
         }
 
-        for ($i = 1; $i <= 3; $i++) {
-            $id = AnnotationTest::create([
-                'image_id' => $image->id,
-                'points' => [$i, $i],
-                'shape_id' => Shape::$pointId,
-            ])->id;
-            AnnotationLabelTest::create([
-                'annotation_id' => $id,
-                'label_id' => $labelId,
-            ]);
-        }
+        LpImageTest::addLaserpoints($image, 3);
 
         return $image;
     }
