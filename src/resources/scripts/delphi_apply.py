@@ -17,9 +17,23 @@ lp_prototypes = data['lp_prototypes']
 all_laserpoints = data['all_laserpoints']
 numLaserpoints = all_laserpoints.shape[1]
 
-# apply
-# load current image
-img = imread(imgfile)
+try:
+    img = imread(imgfile)
+except IOError:
+    # It may be another error than "cannot identify image file" but we don't print the
+    # error message to not expose any internal file paths.
+    print json.dumps({
+        "error": True,
+        "message": "Could not load image. Cannot identify image file.",
+    })
+    exit(1)
+
+if len(img.shape) is 0:
+    print json.dumps({
+        "error": True,
+        "message": "Could not load image. The image file might be corrupt.",
+    })
+    exit(1)
 width, height, _ = img.shape
 lpMap = np.zeros([img.shape[0], img.shape[1]], bool)
 
