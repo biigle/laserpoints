@@ -1,4 +1,6 @@
-import sys, os, json
+import sys
+import os
+import json
 import numpy as np
 from scipy.misc import imread
 
@@ -19,7 +21,8 @@ output_path = sys.argv[3]
 image = imread(image_path)
 # If the shape is empty the image wasn't read correctly. We just skip this file.
 # See: https://github.com/BiodataMiningGroup/biigle-laserpoints/issues/24
-if len(image.shape) is 0: sys.exit(0)
+if len(image.shape) == 0:
+    sys.exit(0)
 height, width, _ = image.shape
 
 if os.path.exists(output_path):
@@ -65,9 +68,9 @@ for i, point in enumerate(laserpoints):
         pass
 
 np.savez_compressed(output_path,
-    mask_image=mask_image,
-    lp_prototypes=lp_prototypes,
-    lp_neg_prototypes=lp_neg_prototypes,
-    all_laserpoints=all_laserpoints)
+                    mask_image=mask_image,
+                    lp_prototypes=lp_prototypes,
+                    lp_neg_prototypes=lp_neg_prototypes,
+                    all_laserpoints=all_laserpoints)
 # Rename the file because stupid numpy always appends a '.npz' to the file name.
 os.rename(output_path + '.npz', output_path)

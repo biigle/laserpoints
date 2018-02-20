@@ -9,7 +9,7 @@ imgfile = sys.argv[1]
 laserdistparam = sys.argv[2]
 
 img = imread(imgfile)
-if len(img.shape) is 0:
+if len(img.shape) == 0:
     print json.dumps({
         "error": True,
         "message": "Could not load image. The image file might be corrupt.",

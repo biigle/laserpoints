@@ -1,4 +1,5 @@
-import sys, json
+import sys
+import json
 import numpy as np
 from scipy.misc import imread
 import scipy.ndimage.morphology
@@ -28,7 +29,7 @@ except IOError:
     })
     exit(1)
 
-if len(img.shape) is 0:
+if len(img.shape) == 0:
     print json.dumps({
         "error": True,
         "message": "Could not load image. The image file might be corrupt.",
