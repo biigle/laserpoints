@@ -4,11 +4,16 @@
         "biigle/annotations": "^3.0",
         "biigle/volumes": "^2.0"
     },
-    "require-dev": {
-    },
     "autoload": {
         "psr-4": {
             "Biigle\\Modules\\Laserpoints\\": "src"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Biigle\\Modules\\Laserpoints\\LaserpointsServiceProvider"
+            ]
         }
     }
 }
