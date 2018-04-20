@@ -8,6 +8,7 @@ use Biigle\Volume as BaseVolume;
 use Biigle\Modules\Laserpoints\Image;
 use Biigle\Modules\Laserpoints\Volume;
 use Biigle\Http\Controllers\Api\Controller;
+use Illuminate\Validation\ValidationException;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageManualJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageDelphiJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeDelphiJob;
@@ -36,7 +37,7 @@ class LaserpointsController extends Controller
         $this->authorize('edit-in', $image->volume);
 
         if ($image->tiled === true) {
-            return $this->buildFailedValidationResponse($request, [
+            throw ValidationException::withMessages([
                 'id' => 'Laser point detection is not available for very large images.',
             ]);
         }
@@ -44,7 +45,7 @@ class LaserpointsController extends Controller
         try {
             $manual = $image->readyForManualDetection();
         } catch (Exception $e) {
-            return $this->buildFailedValidationResponse($request, [
+            throw ValidationException::withMessages([
                 'id' => 'Laser point detection can\'t be performed. '.$e->getMessage(),
             ]);
         }
@@ -53,7 +54,7 @@ class LaserpointsController extends Controller
             try {
                 Volume::convert($image->volume)->readyForDelphiDetection();
             } catch (Exception $e) {
-                return $this->buildFailedValidationResponse($request, [
+                throw ValidationException::withMessages([
                     'id' => 'Delphi laser point detection can\'t be performed. '.$e->getMessage(),
                 ]);
             }
@@ -91,7 +92,7 @@ class LaserpointsController extends Controller
         $this->authorize('edit-in', $volume);
 
         if ($volume->hasTiledImages()) {
-            return $this->buildFailedValidationResponse($request, [
+            throw ValidationException::withMessages([
                 'id' => 'Laser point detection is not available for volumes with very large images.',
             ]);
         }
@@ -99,7 +100,7 @@ class LaserpointsController extends Controller
         try {
             Volume::convert($volume)->readyForDelphiDetection();
         } catch (Exception $e) {
-            return $this->buildFailedValidationResponse($request, [
+            throw ValidationException::withMessages([
                 'id' => 'Delphi laser point detection can\'t be performed. '.$e->getMessage(),
             ]);
         }
