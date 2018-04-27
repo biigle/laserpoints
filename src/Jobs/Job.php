@@ -8,14 +8,13 @@ use ImageCache;
 use Biigle\Image;
 use Biigle\Shape;
 use Biigle\Jobs\Job as BaseJob;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Biigle\Modules\Laserpoints\Support\DelphiGather;
 
 abstract class Job extends BaseJob implements ShouldQueue
 {
-    use InteractsWithQueue, SerializesModels;
+    use InteractsWithQueue;
 
     /**
      * Distance between laser points im cm to use for computation.
