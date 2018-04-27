@@ -20,7 +20,7 @@ output_path = sys.argv[3]
 
 image = imread(image_path)
 # If the shape is empty the image wasn't read correctly. We just skip this file.
-# See: https://github.com/BiodataMiningGroup/biigle-laserpoints/issues/24
+# See: https://github.com/biigle/laserpoints/issues/24
 if len(image.shape) == 0:
     sys.exit(0)
 height, width, _ = image.shape
