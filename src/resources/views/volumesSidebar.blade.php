@@ -1,9 +1,9 @@
 @can('edit-in', $volume)
     @if($volume->hasTiledImages())
-        <sidebar-tab name="laserpoints" icon="sound-stereo" title="Laser point detection is not available for volumes with very large images" :disabled="true"></sidebar-tab>
+        <sidebar-tab name="laserpoints" icon="vector-square" title="Laser point detection is not available for volumes with very large images" :disabled="true"></sidebar-tab>
     @else
-        <sidebar-tab v-cloak name="laserpoints" icon="sound-stereo" title="Compute the area of each image in this volume">
-            <a href="{{route('manual-tutorials', ['laserpoints', 'laserpoint-detection'])}}" target="_blank" class="btn btn-default btn-xs pull-right" title="What is this?"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></a>
+        <sidebar-tab v-cloak name="laserpoints" icon="vector-square" title="Compute the area of each image in this volume">
+            <a href="{{route('manual-tutorials', ['laserpoints', 'laserpoint-detection'])}}" target="_blank" class="btn btn-default btn-xs pull-right" title="What is this?"><span class="fa fa-info-circle" aria-hidden="true"></span></a>
             <laserpoints-form inline-template>
                 <form class="form-stacked" v-on:submit.prevent="submit">
                     <div class="form-group">
