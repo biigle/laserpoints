@@ -3,7 +3,6 @@
 namespace Biigle\Tests\Modules\Laserpoints\Http\Controllers\Api;
 
 use ApiTestCase;
-use Biigle\Label;
 use Biigle\Shape;
 use Biigle\Image;
 use Biigle\Tests\LabelTest;
