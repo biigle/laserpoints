@@ -4,6 +4,7 @@ namespace Biigle\Modules\Laserpoints\Jobs;
 
 use App;
 use File;
+use Cache;
 use Exception;
 use ImageCache;
 use Biigle\Jobs\Job as BaseJob;
@@ -38,18 +39,12 @@ class ProcessDelphiChunkJob extends BaseJob implements ShouldQueue
     protected $distance;
 
     /**
-     * Path to the file tracking the running "sibling" jobs accessing the same gatherFile.
+     * Key of the cached count of other jobs that run on the same volume than this one.
+     * The last job should delete the gatherFile.
      *
      * @var string
      */
-    protected $indexFile;
-
-    /**
-     * Index of this job among the "sibling" jobs.
-     *
-     * @var int
-     */
-    protected $index;
+    protected $cacheKey;
 
     /**
      * Create a new job instance.
@@ -58,19 +53,17 @@ class ProcessDelphiChunkJob extends BaseJob implements ShouldQueue
      * @param array $images
      * @param float $distance
      * @param string $gatherFile
-     * @param string $indexFile
-     * @param int $index
+     * @param string $cacheKey
      *
      * @return void
      */
-    public function __construct($images, $distance, $gatherFile, $indexFile = null, $index = null)
+    public function __construct($images, $distance, $gatherFile, $cacheKey = null)
     {
         $this->images = $images;
         $this->gatherFile = $gatherFile;
         $this->distance = $distance;
-        // If null this job assumes it is the only one accessing the gatherFile.
-        $this->indexFile = $indexFile;
-        $this->index = $index;
+        // If null, this job assumes it is the only one accessing the gatherFile.
+        $this->cacheKey = $cacheKey;
     }
 
     /**
@@ -116,53 +109,29 @@ class ProcessDelphiChunkJob extends BaseJob implements ShouldQueue
      */
     public function failed()
     {
-        // DON'T delete the gather and index files in this case. We want to be able to
-        // re-run this job if it failed!
+        $this->maybeDeleteGatherFile();
     }
 
     /**
      * Handles the deletion of the gatherFile once all "sibling" jobs finished.
      *
      * If more than one chunk is processed during a Delphi LP detection, the jobs use the
-     * index file to track how many of them are still running. They need to track this to
-     * determine when the gatherFile can be deleted. This function updates the index file
-     * when a job was finished and deletes the index and gather files if this is the
-     * last job to finish.
+     * cache to track how many of them are still running. They need to track this to
+     * determine when the gatherFile can be deleted. This function updates the count
+     * when a job was finished and deletes the gather file if this is the last job to
+     * finish.
      */
     protected function maybeDeleteGatherFile()
     {
-        $delete = true;
-
-        if ($this->indexFile) {
-            $handle = fopen($this->indexFile, 'r+');
-            // We need an exclusive lock for this because the "sibling" jobs may run in
-            // parallel.
-            if (flock($handle, LOCK_EX)) {
-                $running = json_decode(fgets($handle), true);
-                // Remove the index of this job.
-                $running = array_values(array_filter($running, function ($i) {
-                    return $i !== $this->index;
-                }));
-
-                if (empty($running)) {
-                    File::delete($this->indexFile);
-                } else {
-                    $delete = false;
-                    rewind($handle);
-                    ftruncate($handle, 0);
-                    fwrite($handle, json_encode($running));
-                }
-                flock($handle, LOCK_UN);
-                fclose($handle);
-            } else {
-                // Should not happen. Either way we can't do anything meaningful if this
-                // happens except not deleting the file so it can't break any other jobs.
-                $delete = false;
+        if ($this->cacheKey) {
+            // This requires an atomic operation to work correctly. BIIGLE uses the
+            // Redis cache which provides these atomic operations.
+            if (Cache::decrement($this->cacheKey) > 0) {
+                return;
             }
+            Cache::forget($this->cacheKey);
         }
 
-        if ($delete) {
-            File::delete($this->gatherFile);
-        }
+        File::delete($this->gatherFile);
     }
 }

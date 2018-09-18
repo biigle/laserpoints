@@ -5,6 +5,7 @@ namespace Biigle\Tests\Modules\Laserpoints\Jobs;
 use App;
 use File;
 use Queue;
+use Cache;
 use Mockery;
 use TestCase;
 use ImageCache;
@@ -44,25 +45,11 @@ class ProcessVolumeDelphiJobTest extends TestCase
             return $mock;
         });
 
-        File::shouldReceive('isDirectory')
-            ->once()
-            ->with('/tmp')
-            ->andReturn(false);
-
-        File::shouldReceive('makeDirectory')
-            ->once()
-            ->with('/tmp', 0755, true);
-
-        File::shouldReceive('put')->once()->with(Mockery::on(function ($path) {
-            // Use this validator function to delete the countFile after each test.
-            unlink($path);
-
-            return starts_with($path, '/tmp/');
-        }), '[0]');
+        Cache::shouldReceive('forever')->once()->with(Mockery::any(), 1);
 
         Queue::fake();
         with(new ProcessVolumeDelphiJob($image->volume, 50))->handle();
-        Queue::assertPushed(ProcessDelphiChunkJob::class);
+        Queue::assertPushed(ProcessDelphiChunkJob::class, 1);
         Queue::assertPushed(ProcessManualChunkJob::class);
     }
 
@@ -87,20 +74,13 @@ class ProcessVolumeDelphiJobTest extends TestCase
             return $mock;
         });
 
-        File::shouldReceive('isDirectory')
-            ->once()
-            ->with('/tmp')
-            ->andReturn(true);
-
-        File::shouldReceive('put')->once()->with(Mockery::on(function ($path) {
-            return starts_with($path, '/tmp/');
-        }), '[0,1]');
+        Cache::shouldReceive('forever')->once()->with(Mockery::any(), 2);
 
         $job = new ProcessVolumeDelphiJob($volume, 50);
         $job->chunkSize = 1;
         Queue::fake();
         $job->handle();
-        Queue::assertPushed(ProcessDelphiChunkJob::class);
+        Queue::assertPushed(ProcessDelphiChunkJob::class, 2);
         Queue::assertPushed(ProcessManualChunkJob::class);
     }
 

@@ -2,7 +2,7 @@
 
 namespace Biigle\Modules\Laserpoints\Jobs;
 
-use File;
+use Cache;
 use Biigle\Volume;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 
@@ -72,20 +72,16 @@ class ProcessVolumeDelphiJob extends Job
 
         $gatherFile = $this->gather($points);
 
-        $imagesToProcess = $this->volume->images()
+        $imageChunksToProcess = $this->volume->images()
             ->whereNotIn('id', $points->keys())
             ->pluck('id')
             ->chunk($this->chunkSize);
 
-        $tmpDir = config('laserpoints.tmp_dir');
-        if (!File::isDirectory($tmpDir)) {
-            File::makeDirectory($tmpDir, 0755, true);
-        }
-        $indexFile = tempnam($tmpDir, 'biigle_delphi_job_indices');
-        File::put($indexFile, json_encode($imagesToProcess->keys()));
+        $cacheKey = uniqid('delphi_job_count_');
+        Cache::forever($cacheKey, $imageChunksToProcess->count());
 
-        foreach ($imagesToProcess as $index => $chunk) {
-            $this->dispatch(new ProcessDelphiChunkJob($chunk, $this->distance, $gatherFile, $indexFile, $index));
+        foreach ($imageChunksToProcess as $chunk) {
+            $this->dispatch(new ProcessDelphiChunkJob($chunk, $this->distance, $gatherFile, $cacheKey));
         }
     }
 }

@@ -4,6 +4,7 @@ namespace Biigle\Tests\Modules\Laserpoints\Jobs;
 
 use App;
 use File;
+use Cache;
 use Mockery;
 use TestCase;
 use Exception;
@@ -65,49 +66,39 @@ class ProcessDelphiChunkJobTest extends TestCase
 
     public function testHandleCountDecrease()
     {
-        $indexFile = sys_get_temp_dir().'/biigle_delphi_chunk_job_test';
-        File::put($indexFile, '[0,1]');
+        Cache::forever('test_job_count', 2);
 
-        try {
-            $mock = Mockery::mock(DelphiApply::class);
-            $mock->shouldReceive('execute')
-                ->once()
-                ->andReturn([]);
+        $mock = Mockery::mock(DelphiApply::class);
+        $mock->shouldReceive('execute')
+            ->once()
+            ->andReturn([]);
 
-            App::singleton(DelphiApply::class, function () use ($mock) {
-                return $mock;
-            });
+        App::singleton(DelphiApply::class, function () use ($mock) {
+            return $mock;
+        });
 
-            File::shouldReceive('delete')->never();
-            with(new ProcessDelphiChunkJob($this->images, 30, $this->gatherFile, $indexFile, 0))->handle();
+        File::shouldReceive('delete')->never();
+        with(new ProcessDelphiChunkJob($this->images, 30, $this->gatherFile, 'test_job_count'))->handle();
 
-            $this->assertEquals('[1]', file_get_contents($indexFile));
-        } finally {
-            unlink($indexFile);
-        }
+        $this->assertEquals(1, Cache::get('test_job_count'));
     }
 
     public function testHandleCountZero()
     {
-        $indexFile = sys_get_temp_dir().'/biigle_delphi_chunk_job_test';
-        File::put($indexFile, '[1]');
+        Cache::forever('test_job_count', 1);
 
-        try {
-            $mock = Mockery::mock(DelphiApply::class);
-            $mock->shouldReceive('execute')
-                ->once()
-                ->andReturn([]);
+        $mock = Mockery::mock(DelphiApply::class);
+        $mock->shouldReceive('execute')
+            ->once()
+            ->andReturn([]);
 
-            App::singleton(DelphiApply::class, function () use ($mock) {
-                return $mock;
-            });
+        App::singleton(DelphiApply::class, function () use ($mock) {
+            return $mock;
+        });
 
-            File::shouldReceive('delete')->once()->with($indexFile);
-            File::shouldReceive('delete')->once()->with($this->gatherFile);
-            with(new ProcessDelphiChunkJob($this->images, 30, $this->gatherFile, $indexFile, 1))->handle();
-        } finally {
-            unlink($indexFile);
-        }
+        File::shouldReceive('delete')->once()->with($this->gatherFile);
+        with(new ProcessDelphiChunkJob($this->images, 30, $this->gatherFile, 'test_job_count'))->handle();
+        $this->assertFalse(Cache::has('test_job_count'));
     }
 
     public function testHandleGracefulError()
@@ -173,7 +164,7 @@ class ProcessDelphiChunkJobTest extends TestCase
 
     public function testFailed()
     {
-        File::shouldReceive('delete')->never();
+        File::shouldReceive('delete')->once()->with($this->gatherFile);
         with(new ProcessDelphiChunkJob($this->images, 30, $this->gatherFile))->failed();
     }
 }
