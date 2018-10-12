@@ -1,5 +1,11 @@
 {
     "name": "biigle/laserpoints",
+    "authors": [
+        {
+            "name": "Martin Zurowietz",
+            "email": "martin@cebitec.uni-bielefeld.de"
+        }
+    ],
     "require": {
         "biigle/annotations": "^3.0",
         "biigle/volumes": "^2.0"
