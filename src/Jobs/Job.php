@@ -58,7 +58,7 @@ abstract class Job extends BaseJob implements ShouldQueue
             ->join('images', 'annotations.image_id', '=', 'images.id')
             ->where('images.volume_id', $id)
             ->where('annotation_labels.label_id', $labelId)
-            ->where('annotations.shape_id', Shape::$pointId)
+            ->where('annotations.shape_id', Shape::pointId())
             ->select('annotations.points', 'annotations.image_id')
             ->get()
             ->groupBy('image_id')

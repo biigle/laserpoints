@@ -26,7 +26,7 @@ class ProcessImageDelphiJobTest extends TestCase
             $id = AnnotationTest::create([
                 'image_id' => $image->id,
                 'points' => [$i, $i],
-                'shape_id' => Shape::$pointId,
+                'shape_id' => Shape::pointId(),
             ])->id;
             AnnotationLabelTest::create([
                 'annotation_id' => $id,

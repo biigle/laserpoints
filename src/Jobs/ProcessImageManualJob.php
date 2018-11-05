@@ -64,7 +64,7 @@ class ProcessImageManualJob extends Job
             ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
             ->where('annotations.image_id', $id)
             ->where('annotation_labels.label_id', $labelId)
-            ->where('annotations.shape_id', Shape::$pointId)
+            ->where('annotations.shape_id', Shape::pointId())
             ->select('annotations.points', 'annotations.image_id')
             ->pluck('annotations.points');
 

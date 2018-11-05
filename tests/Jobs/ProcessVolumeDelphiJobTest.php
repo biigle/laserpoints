@@ -9,6 +9,7 @@ use Cache;
 use Mockery;
 use TestCase;
 use ImageCache;
+use Biigle\Shape;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\VolumeTest;
 use Biigle\Modules\Laserpoints\Support\DelphiGather;
@@ -45,6 +46,7 @@ class ProcessVolumeDelphiJobTest extends TestCase
             return $mock;
         });
 
+        Cache::shouldReceive('rememberForever')->andReturn(Shape::whereName('Point')->first());
         Cache::shouldReceive('forever')->once()->with(Mockery::any(), 1);
 
         Queue::fake();
@@ -74,6 +76,7 @@ class ProcessVolumeDelphiJobTest extends TestCase
             return $mock;
         });
 
+        Cache::shouldReceive('rememberForever')->andReturn(Shape::whereName('Point')->first());
         Cache::shouldReceive('forever')->once()->with(Mockery::any(), 2);
 
         $job = new ProcessVolumeDelphiJob($volume, 50);

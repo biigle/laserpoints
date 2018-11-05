@@ -198,7 +198,7 @@ class Image extends BaseImage
             ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
             ->where('annotations.image_id', $this->id)
             ->where('annotation_labels.label_id', $labelId)
-            ->where('annotations.shape_id', Shape::$pointId)
+            ->where('annotations.shape_id', Shape::pointId())
             ->count();
 
         if ($count > 0) {

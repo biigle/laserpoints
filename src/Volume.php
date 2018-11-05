@@ -49,7 +49,7 @@ class Volume extends BaseVolume
             ->join('images', 'annotations.image_id', '=', 'images.id')
             ->where('images.volume_id', $this->id)
             ->where('annotation_labels.label_id', $labelId)
-            ->where('annotations.shape_id', Shape::$pointId)
+            ->where('annotations.shape_id', Shape::pointId())
             ->select(DB::raw('count(annotation_labels.id) as count'))
             ->groupBy('images.id')
             ->pluck('count');

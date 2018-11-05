@@ -171,7 +171,7 @@ class LaserpointsControllerTest extends ApiTestCase
             for ($j = 0; $j < $annotations; $j++) {
                 $annotation = AnnotationTest::create([
                     'image_id' => $image->id,
-                    'shape_id' => Shape::$pointId,
+                    'shape_id' => Shape::pointId(),
                 ]);
                 AnnotationLabelTest::create([
                     'annotation_id' => $annotation->id,

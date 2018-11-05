@@ -26,7 +26,7 @@ class ImageTest extends TestCase
         for ($i = 0; $i < $count; $i++) {
             $id = AnnotationTest::create([
                 'image_id' => $image->id,
-                'shape_id' => Shape::$pointId,
+                'shape_id' => Shape::pointId(),
             ])->id;
             AnnotationLabelTest::create([
                 'annotation_id' => $id,
