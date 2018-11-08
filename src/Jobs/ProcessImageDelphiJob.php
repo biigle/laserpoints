@@ -3,12 +3,9 @@
 namespace Biigle\Modules\Laserpoints\Jobs;
 
 use Biigle\Image;
-use Illuminate\Foundation\Bus\DispatchesJobs;
 
 class ProcessImageDelphiJob extends Job
 {
-    use DispatchesJobs;
-
     /**
      * The image to compute the area for.
      *
@@ -44,6 +41,6 @@ class ProcessImageDelphiJob extends Job
 
         $points = $this->getLaserpointsForVolume($this->image->volume_id);
         $gatherFile = $this->gather($points);
-        $this->dispatch(new ProcessDelphiChunkJob([$this->image->id], $this->distance, $gatherFile));
+        ProcessDelphiChunkJob::dispatch([$this->image->id], $this->distance, $gatherFile);
     }
 }

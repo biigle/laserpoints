@@ -5,12 +5,9 @@ namespace Biigle\Modules\Laserpoints\Jobs;
 use DB;
 use Biigle\Shape;
 use Biigle\Image;
-use Illuminate\Foundation\Bus\DispatchesJobs;
 
 class ProcessImageManualJob extends Job
 {
-    use DispatchesJobs;
-
     /**
      * The image to compute the area for.
      *
@@ -46,7 +43,7 @@ class ProcessImageManualJob extends Job
 
         $points = $this->getLaserpointsForImage($this->image->id);
         $points = collect([$this->image->id => $points]);
-        $this->dispatch(new ProcessManualChunkJob($points, $this->distance));
+        ProcessManualChunkJob::dispatch($points, $this->distance);
     }
 
     /**

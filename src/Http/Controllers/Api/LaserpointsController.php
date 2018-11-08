@@ -64,9 +64,9 @@ class LaserpointsController extends Controller
         $distance = $request->input('distance');
 
         if ($manual) {
-            $this->dispatch(new ProcessImageManualJob($image, $distance));
+            ProcessImageManualJob::dispatch($image, $distance);
         } else {
-            $this->dispatch(new ProcessImageDelphiJob($image, $distance));
+            ProcessImageDelphiJob::dispatch($image, $distance);
         }
     }
 
@@ -108,6 +108,6 @@ class LaserpointsController extends Controller
         $this->validate($request, Image::$laserpointsRules);
         $distance = $request->input('distance');
 
-        $this->dispatch(new ProcessVolumeDelphiJob($volume, $distance));
+        ProcessVolumeDelphiJob::dispatch($volume, $distance);
     }
 }

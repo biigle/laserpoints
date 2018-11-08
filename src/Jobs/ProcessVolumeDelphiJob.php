@@ -4,12 +4,9 @@ namespace Biigle\Modules\Laserpoints\Jobs;
 
 use Cache;
 use Biigle\Volume;
-use Illuminate\Foundation\Bus\DispatchesJobs;
 
 class ProcessVolumeDelphiJob extends Job
 {
-    use DispatchesJobs;
-
     /**
      * Number of images to process in one chunk.
      *
@@ -67,7 +64,7 @@ class ProcessVolumeDelphiJob extends Job
         // queue workers and each one does not run very long (in case there is a hard
         // limit on the runtime of a job).
         foreach ($points->chunk($this->chunkSize) as $chunk) {
-            $this->dispatch(new ProcessManualChunkJob($chunk, $this->distance));
+            ProcessManualChunkJob::dispatch($chunk, $this->distance);
         }
 
         $gatherFile = $this->gather($points);
@@ -81,7 +78,7 @@ class ProcessVolumeDelphiJob extends Job
         Cache::forever($cacheKey, $imageChunksToProcess->count());
 
         foreach ($imageChunksToProcess as $chunk) {
-            $this->dispatch(new ProcessDelphiChunkJob($chunk, $this->distance, $gatherFile, $cacheKey));
+            ProcessDelphiChunkJob::dispatch($chunk, $this->distance, $gatherFile, $cacheKey);
         }
     }
 }
