@@ -86,6 +86,9 @@ biigle.$require('annotations.components.settingsTabPlugins').laserPoints = {
                 }));
             }
         },
+        extendMap: function (map) {
+            map.addLayer(this.layer);
+        },
     },
     watch: {
         opacity: function (opacity, oldOpacity) {
@@ -120,8 +123,6 @@ biigle.$require('annotations.components.settingsTabPlugins').laserPoints = {
         var events = biigle.$require('events');
         events.$on('images.fetching', this.maybeFetchLaserpoints);
         events.$on('images.change', this.updateCurrentImage);
-
-        var map = biigle.$require('annotations.stores.map');
-        map.addLayer(this.layer);
+        events.$on('annotations.map.init', this.extendMap);
     },
 };
