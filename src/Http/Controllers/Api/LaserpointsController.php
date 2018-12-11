@@ -18,7 +18,7 @@ class LaserpointsController extends Controller
     /**
      * Compute distance between laser points for an image.
      *
-     * @api {post} images/:id/laserpoints/area Compute image footprint
+     * @api {post} images/:id/laserpoints/area Compute image area
      * @apiGroup Images
      * @apiName ImagesComputeArea
      * @apiPermission projectEditor

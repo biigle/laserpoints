@@ -11,7 +11,7 @@ class ImagesController extends Controller
     /**
      * Show laserpoint data for this image.
      *
-     * @api {get} images/:id/laserpoints Show laserpoints data
+     * @api {get} images/:id/laserpoints Show laserpoints information
      * @apiGroup Images
      * @apiName ImagesShowLaserpoints
      * @apiPermission projectMember
