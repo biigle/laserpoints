@@ -8,7 +8,7 @@ use Queue;
 use Cache;
 use Mockery;
 use TestCase;
-use ImageCache;
+use FileCache;
 use Biigle\Shape;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\VolumeTest;
@@ -23,7 +23,7 @@ class ProcessVolumeDelphiJobTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        ImageCache::fake();
+        FileCache::fake();
     }
 
     public function testHandle()

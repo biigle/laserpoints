@@ -6,7 +6,7 @@ use App;
 use File;
 use Cache;
 use Exception;
-use ImageCache;
+use FileCache;
 use Biigle\Jobs\Job as BaseJob;
 use Biigle\Modules\Laserpoints\Image;
 use Illuminate\Queue\InteractsWithQueue;
@@ -85,7 +85,7 @@ class ProcessDelphiChunkJob extends BaseJob implements ShouldQueue
 
         foreach ($images as $image) {
             try {
-                $output = ImageCache::getOnce($image, $callback);
+                $output = FileCache::getOnce($image, $callback);
             } catch (Exception $e) {
                 $output = [
                     'error' => true,

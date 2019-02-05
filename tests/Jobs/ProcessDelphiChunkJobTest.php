@@ -8,7 +8,7 @@ use Cache;
 use Mockery;
 use TestCase;
 use Exception;
-use ImageCache;
+use FileCache;
 use Biigle\Tests\ImageTest;
 use Biigle\Modules\Laserpoints\Image;
 use Biigle\Modules\Laserpoints\Support\DelphiApply;
@@ -26,7 +26,7 @@ class ProcessDelphiChunkJobTest extends TestCase
         $this->image = Image::convert(ImageTest::create());
         $this->images = collect($this->image->id);
         $this->gatherFile = '/my/gather/file';
-        ImageCache::fake();
+        FileCache::fake();
     }
 
     public function testHandle()

@@ -4,7 +4,7 @@ namespace Biigle\Modules\Laserpoints\Jobs;
 
 use DB;
 use App;
-use ImageCache;
+use FileCache;
 use Biigle\Image;
 use Biigle\Shape;
 use Biigle\Jobs\Job as BaseJob;
@@ -90,7 +90,7 @@ abstract class Job extends BaseJob implements ShouldQueue
         };
 
         foreach ($images as $image) {
-            ImageCache::getOnce($image, $callback);
+            FileCache::getOnce($image, $callback);
         }
 
         $gather->finish();
