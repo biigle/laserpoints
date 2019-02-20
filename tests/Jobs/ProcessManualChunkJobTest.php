@@ -34,7 +34,6 @@ class ProcessManualChunkJobTest extends TestCase
             ->andReturn([
                 'error' => false,
                 'area' => 100,
-                'px' => 50000,
                 'count' => 3,
                 'method' => 'manual',
                 'points' => [[100, 100], [200, 200], [300, 300]],
@@ -48,7 +47,6 @@ class ProcessManualChunkJobTest extends TestCase
 
         $expect = [
             'area' => 100,
-            'px' => 50000,
             'count' => 3,
             'method' => 'manual',
             'points' => [[100, 100], [200, 200], [300, 300]],
@@ -89,7 +87,6 @@ class ProcessManualChunkJobTest extends TestCase
         // previous laserpoint detection results should be removed
         $this->image->laserpoints = [
             'area' => 100,
-            'px' => 50000,
             'count' => 3,
             'method' => 'manual',
             'points' => [[100, 100], [200, 200], [300, 300]],

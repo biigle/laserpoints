@@ -38,7 +38,6 @@ class ProcessDelphiChunkJobTest extends TestCase
             ->andReturn([
                 'error' => false,
                 'area' => 100,
-                'px' => 50000,
                 'count' => 3,
                 'method' => 'delphi',
                 'points' => [[100, 100], [200, 200], [300, 300]],
@@ -53,7 +52,6 @@ class ProcessDelphiChunkJobTest extends TestCase
 
         $expect = [
             'area' => 100,
-            'px' => 50000,
             'count' => 3,
             'method' => 'delphi',
             'points' => [[100, 100], [200, 200], [300, 300]],
@@ -132,7 +130,6 @@ class ProcessDelphiChunkJobTest extends TestCase
         // previous laserpoint detection results should be removed
         $this->image->laserpoints = [
             'area' => 100,
-            'px' => 50000,
             'count' => 3,
             'method' => 'delphi',
             'images' => [[100, 100], [200, 200], [300, 300]],

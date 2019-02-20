@@ -40,26 +40,26 @@ class ImageTest extends TestCase
         $image = BaseImageTest::create([
             'attrs' => [
                 Image::LASERPOINTS_ATTRIBUTE => [
-                    'px' => 500,
+                    'area' => 500,
                 ],
             ],
         ]);
         $laserpointsImage = Image::convert($image);
         $this->assertEquals($image->id, $laserpointsImage->id);
         $this->assertTrue($laserpointsImage instanceof Image);
-        $this->assertEquals(500, $laserpointsImage->laserpoints['px']);
+        $this->assertEquals(500, $laserpointsImage->laserpoints['area']);
     }
 
     public function testLaserpoints()
     {
         $image = Image::convert(BaseImageTest::create());
         $image->laserpoints = [
-            'px' => 500,
+            'area' => 500,
         ];
         $image->save();
 
         $expect = [
-            'px' => 500,
+            'area' => 500,
         ];
         $this->assertEquals($expect, $image->fresh()->laserpoints);
     }

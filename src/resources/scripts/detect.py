@@ -15,8 +15,6 @@ if len(img.shape) == 0:
         "message": "Could not load image. The image file might be corrupt.",
     })
     exit(1)
-img[:, 0:int(img.shape[1] * 0.15), :] = 0
-img[:, int(img.shape[1] - img.shape[1] * 0.15):, :] = 0
 
 width = img.shape[0]
 height = img.shape[1]
@@ -66,7 +64,6 @@ else:
         "method": detection
     })
     exit(1)
-pixelsize = width * height
 if (aqm < 0.1):
     print json.dumps({
         "error": True,
@@ -86,7 +83,6 @@ elif (aqm > 50):
 print json.dumps({
     "error": False,
     "area": aqm,
-    "px": pixelsize,
     "count": laserpoints.shape[0],
     "method": detection,
     "points": np.fliplr(laserpoints).tolist()

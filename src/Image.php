@@ -50,7 +50,6 @@ class Image extends BaseImage
      */
     private static $infoParams = [
         'area',
-        'px',
         'count',
         'method',
         'distance',
@@ -111,16 +110,6 @@ class Image extends BaseImage
     public function getAreaAttribute()
     {
         return $this->accessLaserpointsArray('area');
-    }
-
-    /**
-     * Get the px attribute from the laser point detection.
-     *
-     * @return int
-     */
-    public function getPxAttribute()
-    {
-        return $this->accessLaserpointsArray('px');
     }
 
     /**

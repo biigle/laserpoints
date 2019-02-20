@@ -17,13 +17,6 @@
             <?php $img = \Biigle\Modules\Laserpoints\Image::convert($image); ?>
             @if ($img->laserpoints)
                 <table class="table">
-                    @if ($img->px)
-                        <tr>
-                            <th>Number of pixels</th>
-                            <td>{{ $img->px }}</td>
-                        </tr>
-                    @endif
-
                     @if ($img->area)
                         <tr>
                             <th>Area covered by the image</th>

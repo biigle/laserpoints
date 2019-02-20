@@ -116,7 +116,6 @@ else:
         "method": detection
     })
     exit(1)
-pixelsize = width * height
 if (aqm < 0.1):
     print json.dumps({
         "error": True,
@@ -136,7 +135,6 @@ elif (aqm > 50):
 print json.dumps({
     "error": False,
     "area": aqm,
-    "px": pixelsize,
     "count": laserpoints.shape[0],
     "method": detection,
     "points": np.fliplr(laserpoints).tolist()
