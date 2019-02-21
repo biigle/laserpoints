@@ -5,6 +5,7 @@ namespace Biigle\Modules\Laserpoints;
 use DB;
 use Exception;
 use Biigle\Shape;
+use Biigle\Label;
 use Biigle\Image as BaseImage;
 
 /**
@@ -33,15 +34,6 @@ class Image extends BaseImage
      * @var int
      */
     const MAX_MANUAL_POINTS = 4;
-
-    /**
-     * Validation rules for a new laser point computation.
-     *
-     * @var array
-     */
-    public static $laserpointsRules = [
-        'distance' => 'required|numeric|min:1',
-    ];
 
     /**
      * Properties of the laser points object.
@@ -175,18 +167,17 @@ class Image extends BaseImage
     /**
      * Determines if this image has a valid number of manually annotated laser points.
      *
-     * @param Image $image
+     * @param Label $label The laser point label.
      * @throws Exception If the image has an invalid count of manually annotated laser points
      *
      * @return bool
      */
-    public function readyForManualDetection()
+    public function readyForManualDetection(Label $label)
     {
-        $labelId = config('laserpoints.label_id');
         $count = DB::table('annotations')
             ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
             ->where('annotations.image_id', $this->id)
-            ->where('annotation_labels.label_id', $labelId)
+            ->where('annotation_labels.label_id', $label->id)
             ->where('annotations.shape_id', Shape::pointId())
             ->count();
 

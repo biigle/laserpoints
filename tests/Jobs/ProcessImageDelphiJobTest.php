@@ -20,7 +20,6 @@ class ProcessImageDelphiJobTest extends TestCase
     public function testHandle()
     {
         $label = LabelTest::create();
-        config(['laserpoints.label_id' => $label->id]);
         $image = ImageTest::create();
         for ($i = 1; $i <= 3; $i++) {
             $id = AnnotationTest::create([
@@ -50,7 +49,7 @@ class ProcessImageDelphiJobTest extends TestCase
         });
 
         Queue::fake();
-        with(new ProcessImageDelphiJob($image2, 50))->handle();
+        with(new ProcessImageDelphiJob($image2, 50, $label->id))->handle();
         Queue::assertPushed(ProcessDelphiChunkJob::class);
     }
 }

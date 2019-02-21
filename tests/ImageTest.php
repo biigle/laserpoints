@@ -7,6 +7,7 @@ use Exception;
 use Biigle\Label;
 use Biigle\Shape;
 use Biigle\Tests\LabelTest;
+use Biigle\Image as BaseImage;
 use Biigle\Tests\AnnotationTest;
 use Biigle\Tests\AnnotationLabelTest;
 use Biigle\Modules\Laserpoints\Image;
@@ -14,15 +15,8 @@ use Biigle\Tests\ImageTest as BaseImageTest;
 
 class ImageTest extends TestCase
 {
-    protected static $labelId;
-
-    public static function addLaserpoints(\Biigle\Image $image, $count = 1)
+    public static function addLaserpoints($image, $label, $count = 1)
     {
-        if (!static::$labelId || !Label::where('id', static::$labelId)->exists()) {
-            static::$labelId = LabelTest::create(['name' => 'Laserpoint'])->id;
-            config(['laserpoints.label_id' => static::$labelId]);
-        }
-
         for ($i = 0; $i < $count; $i++) {
             $id = AnnotationTest::create([
                 'image_id' => $image->id,
@@ -30,7 +24,7 @@ class ImageTest extends TestCase
             ])->id;
             AnnotationLabelTest::create([
                 'annotation_id' => $id,
-                'label_id' => static::$labelId,
+                'label_id' => $label->id,
             ]);
         }
     }
@@ -38,11 +32,7 @@ class ImageTest extends TestCase
     public function testConvert()
     {
         $image = BaseImageTest::create([
-            'attrs' => [
-                Image::LASERPOINTS_ATTRIBUTE => [
-                    'area' => 500,
-                ],
-            ],
+            'attrs' => [Image::LASERPOINTS_ATTRIBUTE => ['area' => 500]],
         ]);
         $laserpointsImage = Image::convert($image);
         $this->assertEquals($image->id, $laserpointsImage->id);
@@ -73,27 +63,27 @@ class ImageTest extends TestCase
 
     public function testReadyForManualDetection()
     {
+        $label = LabelTest::create();
         $image = Image::convert(BaseImageTest::create());
 
-        $this->assertFalse($image->readyForManualDetection());
-        self::addLaserpoints($image);
+        $this->assertFalse($image->readyForManualDetection($label));
+        static::addLaserpoints($image, $label);
 
         try {
-            $image->readyForManualDetection();
+            $image->readyForManualDetection($label);
             $this->assertFalse(true);
         } catch (Exception $e) {
             $this->assertContains('must have at least 2 manually annotated laser points', $e->getMessage());
         }
 
-        self::addLaserpoints($image);
-        $this->assertTrue($image->readyForManualDetection());
-        self::addLaserpoints($image);
-        self::addLaserpoints($image);
-        $this->assertTrue($image->readyForManualDetection());
-        self::addLaserpoints($image);
+        static::addLaserpoints($image, $label);
+        $this->assertTrue($image->readyForManualDetection($label));
+        static::addLaserpoints($image, $label, 2);
+        $this->assertTrue($image->readyForManualDetection($label));
+        static::addLaserpoints($image, $label);
 
         try {
-            $image->readyForManualDetection();
+            $image->readyForManualDetection($label);
             $this->assertFalse(true);
         } catch (Exception $e) {
             $this->assertContains('can\'t have more than 4 manually annotated laser points', $e->getMessage());

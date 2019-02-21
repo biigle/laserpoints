@@ -24,15 +24,24 @@ abstract class Job extends BaseJob implements ShouldQueue
     protected $distance;
 
     /**
+     * ID of the laser point label.
+     *
+     * @var int
+     */
+    protected $labelId;
+
+    /**
      * Create a new job instance.
      *
      * @param float $distance
+     * @param int $labelId
      *
      * @return void
      */
-    public function __construct($distance)
+    public function __construct($distance, $labelId)
     {
         $this->distance = $distance;
+        $this->labelId = $labelId;
     }
 
     /**
@@ -51,13 +60,11 @@ abstract class Job extends BaseJob implements ShouldQueue
      */
     protected function getLaserpointsForVolume($id)
     {
-        $labelId = config('laserpoints.label_id');
-
         return DB::table('annotations')
             ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
             ->join('images', 'annotations.image_id', '=', 'images.id')
             ->where('images.volume_id', $id)
-            ->where('annotation_labels.label_id', $labelId)
+            ->where('annotation_labels.label_id', $this->labelId)
             ->where('annotations.shape_id', Shape::pointId())
             ->select('annotations.points', 'annotations.image_id')
             ->get()

@@ -11,6 +11,7 @@ use TestCase;
 use FileCache;
 use Biigle\Shape;
 use Biigle\Tests\ImageTest;
+use Biigle\Tests\LabelTest;
 use Biigle\Tests\VolumeTest;
 use Biigle\Modules\Laserpoints\Support\DelphiGather;
 use Biigle\Modules\Laserpoints\Jobs\ProcessDelphiChunkJob;
@@ -28,8 +29,9 @@ class ProcessVolumeDelphiJobTest extends TestCase
 
     public function testHandle()
     {
+        $label = LabelTest::create();
         config(['laserpoints.tmp_dir' => '/tmp']);
-        $image = $this->createAnnotatedImage();
+        $image = $this->createAnnotatedImage($label);
         $image2 = ImageTest::create([
             'filename' => 'xyz',
             'volume_id' => $image->volume_id,
@@ -50,17 +52,18 @@ class ProcessVolumeDelphiJobTest extends TestCase
         Cache::shouldReceive('forever')->once()->with(Mockery::any(), 1);
 
         Queue::fake();
-        with(new ProcessVolumeDelphiJob($image->volume, 50))->handle();
+        with(new ProcessVolumeDelphiJob($image->volume, 50, $label->id))->handle();
         Queue::assertPushed(ProcessDelphiChunkJob::class, 1);
         Queue::assertPushed(ProcessManualChunkJob::class);
     }
 
     public function testHandleChunking()
     {
+        $label = LabelTest::create();
         config(['laserpoints.tmp_dir' => '/tmp']);
         $volume = VolumeTest::create();
         for ($i = 0; $i < 2; $i++) {
-            $this->createAnnotatedImage($volume->id);
+            $this->createAnnotatedImage($label, $volume->id);
             ImageTest::create([
                 'volume_id' => $volume->id,
                 'filename' => uniqid(),
@@ -79,7 +82,7 @@ class ProcessVolumeDelphiJobTest extends TestCase
         Cache::shouldReceive('rememberForever')->andReturn(Shape::whereName('Point')->first());
         Cache::shouldReceive('forever')->once()->with(Mockery::any(), 2);
 
-        $job = new ProcessVolumeDelphiJob($volume, 50);
+        $job = new ProcessVolumeDelphiJob($volume, 50, $label->id);
         $job->chunkSize = 1;
         Queue::fake();
         $job->handle();
@@ -87,7 +90,7 @@ class ProcessVolumeDelphiJobTest extends TestCase
         Queue::assertPushed(ProcessManualChunkJob::class);
     }
 
-    protected function createAnnotatedImage($volumeId = null)
+    protected function createAnnotatedImage($label, $volumeId = null)
     {
         if ($volumeId) {
             $image = ImageTest::create([
@@ -98,7 +101,7 @@ class ProcessVolumeDelphiJobTest extends TestCase
             $image = ImageTest::create(['filename' => uniqid()]);
         }
 
-        LpImageTest::addLaserpoints($image, 3);
+        LpImageTest::addLaserpoints($image, $label, 3);
 
         return $image;
     }

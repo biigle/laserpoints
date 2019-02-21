@@ -6,6 +6,7 @@ use TestCase;
 use Exception;
 use Biigle\Image;
 use Biigle\Annotation;
+use Biigle\Tests\LabelTest;
 use Biigle\Modules\Laserpoints\Volume;
 use Biigle\Tests\VolumeTest as BaseVolumeTest;
 
@@ -22,6 +23,7 @@ class VolumeTest extends TestCase
     public function testReadyForDelphiDetection()
     {
         $volume = Volume::convert(BaseVolumeTest::create());
+        $label = LabelTest::create();
 
         $images = factory(Image::class, 4)->create()
             ->each(function ($i) use ($volume) {
@@ -31,46 +33,46 @@ class VolumeTest extends TestCase
             });
 
         try {
-            $volume->readyForDelphiDetection();
+            $volume->readyForDelphiDetection($label);
             $this->assertFalse(true);
         } catch (Exception $e) {
             $this->assertContains('At least 4 are required', $e->getMessage());
         }
 
-        $images->each(function ($i) {
-            ImageTest::addLaserpoints($i);
+        $images->each(function ($i) use ($label) {
+            ImageTest::addLaserpoints($i, $label);
         });
         try {
-            $volume->readyForDelphiDetection();
+            $volume->readyForDelphiDetection($label);
             $this->assertFalse(true);
         } catch (Exception $e) {
             $this->assertContains('at least 2 manually annotated laser points per image', $e->getMessage());
         }
 
-        $images->each(function ($i) {
-            ImageTest::addLaserpoints($i, 3);
+        $images->each(function ($i) use ($label) {
+            ImageTest::addLaserpoints($i, $label, 3);
         });
         // Succeeds.
-        $volume->readyForDelphiDetection();
+        $volume->readyForDelphiDetection($label);
 
-        $images->each(function ($i) {
-            ImageTest::addLaserpoints($i);
+        $images->each(function ($i) use ($label) {
+            ImageTest::addLaserpoints($i, $label);
         });
         try {
-            $volume->readyForDelphiDetection();
+            $volume->readyForDelphiDetection($label);
             $this->assertFalse(true);
         } catch (Exception $e) {
             $this->assertContains('can\'t be more than 4 manually annotated laser points per image', $e->getMessage());
         }
 
         Annotation::getQuery()->delete();
-        $images->each(function ($i) {
-            ImageTest::addLaserpoints($i, 3);
+        $images->each(function ($i) use ($label) {
+            ImageTest::addLaserpoints($i, $label, 3);
         });
-        ImageTest::addLaserpoints($images[0], 1);
+        ImageTest::addLaserpoints($images[0], $label , 1);
 
         try {
-            $volume->readyForDelphiDetection();
+            $volume->readyForDelphiDetection($label);
             $this->assertFalse(true);
         } catch (Exception $e) {
             $this->assertContains('must have equal count of manually annotated laser points', $e->getMessage());

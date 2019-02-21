@@ -18,12 +18,13 @@ class ProcessImageDelphiJob extends Job
      *
      * @param Image $image
      * @param float $distance
+     * @param int $labelId
      *
      * @return void
      */
-    public function __construct(Image $image, $distance)
+    public function __construct(Image $image, $distance, $labelId)
     {
-        parent::__construct($distance);
+        parent::__construct($distance, $labelId);
         $this->image = $image;
     }
 

@@ -20,12 +20,13 @@ class ProcessImageManualJob extends Job
      *
      * @param Image $image
      * @param float $distance
+     * @param int $labelId
      *
      * @return void
      */
-    public function __construct(Image $image, $distance)
+    public function __construct(Image $image, $distance, $labelId)
     {
-        parent::__construct($distance);
+        parent::__construct($distance, $labelId);
         $this->image = $image;
     }
 
@@ -55,12 +56,10 @@ class ProcessImageManualJob extends Job
      */
     protected function getLaserpointsForImage($id)
     {
-        $labelId = config('laserpoints.label_id');
-
         $points = DB::table('annotations')
             ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
             ->where('annotations.image_id', $id)
-            ->where('annotation_labels.label_id', $labelId)
+            ->where('annotation_labels.label_id', $this->labelId)
             ->where('annotations.shape_id', Shape::pointId())
             ->select('annotations.points', 'annotations.image_id')
             ->pluck('annotations.points');

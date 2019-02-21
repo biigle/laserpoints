@@ -3,11 +3,6 @@
 return [
 
     /*
-    | label_id of a laser point
-    */
-    'label_id' => env('LASER_POINT_LABEL_ID', null),
-
-    /*
     | Path to the Python executable.
     */
     'python' => '/usr/bin/python',

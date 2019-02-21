@@ -35,12 +35,13 @@ class ProcessVolumeDelphiJob extends Job
      *
      * @param Volume $volume
      * @param float $distance
+     * @param int $labelid
      *
      * @return void
      */
-    public function __construct(Volume $volume, $distance)
+    public function __construct(Volume $volume, $distance, $labelId)
     {
-        parent::__construct($distance);
+        parent::__construct($distance, $labelId);
         $this->volume = $volume;
         $this->chunkSize = self::CHUNK_SIZE;
     }

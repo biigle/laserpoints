@@ -3,14 +3,16 @@
 namespace Biigle\Modules\Laserpoints\Http\Controllers\Api;
 
 use Exception;
-use Illuminate\Http\Request;
+use Biigle\Label;
 use Biigle\Volume as BaseVolume;
 use Biigle\Modules\Laserpoints\Image;
 use Biigle\Modules\Laserpoints\Volume;
 use Biigle\Http\Controllers\Api\Controller;
 use Illuminate\Validation\ValidationException;
+use Biigle\Modules\Laserpoints\Http\Requests\ComputeImage;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageManualJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageDelphiJob;
+use Biigle\Modules\Laserpoints\Http\Requests\ComputeVolume;
 use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeDelphiJob;
 
 class LaserpointsController extends Controller
@@ -25,48 +27,38 @@ class LaserpointsController extends Controller
      * @apiDescription This feature is not available for very large images.
      *
      * @apiParam {Number} id The image ID.
+     * @apiParam (Required arguments) {Number} label_id ID of the laser point label that was used.
      * @apiParam (Required arguments) {Number} distance The distance between two laser points in cm.
      *
-     * @param Request $request
+     * @param ComputeImage $request
      * @param int $id image id
      * @return \Illuminate\Http\Response
      */
-    public function computeImage(Request $request, $id)
+    public function computeImage(ComputeImage $request)
     {
-        $image = Image::with('volume')->findOrFail($id);
-        $this->authorize('edit-in', $image->volume);
-
-        if ($image->tiled === true) {
-            throw ValidationException::withMessages([
-                'id' => 'Laser point detection is not available for very large images.',
-            ]);
-        }
+        $image = Image::convert($request->image);
+        $label = Label::find($request->input('label_id'));
 
         try {
-            $manual = $image->readyForManualDetection();
+            $manual = $image->readyForManualDetection($label);
         } catch (Exception $e) {
             throw ValidationException::withMessages([
                 'id' => 'Laser point detection can\'t be performed. '.$e->getMessage(),
             ]);
         }
 
-        if (!$manual) {
+        if ($manual) {
+            ProcessImageManualJob::dispatch($image, $request->input('distance'), $label->id);
+        } else {
             try {
-                Volume::convert($image->volume)->readyForDelphiDetection();
+                Volume::convert($image->volume)->readyForDelphiDetection($label);
             } catch (Exception $e) {
                 throw ValidationException::withMessages([
                     'id' => 'Delphi laser point detection can\'t be performed. '.$e->getMessage(),
                 ]);
             }
-        }
 
-        $this->validate($request, Image::$laserpointsRules);
-        $distance = $request->input('distance');
-
-        if ($manual) {
-            ProcessImageManualJob::dispatch($image, $distance);
-        } else {
-            ProcessImageDelphiJob::dispatch($image, $distance);
+            ProcessImageDelphiJob::dispatch($image, $request->input('distance'), $label->id);
         }
     }
 
@@ -80,34 +72,25 @@ class LaserpointsController extends Controller
      * @apiDescription This feature is not available for very large images.
      *
      * @apiParam {Number} id The volume ID.
+     * @apiParam (Required arguments) {Number} label_id ID of the laser point label that was used.
      * @apiParam (Required arguments) {Number} distance The distance between two laser points in cm.
      *
-     * @param Request $request
-     * @param int $id volume id
+     * @param ComputeVolume $request
      * @return \Illuminate\Http\Response
      */
-    public function computeVolume(Request $request, $id)
+    public function computeVolume(ComputeVolume $request)
     {
-        $volume = BaseVolume::findOrFail($id);
-        $this->authorize('edit-in', $volume);
-
-        if ($volume->hasTiledImages()) {
-            throw ValidationException::withMessages([
-                'id' => 'Laser point detection is not available for volumes with very large images.',
-            ]);
-        }
+        $volume = Volume::convert($request->volume);
+        $label = Label::find($request->input('label_id'));
 
         try {
-            Volume::convert($volume)->readyForDelphiDetection();
+            $volume->readyForDelphiDetection($label);
         } catch (Exception $e) {
             throw ValidationException::withMessages([
                 'id' => 'Delphi laser point detection can\'t be performed. '.$e->getMessage(),
             ]);
         }
 
-        $this->validate($request, Image::$laserpointsRules);
-        $distance = $request->input('distance');
-
-        ProcessVolumeDelphiJob::dispatch($volume, $distance);
+        ProcessVolumeDelphiJob::dispatch($volume, $request->input('distance'), $label->id);
     }
 }

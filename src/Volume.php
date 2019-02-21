@@ -5,6 +5,7 @@ namespace Biigle\Modules\Laserpoints;
 use DB;
 use Exception;
 use Biigle\Shape;
+use Biigle\Label;
 use Biigle\Volume as BaseVolume;
 
 /**
@@ -39,18 +40,19 @@ class Volume extends BaseVolume
     /**
      * Determines if the images of this volume can be processed with Delphi.
      *
+     * @param Label $label The laser point label.
+     *
      * @throws Exception If the images of this volume can't be processed with Delphi
      */
-    public function readyForDelphiDetection()
+    public function readyForDelphiDetection(Label $label)
     {
-        $labelId = config('laserpoints.label_id');
         $points = DB::table('annotations')
             ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
             ->join('images', 'annotations.image_id', '=', 'images.id')
             ->where('images.volume_id', $this->id)
-            ->where('annotation_labels.label_id', $labelId)
+            ->where('annotation_labels.label_id', $label->id)
             ->where('annotations.shape_id', Shape::pointId())
-            ->select(DB::raw('count(annotation_labels.id) as count'))
+            ->selectRaw('count(annotation_labels.id) as count')
             ->groupBy('images.id')
             ->pluck('count');
 

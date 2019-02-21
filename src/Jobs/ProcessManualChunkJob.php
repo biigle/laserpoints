@@ -50,7 +50,6 @@ class ProcessManualChunkJob extends BaseJob implements ShouldQueue
      */
     public function handle()
     {
-        $labelId = config('laserpoints.label_id');
         $detect = App::make(Detect::class);
 
         $images = Image::whereIn('id', $this->points->keys())
