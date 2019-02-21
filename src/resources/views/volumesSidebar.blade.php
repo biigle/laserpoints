@@ -7,6 +7,10 @@
             <laserpoints-form inline-template>
                 <form class="form-stacked" v-on:submit.prevent="submit">
                     <div class="form-group">
+                        <label for="label">Laser point label</label>
+                        <typeahead id="label" title="Laser point" placeholder="Laser point label" class="typeahead--block" :items="labels" v-on:select="handleSelectLabel" v-on:focus="loadLabels">
+                    </div>
+                    <div class="form-group">
                         <label for="distance">Laser distance in cm</label>
                         <input v-model="distance" id="distance" type="number" min="1" title="Distance between two laser points in cm" class="form-control" required>
                     </div>

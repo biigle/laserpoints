@@ -1,6 +1,17 @@
+<?php $img = \Biigle\Modules\Laserpoints\Image::convert($image); ?>
+
 @unless ($volume->hasTiledImages())
     @push('scripts')
+        <script src="{{ cachebust_asset('vendor/label-trees/scripts/main.js') }}"></script>
+        <script src="{{ cachebust_asset('vendor/annotations/scripts/volumes.js') }}"></script>
         <script src="{{ cachebust_asset('vendor/laserpoints/scripts/main.js') }}"></script>
+        <script type="text/javascript">
+            biigle.$declare('laserpoints.image', {!! $image->toJson() !!});
+            biigle.$declare('laserpoints.distance', {!! $img->distance ?: 'null' !!});
+        </script>
+    @endpush
+    @push('styles')
+        <link rel="stylesheet" type="text/css" href="{{ cachebust_asset('vendor/label-trees/styles/main.css') }}">
     @endpush
 @endunless
 
@@ -14,7 +25,6 @@
                 The laser point detection is not available for very large images.
             </div>
         @else
-            <?php $img = \Biigle\Modules\Laserpoints\Image::convert($image); ?>
             @if ($img->laserpoints)
                 <table class="table">
                     @if ($img->area)
@@ -64,22 +74,18 @@
                         The laser point detection was submitted and will be available soon.
                     </div>
                     <div class="alert alert-danger" v-cloak v-else v-if="error" v-text="error"></div>
-                    <form class="form-inline" v-if="!processing">
-                        @if($img->laserpoints)
-                            <div class="form-group">
-                                <input class="form-control" v-model="distance" type="number" min="0" placeholder="New laser distance in cm" title="Distance between two laser points in cm. Leave empty to use the previously set distance ({{$img->distance}})"></input>
+                    <form class="" v-if="!processing" v-on:submit.prevent="submit">
+                        <div class="form-group">
+                            <typeahead id="label" title="Label that was used to annotate laser points" placeholder="Laser point label" class="typeahead--block" :items="labels" v-on:select="handleSelectLabel" v-on:focus="loadLabels">
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-xs-6">
+                                <input class="form-control" v-model="distance" type="number" min="0" placeholder="Laser distance" title="Distance between two laser points in cm"></input>
                             </div>
-                            <div class="form-group">
-                                <button class="btn btn-success" :disabled="loading" v-on:click.prevent="detect({{$image->id}}, {{$img->distance}})" title="Restart the laser point detection">Submit</button>
+                            <div class="col-xs-6">
+                                <button class="btn btn-success btn-block" :disabled="submitDisabled" title="Start a new laser point detection">Submit</button>
                             </div>
-                        @else
-                            <div class="form-group">
-                                <input class="form-control" v-model="distance" type="number" min="0" placeholder="Laser distance in cm" title="Distance between two laser points in cm" required></input>
-                            </div>
-                            <div class="form-group">
-                                <button class="btn btn-success" :disabled="loading || !distance" v-on:click.prevent="detect({{$image->id}})" title="Start a new laser point detection">Submit</button>
-                            </div>
-                        @endif
+                        </div>
                     </form>
                 @endcan
             @endif
