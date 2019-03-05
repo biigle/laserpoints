@@ -11,8 +11,13 @@
         <p>
             For many collections of benthic images a geometric laser point pattern is used to determine the pixel-to-centimetre ratio of displayed sea floor. BIIGLE can assist in the evaluation of your data and provides a method <a href="#ref1">[1]</a> to automatically detect laser points and compute the visual footprint of the images.
         </p>
+        <div class="panel panel-warning">
+            <div class="panel-body text-warning">
+                Measurements based on the image footprint of the laser point detection are only accurate if the camera points straight down to the ground (nadir).
+            </div>
+        </div>
         <p>
-            Before you can start an automatic laser point detection you have to manually annotate a few example laser points with point annotations in your images. You have to annotate at least {{Biigle\Modules\Laserpoints\Volume::MIN_DELPHI_IMAGES}} images this way. BIIGLE currently supports the following types of geometric laser point patterns:
+            Before you can start the automatic laser point detection you have to manually annotate a few example laser points with point annotations in your images. You have to annotate at least {{Biigle\Modules\Laserpoints\Volume::MIN_DELPHI_IMAGES}} images this way. BIIGLE currently supports the following types of geometric laser point patterns:
         </p>
         <ul>
             <li>2 parallel lasers painting two points</li>
