@@ -76,7 +76,6 @@ class ProcessDelphiChunkJob extends BaseJob implements ShouldQueue
         $delphi = App::make(DelphiApply::class);
         $images = Image::whereIn('id', $this->images)
             ->with('volume')
-            ->select('id', 'filename', 'volume_id')
             ->get();
 
         $callback = function ($image, $path) use ($delphi) {

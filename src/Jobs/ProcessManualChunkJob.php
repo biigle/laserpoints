@@ -54,7 +54,6 @@ class ProcessManualChunkJob extends BaseJob implements ShouldQueue
 
         $images = Image::whereIn('id', $this->points->keys())
             ->with('volume')
-            ->select('id', 'filename', 'volume_id')
             ->get();
 
         $callback = function ($image, $path) use ($detect) {

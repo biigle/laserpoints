@@ -23,7 +23,7 @@ class ProcessDelphiChunkJobTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $this->image = Image::convert(ImageTest::create());
+        $this->image = Image::convert(ImageTest::create(['attrs' => ['a' => 1]]));
         $this->images = collect($this->image->id);
         $this->gatherFile = '/my/gather/file';
         FileCache::fake();
@@ -60,6 +60,8 @@ class ProcessDelphiChunkJobTest extends TestCase
         ];
 
         $this->assertEquals($expect, $this->image->fresh()->laserpoints);
+        // Previously set attrs should not be lost.
+        $this->assertEquals(1, $this->image->fresh()->attrs['a']);
     }
 
     public function testHandleCountDecrease()

@@ -19,7 +19,7 @@ class ProcessManualChunkJobTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $this->image = Image::convert(ImageTest::create());
+        $this->image = Image::convert(ImageTest::create(['attrs' => ['a' => 1]]));
         $this->points = collect([
             $this->image->id => '[[100,100],[200,200],[300,300]]',
         ]);
@@ -55,6 +55,8 @@ class ProcessManualChunkJobTest extends TestCase
         ];
 
         $this->assertEquals($expect, $this->image->fresh()->laserpoints);
+        // Previously set attributes should not be lost.
+        $this->assertEquals(1, $this->image->fresh()->attrs['a']);
     }
 
     public function testHandleGracefulError()
