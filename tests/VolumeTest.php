@@ -69,7 +69,7 @@ class VolumeTest extends TestCase
         $images->each(function ($i) use ($label) {
             ImageTest::addLaserpoints($i, $label, 3);
         });
-        ImageTest::addLaserpoints($images[0], $label , 1);
+        ImageTest::addLaserpoints($images[0], $label, 1);
 
         try {
             $volume->readyForDelphiDetection($label);
