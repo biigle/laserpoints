@@ -12,7 +12,7 @@
                     </div>
                     <div class="form-group">
                         <label for="distance">Laser distance in cm</label>
-                        <input v-model="distance" id="distance" type="number" min="1" title="Distance between two laser points in cm" class="form-control" required>
+                        <input v-model="distance" id="distance" type="number" min="1" step="0.1" title="Distance between two laser points in cm" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <button class="btn btn-success btn-block" title="Compute the area of each image in this  volume." :disabled="submitDisabled">Submit</button>
