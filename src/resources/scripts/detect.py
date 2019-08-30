@@ -64,10 +64,10 @@ else:
         "method": detection
     })
     exit(1)
-if (aqm < 0.1):
+if (aqm <= 0):
     print json.dumps({
         "error": True,
-        "message": "The estimated image area is too small (min is 0.1 sqm but was {} sqm).".format(round(aqm)),
+        "message": "The estimated image area is too small (was {} sqm).".format(round(aqm)),
         "method": detection,
     })
     exit(1)
