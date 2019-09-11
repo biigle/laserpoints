@@ -40,7 +40,15 @@ lpMap = np.zeros([img.shape[0], img.shape[1]], bool)
 
 
 sel = np.where(mask_image)
-sel2 = np.zeros(img[mask_image].shape[0], bool)
+try:
+    sel2 = np.zeros(img[mask_image].shape[0], bool)
+except IndexError as e:
+    print json.dumps({
+        "error": True,
+        "message": "The image has a different size than the reference image.",
+    })
+    exit(1)
+
 for idx, i in enumerate(img[mask_image]):
     sel2[idx] = np.any(scipy.spatial.distance.cdist(np.atleast_2d(i), lp_prototypes, 'cityblock') < min_dist)
 lpMap[sel[0][sel2], sel[1][sel2]] = 1
