@@ -21,7 +21,7 @@ use Biigle\Tests\Modules\Laserpoints\ImageTest as LpImageTest;
 
 class ProcessVolumeDelphiJobTest extends TestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         FileCache::fake();

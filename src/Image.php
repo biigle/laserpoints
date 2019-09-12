@@ -3,6 +3,7 @@
 namespace Biigle\Modules\Laserpoints;
 
 use DB;
+use Arr;
 use Exception;
 use Biigle\Shape;
 use Biigle\Label;
@@ -88,7 +89,7 @@ class Image extends BaseImage
         }
 
         if (!is_null($value)) {
-            $value = array_only($value, static::$infoParams);
+            $value = Arr::only($value, static::$infoParams);
         }
 
         $this->setJsonAttr(self::LASERPOINTS_ATTRIBUTE, $value);
@@ -200,6 +201,6 @@ class Image extends BaseImage
      */
     protected function accessLaserpointsArray($key)
     {
-        return array_get($this->laserpoints, $key);
+        return Arr::get($this->laserpoints, $key);
     }
 }
