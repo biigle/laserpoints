@@ -1,5 +1,13 @@
 {
     "name": "biigle/laserpoints",
+    "description": "BIIGLE module to perform a heuristic laser point detection on images.",
+    "keywords": ["biigle", "biigle-module"],
+    "license": "GPL-3.0-only",
+    "support": {
+        "source": "https://github.com/biigle/laserpoints",
+        "issues": "https://github.com/biigle/laserpoints/issues"
+    },
+    "homepage": "https://biigle.de",
     "authors": [
         {
             "name": "Martin Zurowietz",
