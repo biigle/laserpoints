@@ -7,8 +7,8 @@
         }
     ],
     "require": {
-        "biigle/annotations": "^3.0",
-        "biigle/volumes": "^2.0",
+        "biigle/annotations": "^3.0 | dev-master",
+        "biigle/volumes": "^2.0 | dev-master",
         "biigle/laravel-file-cache": "^2.0"
     },
     "autoload": {
