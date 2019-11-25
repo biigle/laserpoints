@@ -16,7 +16,7 @@ class ProcessManualChunkJobTest extends TestCase
     protected $image;
     protected $points;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->image = Image::convert(ImageTest::create(['attrs' => ['a' => 1]]));

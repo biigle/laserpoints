@@ -20,7 +20,7 @@ class ProcessDelphiChunkJobTest extends TestCase
     protected $images;
     protected $gatherFile;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->image = Image::convert(ImageTest::create(['attrs' => ['a' => 1]]));
