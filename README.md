@@ -1,5 +1,7 @@
 # BIIGLE Laserpoints Module
 
+[![Test status](https://github.com/biigle/laserpoints/workflows/Tests/badge.svg)](https://github.com/biigle/laserpoints/actions?query=workflow%3ATests)
+
 This is the BIIGLE module to perform a heuristic laser point detection on images.
 
 ## Installation
