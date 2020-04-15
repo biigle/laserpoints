@@ -44,7 +44,8 @@ class ProcessImageManualJob extends Job
 
         $points = $this->getLaserpointsForImage($this->image->id);
         $points = collect([$this->image->id => $points]);
-        ProcessManualChunkJob::dispatch($points, $this->distance);
+        ProcessManualChunkJob::dispatch($points, $this->distance)
+            ->onQueue(config('laserpoints.process_manual_queue'));
     }
 
     /**

@@ -65,7 +65,8 @@ class ProcessVolumeDelphiJob extends Job
         // queue workers and each one does not run very long (in case there is a hard
         // limit on the runtime of a job).
         foreach ($points->chunk($this->chunkSize) as $chunk) {
-            ProcessManualChunkJob::dispatch($chunk, $this->distance);
+            ProcessManualChunkJob::dispatch($chunk, $this->distance)
+                ->onQueue(config('laserpoints.process_manual_queue'));
         }
 
         $gatherFile = $this->gather($points);
@@ -79,7 +80,8 @@ class ProcessVolumeDelphiJob extends Job
         Cache::forever($cacheKey, $imageChunksToProcess->count());
 
         foreach ($imageChunksToProcess as $chunk) {
-            ProcessDelphiChunkJob::dispatch($chunk, $this->distance, $gatherFile, $cacheKey);
+            ProcessDelphiChunkJob::dispatch($chunk, $this->distance, $gatherFile, $cacheKey)
+                ->onQueue(config('laserpoints.process_delphi_queue'));
         }
     }
 }

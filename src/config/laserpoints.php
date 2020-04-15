@@ -33,4 +33,10 @@ return [
     | good idea.
     */
     'tmp_dir' => storage_path('framework/cache/laserpoints'),
+
+    /*
+     | Specifies which queue should be used for which job.
+     */
+    'process_delphi_queue' => env('LASERPOINTS_PROCESS_DELPHI_QUEUE', 'default'),
+    'process_manual_queue' => env('LASERPOINTS_PROCESS_MANUAL_QUEUE', 'default'),
 ];

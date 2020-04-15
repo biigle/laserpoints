@@ -48,7 +48,8 @@ class LaserpointsController extends Controller
         }
 
         if ($manual) {
-            ProcessImageManualJob::dispatch($image, $request->input('distance'), $label->id);
+            ProcessImageManualJob::dispatch($image, $request->input('distance'), $label->id)
+                ->onQueue(config('laserpoints.process_manual_queue'));
         } else {
             try {
                 Volume::convert($image->volume)->readyForDelphiDetection($label);
@@ -58,7 +59,8 @@ class LaserpointsController extends Controller
                 ]);
             }
 
-            ProcessImageDelphiJob::dispatch($image, $request->input('distance'), $label->id);
+            ProcessImageDelphiJob::dispatch($image, $request->input('distance'), $label->id)
+                ->onQueue(config('laserpoints.process_delphi_queue'));
         }
     }
 
@@ -91,6 +93,7 @@ class LaserpointsController extends Controller
             ]);
         }
 
-        ProcessVolumeDelphiJob::dispatch($volume, $request->input('distance'), $label->id);
+        ProcessVolumeDelphiJob::dispatch($volume, $request->input('distance'), $label->id)
+            ->onQueue(config('laserpoints.process_delphi_queue'));
     }
 }
