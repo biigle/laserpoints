@@ -2,17 +2,20 @@
 
 namespace Biigle\Modules\Laserpoints;
 
-use DB;
 use Exception;
 use Biigle\Shape;
 use Biigle\Label;
+use Biigle\Annotation;
 use Biigle\Volume as BaseVolume;
+use Biigle\Modules\Laserpoints\Traits\FiltersInvalidLaserPoints;
 
 /**
  * Extends the base Biigle volume.
  */
 class Volume extends BaseVolume
 {
+    use FiltersInvalidLaserPoints;
+
     /**
      * Minimum number of manually annotated images required for Delphi laser point
      * detection.
@@ -46,21 +49,24 @@ class Volume extends BaseVolume
      */
     public function readyForDelphiDetection(Label $label)
     {
-        $points = DB::table('annotations')
-            ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
+        $points = Annotation::join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
             ->join('images', 'annotations.image_id', '=', 'images.id')
             ->where('images.volume_id', $this->id)
             ->where('annotation_labels.label_id', $label->id)
             ->where('annotations.shape_id', Shape::pointId())
-            ->selectRaw('count(annotation_labels.id) as count')
-            ->groupBy('images.id')
-            ->pluck('count');
+            ->select('annotations.points', 'annotations.image_id')
+            ->get()
+            ->groupBy('image_id')
+            ->pipe([$this, 'filterInvalidLaserPoints'])
+            ->map(function ($annotations) {
+                return $annotations->count();
+            });
 
         if ($points->count() < self::MIN_DELPHI_IMAGES) {
             throw new Exception('Only '.$points->count().' images have manually annotated laser points. At least '.self::MIN_DELPHI_IMAGES.' are required.');
         }
 
-        $reference = $points[0];
+        $reference = $points->first();
         if ($reference < Image::MIN_MANUAL_POINTS) {
             throw new Exception('There must be at least '.Image::MIN_MANUAL_POINTS.' manually annotated laser points per image ('.$reference.' found).');
         }
@@ -69,11 +75,11 @@ class Volume extends BaseVolume
             throw new Exception('There can\'t be more than '.Image::MAX_MANUAL_POINTS.' manually annotated laser points per image ('.$reference.' found).');
         }
 
-        foreach ($points as $count) {
+        $points->each(function ($count) use ($reference) {
             if ($reference !== $count) {
                 throw new Exception('Images must have equal count of manually annotated laser points.');
             }
-        }
+        });
     }
 
     /**

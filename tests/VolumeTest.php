@@ -79,6 +79,39 @@ class VolumeTest extends TestCase
         }
     }
 
+    public function testReadyForDelphiDetectionOutOfBounds()
+    {
+        $volume = Volume::convert(BaseVolumeTest::create());
+        $label = LabelTest::create();
+
+        $images = factory(Image::class, 4)->create()
+            ->each(function ($i) use ($volume) {
+                $i->filename = uniqid();
+                $i->volume_id = $volume->id;
+                $i->width = 100;
+                $i->height = 100;
+                $i->save();
+            });
+
+        $images->each(function ($i) use ($label) {
+            ImageTest::addLaserpoints($i, $label, 2);
+        });
+
+        $annotation = $images->first()->annotations()->first();
+
+        // The point is outside the image boundaries.
+        $annotation->points = [50, 101];
+        $annotation->save();
+
+        try {
+            // This fails because images with invalid points are not considered.
+            $volume->readyForDelphiDetection($label);
+            $this->assertFalse(true);
+        } catch (Exception $e) {
+            $this->assertStringContainsString('At least 4 are required', $e->getMessage());
+        }
+    }
+
     public function testHasDetectedLaserpoints()
     {
         $volume = Volume::convert(BaseVolumeTest::create());
