@@ -4,7 +4,10 @@ namespace Biigle\Modules\Laserpoints\Jobs;
 
 use DB;
 use App;
+use File;
+use Storage;
 use FileCache;
+use SplFileInfo;
 use Biigle\Image;
 use Biigle\Shape;
 use Biigle\Annotation;
@@ -81,7 +84,7 @@ abstract class Job extends BaseJob implements ShouldQueue
      *
      * @param Collection $points Points Collection returned from getLaserpointsForVolume.
      *
-     * @return string Path to the gather file.
+     * @return string Path to the gather file in the storage disk.
      */
     protected function gather($points)
     {
@@ -98,12 +101,21 @@ abstract class Job extends BaseJob implements ShouldQueue
             return $gather->execute($path, $points->get($image->id));
         };
 
-        foreach ($images as $image) {
-            FileCache::getOnce($image, $callback);
+        $outputPath = $gather->getOutputPath();
+
+        try {
+            foreach ($images as $image) {
+                FileCache::get($image, $callback);
+            }
+
+            $gather->finish();
+
+            $storagePath = Storage::disk(config('laserpoints.disk'))
+                ->putFileAs('', new SplFileInfo($outputPath), File::basename($outputPath));
+        } finally {
+            File::delete($outputPath);
         }
 
-        $gather->finish();
-
-        return $gather->getOutputPath();
+        return $storagePath;
     }
 }

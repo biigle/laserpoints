@@ -2,8 +2,8 @@
 
 namespace Biigle\Tests\Modules\Laserpoints\Jobs;
 
-use App;
 use Queue;
+use Storage;
 use Mockery;
 use TestCase;
 use Biigle\Shape;
@@ -19,6 +19,8 @@ class ProcessImageDelphiJobTest extends TestCase
 {
     public function testHandle()
     {
+        Storage::fake('laserpoints');
+
         $label = LabelTest::create();
         $image = ImageTest::create();
         for ($i = 1; $i <= 3; $i++) {
@@ -37,19 +39,20 @@ class ProcessImageDelphiJobTest extends TestCase
             'volume_id' => $image->volume_id,
         ]);
 
-        $mock = Mockery::mock(DelphiGather::class);
-        $mock->shouldReceive('execute')
-            ->once()
-            ->with(Mockery::any(), '[[1,1],[2,2],[3,3]]');
-        $mock->shouldReceive('finish')->once();
-        $mock->shouldReceive('getOutputPath')->once();
-
-        App::singleton(DelphiGather::class, function () use ($mock) {
-            return $mock;
-        });
-
         Queue::fake();
-        with(new ProcessImageDelphiJob($image2, 50, $label->id))->handle();
+        $job = new ProcessImageDelphiJobStub($image2, 50, $label->id);
+        $job->handle();
         Queue::assertPushed(ProcessDelphiJob::class);
+        $expect = [$image->id => '[[1,1],[2,2],[3,3]]'];
+        $this->assertEquals($expect, $job->points->toArray());
+    }
+}
+
+class ProcessImageDelphiJobStub extends ProcessImageDelphiJob
+{
+    protected function gather($points) {
+        $this->points = $points;
+
+        return 'abc';
     }
 }
