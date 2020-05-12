@@ -21,11 +21,7 @@ class DelphiGather
     public function __construct()
     {
         $tmpDir = config('laserpoints.tmp_dir');
-        if (!File::isDirectory($tmpDir)) {
-            File::makeDirectory($tmpDir, 0755, true);
-        }
-        $tmpFile = uniqid('biigle_delphi_gather_output_');
-        $this->outputPath = "{$tmpDir}/{$tmpFile}";
+        $this->outputPath = tempnam($tmpDir, 'biigle_delphi_gather_output_');
     }
 
     /**

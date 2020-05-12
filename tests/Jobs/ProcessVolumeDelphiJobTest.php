@@ -3,10 +3,10 @@
 namespace Biigle\Tests\Modules\Laserpoints\Jobs;
 
 use App;
-use File;
 use Queue;
 use Cache;
 use Mockery;
+use Storage;
 use TestCase;
 use FileCache;
 use Biigle\Shape;
@@ -25,12 +25,13 @@ class ProcessVolumeDelphiJobTest extends TestCase
     {
         parent::setUp();
         FileCache::fake();
+        Storage::fake('laserpoints');
+        config(['laserpoints.tmp_dir' => '/tmp']);
     }
 
     public function testHandle()
     {
         $label = LabelTest::create();
-        config(['laserpoints.tmp_dir' => '/tmp']);
         $image = $this->createAnnotatedImage($label);
         $image2 = ImageTest::create([
             'filename' => 'xyz',
@@ -60,7 +61,6 @@ class ProcessVolumeDelphiJobTest extends TestCase
     public function testCacheKey()
     {
         $label = LabelTest::create();
-        config(['laserpoints.tmp_dir' => '/tmp']);
         $volume = VolumeTest::create();
         for ($i = 0; $i < 2; $i++) {
             $this->createAnnotatedImage($label, $volume->id);
