@@ -35,7 +35,7 @@ return [
     /*
     | Storage disk to store Delphi gather files that are shared by queued jobs.
     */
-    'disk' => env('LASERPOINTS_DISK', 'laserpoints'),
+    'disk' => env('LASERPOINTS_STORAGE_DISK', 'laserpoints'),
 
     /*
      | Specifies which queue should be used for which job.
