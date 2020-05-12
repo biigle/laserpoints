@@ -28,11 +28,14 @@ return [
     'delphi_apply_script' => __DIR__.'/../resources/scripts/delphi_apply.py',
 
     /*
-    | Directory for temporary files to share data between workers. Note that this
-    | directory must be accessible for all workers! The storage directory might be a
-    | good idea.
+    | Directory for temporary files.
     */
-    'tmp_dir' => storage_path('framework/cache/laserpoints'),
+    'tmp_dir' => sys_get_temp_dir(),
+
+    /*
+    | Storage disk to store Delphi gather files that are shared by queued jobs.
+    */
+    'disk' => env('LASERPOINTS_DISK', 'laserpoints'),
 
     /*
      | Specifies which queue should be used for which job.

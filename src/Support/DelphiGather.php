@@ -21,10 +21,8 @@ class DelphiGather
     public function __construct()
     {
         $tmpDir = config('laserpoints.tmp_dir');
-        if (!File::isDirectory($tmpDir)) {
-            File::makeDirectory($tmpDir, 0755, true);
-        }
         $tmpFile = uniqid('biigle_delphi_gather_output_');
+        // Determine only the path of the file as it must not exist initially.
         $this->outputPath = "{$tmpDir}/{$tmpFile}";
     }
 

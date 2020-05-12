@@ -5,6 +5,7 @@ namespace Biigle\Modules\Laserpoints\Jobs;
 use App;
 use File;
 use Cache;
+use Storage;
 use Exception;
 use FileCache;
 use Biigle\Jobs\Job as BaseJob;
@@ -55,6 +56,13 @@ class ProcessDelphiJob extends BaseJob implements ShouldQueue
     protected $deleteWhenMissingModels = true;
 
     /**
+     * The number of times the job may be attempted.
+     *
+     * @var int
+     */
+    public $tries = 1;
+
+    /**
      * Create a new job instance.
      *
      * @param Image $image
@@ -66,7 +74,7 @@ class ProcessDelphiJob extends BaseJob implements ShouldQueue
      */
     public function __construct($image, $distance, $gatherFile, $cacheKey = null)
     {
-        $this->image = $image;
+        $this->image = Image::convert($image);
         $this->gatherFile = $gatherFile;
         $this->distance = $distance;
         // If null, this job assumes it is the only one accessing the gatherFile.
@@ -80,18 +88,27 @@ class ProcessDelphiJob extends BaseJob implements ShouldQueue
      */
     public function handle()
     {
+        $tmpDir = config('laserpoints.tmp_dir');
+        $localGatherPath = "{$tmpDir}/{$this->gatherFile}";
+        $stream = Storage::disk(config('laserpoints.disk'))
+            ->readStream($this->gatherFile);
+        File::put($localGatherPath, $stream);
+
+        $callback = function ($image, $path) use ($localGatherPath) {
+            $delphi = App::make(DelphiApply::class);
+
+            return $delphi->execute($localGatherPath, $path, $this->distance);
+        };
 
         try {
-            $output = FileCache::getOnce($this->image, function ($image, $path){
-                $delphi = App::make(DelphiApply::class);
-
-                return $delphi->execute($this->gatherFile, $path, $this->distance);
-            });
+            $output = FileCache::getOnce($this->image, $callback);
         } catch (Exception $e) {
             $output = [
                 'error' => true,
                 'message' => $e->getMessage(),
             ];
+        } finally {
+            File::delete($localGatherPath);
         }
 
         $output['distance'] = $this->distance;
@@ -115,7 +132,7 @@ class ProcessDelphiJob extends BaseJob implements ShouldQueue
     /**
      * Handles the deletion of the gatherFile once all "sibling" jobs finished.
      *
-     * If more than one chunk is processed during a Delphi LP detection, the jobs use the
+     * If more than one image is processed during a Delphi LP detection, the jobs use the
      * cache to track how many of them are still running. They need to track this to
      * determine when the gatherFile can be deleted. This function updates the count
      * when a job was finished and deletes the gather file if this is the last job to
@@ -132,6 +149,6 @@ class ProcessDelphiJob extends BaseJob implements ShouldQueue
             Cache::forget($this->cacheKey);
         }
 
-        File::delete($this->gatherFile);
+        Storage::disk(config('laserpoints.disk'))->delete($this->gatherFile);
     }
 }

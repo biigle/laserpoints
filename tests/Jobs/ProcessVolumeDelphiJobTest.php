@@ -2,11 +2,10 @@
 
 namespace Biigle\Tests\Modules\Laserpoints\Jobs;
 
-use App;
-use File;
 use Queue;
 use Cache;
 use Mockery;
+use Storage;
 use TestCase;
 use FileCache;
 use Biigle\Shape;
@@ -25,42 +24,34 @@ class ProcessVolumeDelphiJobTest extends TestCase
     {
         parent::setUp();
         FileCache::fake();
+        Storage::fake('laserpoints');
+        config(['laserpoints.tmp_dir' => '/tmp']);
     }
 
     public function testHandle()
     {
         $label = LabelTest::create();
-        config(['laserpoints.tmp_dir' => '/tmp']);
         $image = $this->createAnnotatedImage($label);
         $image2 = ImageTest::create([
             'filename' => 'xyz',
             'volume_id' => $image->volume_id,
         ]);
 
-        $mock = Mockery::mock(DelphiGather::class);
-        $mock->shouldReceive('execute')
-            ->once()
-            ->with(Mockery::any(), '[[0,0],[0,0],[0,0]]');
-        $mock->shouldReceive('finish')->once();
-        $mock->shouldReceive('getOutputPath')->once();
-
-        App::singleton(DelphiGather::class, function () use ($mock) {
-            return $mock;
-        });
-
         Cache::shouldReceive('rememberForever')->andReturn(Shape::whereName('Point')->first());
         Cache::shouldReceive('forever')->once()->with(Mockery::any(), 1);
 
         Queue::fake();
-        with(new ProcessVolumeDelphiJob($image->volume, 50, $label->id))->handle();
+        $job = new ProcessVolumeDelphiJobStub($image->volume, 50, $label->id);
+        $job->handle();
         Queue::assertPushed(ProcessDelphiJob::class, 1);
         Queue::assertPushed(ProcessManualJob::class);
+        $expect = [$image->id => '[[0,0],[0,0],[0,0]]'];
+        $this->assertEquals($expect, $job->points->toArray());
     }
 
     public function testCacheKey()
     {
         $label = LabelTest::create();
-        config(['laserpoints.tmp_dir' => '/tmp']);
         $volume = VolumeTest::create();
         for ($i = 0; $i < 2; $i++) {
             $this->createAnnotatedImage($label, $volume->id);
@@ -70,20 +61,11 @@ class ProcessVolumeDelphiJobTest extends TestCase
             ]);
         }
 
-        $mock = Mockery::mock(DelphiGather::class);
-        $mock->shouldReceive('execute')->twice();
-        $mock->shouldReceive('finish')->once();
-        $mock->shouldReceive('getOutputPath')->once();
-
-        App::singleton(DelphiGather::class, function () use ($mock) {
-            return $mock;
-        });
-
         Cache::shouldReceive('rememberForever')->andReturn(Shape::whereName('Point')->first());
         Cache::shouldReceive('forever')->once()->with(Mockery::any(), 2);
 
-        $job = new ProcessVolumeDelphiJob($volume, 50, $label->id);
         Queue::fake();
+        $job = new ProcessVolumeDelphiJobStub($volume, 50, $label->id);
         $job->handle();
         Queue::assertPushed(ProcessDelphiJob::class, 2);
         Queue::assertPushed(ProcessManualJob::class);
@@ -103,5 +85,15 @@ class ProcessVolumeDelphiJobTest extends TestCase
         LpImageTest::addLaserpoints($image, $label, 3);
 
         return $image;
+    }
+}
+
+class ProcessVolumeDelphiJobStub extends ProcessVolumeDelphiJob
+{
+
+    protected function gather($points) {
+        $this->points = $points;
+
+        return 'abc';
     }
 }

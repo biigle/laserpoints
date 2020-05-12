@@ -10,6 +10,13 @@ This is the BIIGLE module to perform a heuristic laser point detection on images
 2. Add `Biigle\Modules\Laserpoints\LaserpointsServiceProvider::class` to the `providers` array in `config/app.php`.
 3. Run `php artisan vendor:publish --tag=public` to publish the public assets of this module.
 4. Run `pip install -r vendor/biigle/laserpoints/requirements.txt` to install the Python requirements.
+5. Configure a storage disk for the temporary laserpoints files `LASERPOINTS_DISK` variable to the name of this storage disk in the `.env` file. Example for a local disk:
+    ```php
+    'laserpoints' => [
+        'driver' => 'local',
+        'root' => storage_path('framework/cache/laserpoints'),
+    ],
+    ```
 
 ## References
 
