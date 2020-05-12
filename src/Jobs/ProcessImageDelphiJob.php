@@ -42,7 +42,7 @@ class ProcessImageDelphiJob extends Job
 
         $points = $this->getLaserpointsForVolume($this->image->volume_id);
         $gatherFile = $this->gather($points);
-        ProcessDelphiChunkJob::dispatch([$this->image->id], $this->distance, $gatherFile)
+        ProcessDelphiJob::dispatch($this->image, $this->distance, $gatherFile)
             ->onQueue(config('laserpoints.process_delphi_queue'));
     }
 }

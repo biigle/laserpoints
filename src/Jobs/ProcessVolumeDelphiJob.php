@@ -4,24 +4,12 @@ namespace Biigle\Modules\Laserpoints\Jobs;
 
 use Cache;
 use Biigle\Volume;
+use Biigle\Modules\Laserpoints\Image;
+use Illuminate\Queue\SerializesModels;
 
 class ProcessVolumeDelphiJob extends Job
 {
-    /**
-     * Number of images to process in one chunk.
-     *
-     * @var int
-     */
-    const CHUNK_SIZE = 10;
-
-    /**
-     * Number of images to process in one chunk.
-     *
-     * Duplicated as member variable so it can be changed during testing.
-     *
-     * @var int
-     */
-    public $chunkSize;
+    use SerializesModels;
 
     /**
      * The volume to process the images of.
@@ -29,6 +17,13 @@ class ProcessVolumeDelphiJob extends Job
      * @var Volume
      */
     protected $volume;
+
+    /**
+     * Ignore this job if the image does not exist any more.
+     *
+     * @var bool
+     */
+    protected $deleteWhenMissingModels = true;
 
     /**
      * Create a new job instance.
@@ -43,7 +38,6 @@ class ProcessVolumeDelphiJob extends Job
     {
         parent::__construct($distance, $labelId);
         $this->volume = $volume;
-        $this->chunkSize = self::CHUNK_SIZE;
     }
 
     /**
@@ -53,34 +47,25 @@ class ProcessVolumeDelphiJob extends Job
      */
     public function handle()
     {
-        if (!$this->volume) {
-            // The volume was deleted in the meantime.
-            return;
-        }
-
         $points = $this->getLaserpointsForVolume($this->volume->id);
+        $images = Image::whereIn('id', $points->keys())->get();
 
-        // We chunk this job into multiple smaller jobs because volumes can become
-        // really large. Multiple smaller jobs can be better parallelized with multiple
-        // queue workers and each one does not run very long (in case there is a hard
-        // limit on the runtime of a job).
-        foreach ($points->chunk($this->chunkSize) as $chunk) {
-            ProcessManualChunkJob::dispatch($chunk, $this->distance)
+        foreach ($images as $image) {
+            ProcessManualJob::dispatch($image, $points->get($image->id), $this->distance)
                 ->onQueue(config('laserpoints.process_manual_queue'));
         }
 
         $gatherFile = $this->gather($points);
 
-        $imageChunksToProcess = $this->volume->images()
+        $imagesToProcess = $this->volume->images()
             ->whereNotIn('id', $points->keys())
-            ->pluck('id')
-            ->chunk($this->chunkSize);
+            ->get();
 
         $cacheKey = uniqid('delphi_job_count_');
-        Cache::forever($cacheKey, $imageChunksToProcess->count());
+        Cache::forever($cacheKey, $imagesToProcess->count());
 
-        foreach ($imageChunksToProcess as $chunk) {
-            ProcessDelphiChunkJob::dispatch($chunk, $this->distance, $gatherFile, $cacheKey)
+        foreach ($imagesToProcess as $image) {
+            ProcessDelphiJob::dispatch($image, $this->distance, $gatherFile, $cacheKey)
                 ->onQueue(config('laserpoints.process_delphi_queue'));
         }
     }

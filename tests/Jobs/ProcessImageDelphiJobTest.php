@@ -12,7 +12,7 @@ use Biigle\Tests\LabelTest;
 use Biigle\Tests\AnnotationTest;
 use Biigle\Tests\AnnotationLabelTest;
 use Biigle\Modules\Laserpoints\Support\DelphiGather;
-use Biigle\Modules\Laserpoints\Jobs\ProcessDelphiChunkJob;
+use Biigle\Modules\Laserpoints\Jobs\ProcessDelphiJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageDelphiJob;
 
 class ProcessImageDelphiJobTest extends TestCase
@@ -50,6 +50,6 @@ class ProcessImageDelphiJobTest extends TestCase
 
         Queue::fake();
         with(new ProcessImageDelphiJob($image2, 50, $label->id))->handle();
-        Queue::assertPushed(ProcessDelphiChunkJob::class);
+        Queue::assertPushed(ProcessDelphiJob::class);
     }
 }

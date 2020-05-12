@@ -5,15 +5,25 @@ namespace Biigle\Modules\Laserpoints\Jobs;
 use DB;
 use Biigle\Shape;
 use Biigle\Image;
+use Illuminate\Queue\SerializesModels;
 
 class ProcessImageManualJob extends Job
 {
+    use SerializesModels;
+
     /**
      * The image to compute the area for.
      *
      * @var Image
      */
     protected $image;
+
+    /**
+     * Ignore this job if the image does not exist any more.
+     *
+     * @var bool
+     */
+    protected $deleteWhenMissingModels = true;
 
     /**
      * Create a new job instance.
@@ -37,14 +47,8 @@ class ProcessImageManualJob extends Job
      */
     public function handle()
     {
-        // The image may be deleted in the meantime.
-        if (!$this->image) {
-            return;
-        }
-
         $points = $this->getLaserpointsForImage($this->image->id);
-        $points = collect([$this->image->id => $points]);
-        ProcessManualChunkJob::dispatch($points, $this->distance)
+        ProcessManualJob::dispatch($this->image, $points, $this->distance)
             ->onQueue(config('laserpoints.process_manual_queue'));
     }
 

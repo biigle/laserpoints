@@ -9,20 +9,21 @@ use Exception;
 use FileCache;
 use Biigle\Jobs\Job as BaseJob;
 use Biigle\Modules\Laserpoints\Image;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Biigle\Modules\Laserpoints\Support\DelphiApply;
 
-class ProcessDelphiChunkJob extends BaseJob implements ShouldQueue
+class ProcessDelphiJob extends BaseJob implements ShouldQueue
 {
-    use InteractsWithQueue;
+    use InteractsWithQueue, SerializesModels;
 
     /**
-     * IDs of the images to process.
+     * The image to process.
      *
-     * @var array
+     * @var Image
      */
-    protected $images;
+    protected $image;
 
     /**
      * Path to the output of the Delphi gather script.
@@ -47,19 +48,25 @@ class ProcessDelphiChunkJob extends BaseJob implements ShouldQueue
     protected $cacheKey;
 
     /**
+     * Ignore this job if the image does not exist any more.
+     *
+     * @var bool
+     */
+    protected $deleteWhenMissingModels = true;
+
+    /**
      * Create a new job instance.
      *
-     * @param string $volumeUrl
-     * @param array $images
+     * @param Image $image
      * @param float $distance
      * @param string $gatherFile
      * @param string $cacheKey
      *
      * @return void
      */
-    public function __construct($images, $distance, $gatherFile, $cacheKey = null)
+    public function __construct($image, $distance, $gatherFile, $cacheKey = null)
     {
-        $this->images = $images;
+        $this->image = $image;
         $this->gatherFile = $gatherFile;
         $this->distance = $distance;
         // If null, this job assumes it is the only one accessing the gatherFile.
@@ -73,30 +80,24 @@ class ProcessDelphiChunkJob extends BaseJob implements ShouldQueue
      */
     public function handle()
     {
-        $delphi = App::make(DelphiApply::class);
-        $images = Image::whereIn('id', $this->images)
-            ->with('volume')
-            ->get();
 
-        $callback = function ($image, $path) use ($delphi) {
-            return $delphi->execute($this->gatherFile, $path, $this->distance);
-        };
+        try {
+            $output = FileCache::getOnce($this->image, function ($image, $path){
+                $delphi = App::make(DelphiApply::class);
 
-        foreach ($images as $image) {
-            try {
-                $output = FileCache::getOnce($image, $callback);
-            } catch (Exception $e) {
-                $output = [
-                    'error' => true,
-                    'message' => $e->getMessage(),
-                ];
-            }
-
-            $output['distance'] = $this->distance;
-
-            $image->laserpoints = $output;
-            $image->save();
+                return $delphi->execute($this->gatherFile, $path, $this->distance);
+            });
+        } catch (Exception $e) {
+            $output = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
         }
+
+        $output['distance'] = $this->distance;
+
+        $this->image->laserpoints = $output;
+        $this->image->save();
 
         $this->maybeDeleteGatherFile();
     }

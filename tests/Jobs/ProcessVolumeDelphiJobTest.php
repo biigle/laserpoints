@@ -14,8 +14,8 @@ use Biigle\Tests\ImageTest;
 use Biigle\Tests\LabelTest;
 use Biigle\Tests\VolumeTest;
 use Biigle\Modules\Laserpoints\Support\DelphiGather;
-use Biigle\Modules\Laserpoints\Jobs\ProcessDelphiChunkJob;
-use Biigle\Modules\Laserpoints\Jobs\ProcessManualChunkJob;
+use Biigle\Modules\Laserpoints\Jobs\ProcessDelphiJob;
+use Biigle\Modules\Laserpoints\Jobs\ProcessManualJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeDelphiJob;
 use Biigle\Tests\Modules\Laserpoints\ImageTest as LpImageTest;
 
@@ -53,11 +53,11 @@ class ProcessVolumeDelphiJobTest extends TestCase
 
         Queue::fake();
         with(new ProcessVolumeDelphiJob($image->volume, 50, $label->id))->handle();
-        Queue::assertPushed(ProcessDelphiChunkJob::class, 1);
-        Queue::assertPushed(ProcessManualChunkJob::class);
+        Queue::assertPushed(ProcessDelphiJob::class, 1);
+        Queue::assertPushed(ProcessManualJob::class);
     }
 
-    public function testHandleChunking()
+    public function testCacheKey()
     {
         $label = LabelTest::create();
         config(['laserpoints.tmp_dir' => '/tmp']);
@@ -83,11 +83,10 @@ class ProcessVolumeDelphiJobTest extends TestCase
         Cache::shouldReceive('forever')->once()->with(Mockery::any(), 2);
 
         $job = new ProcessVolumeDelphiJob($volume, 50, $label->id);
-        $job->chunkSize = 1;
         Queue::fake();
         $job->handle();
-        Queue::assertPushed(ProcessDelphiChunkJob::class, 2);
-        Queue::assertPushed(ProcessManualChunkJob::class);
+        Queue::assertPushed(ProcessDelphiJob::class, 2);
+        Queue::assertPushed(ProcessManualJob::class);
     }
 
     protected function createAnnotatedImage($label, $volumeId = null)

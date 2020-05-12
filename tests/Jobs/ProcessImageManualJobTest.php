@@ -6,7 +6,7 @@ use Queue;
 use TestCase;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\LabelTest;
-use Biigle\Modules\Laserpoints\Jobs\ProcessManualChunkJob;
+use Biigle\Modules\Laserpoints\Jobs\ProcessManualJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageManualJob;
 
 class ProcessImageManualJobTest extends TestCase
@@ -17,6 +17,6 @@ class ProcessImageManualJobTest extends TestCase
         $label = LabelTest::create();
         Queue::fake();
         with(new ProcessImageManualJob($image, 50, $label->id))->handle();
-        Queue::assertPushed(ProcessManualChunkJob::class);
+        Queue::assertPushed(ProcessManualJob::class);
     }
 }

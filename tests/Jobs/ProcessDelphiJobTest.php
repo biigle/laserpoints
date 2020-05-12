@@ -12,19 +12,17 @@ use FileCache;
 use Biigle\Tests\ImageTest;
 use Biigle\Modules\Laserpoints\Image;
 use Biigle\Modules\Laserpoints\Support\DelphiApply;
-use Biigle\Modules\Laserpoints\Jobs\ProcessDelphiChunkJob;
+use Biigle\Modules\Laserpoints\Jobs\ProcessDelphiJob;
 
-class ProcessDelphiChunkJobTest extends TestCase
+class ProcessDelphiJobTest extends TestCase
 {
     protected $image;
-    protected $images;
     protected $gatherFile;
 
     public function setUp(): void
     {
         parent::setUp();
         $this->image = Image::convert(ImageTest::create(['attrs' => ['a' => 1]]));
-        $this->images = collect($this->image->id);
         $this->gatherFile = '/my/gather/file';
         FileCache::fake();
     }
@@ -48,7 +46,7 @@ class ProcessDelphiChunkJobTest extends TestCase
         });
 
         File::shouldReceive('delete')->once()->with($this->gatherFile);
-        with(new ProcessDelphiChunkJob($this->images, 30, $this->gatherFile))->handle();
+        with(new ProcessDelphiJob($this->image, 30, $this->gatherFile))->handle();
 
         $expect = [
             'area' => 100,
@@ -78,7 +76,7 @@ class ProcessDelphiChunkJobTest extends TestCase
         });
 
         File::shouldReceive('delete')->never();
-        with(new ProcessDelphiChunkJob($this->images, 30, $this->gatherFile, 'test_job_count'))->handle();
+        with(new ProcessDelphiJob($this->image, 30, $this->gatherFile, 'test_job_count'))->handle();
 
         $this->assertEquals(1, Cache::get('test_job_count'));
     }
@@ -97,7 +95,7 @@ class ProcessDelphiChunkJobTest extends TestCase
         });
 
         File::shouldReceive('delete')->once()->with($this->gatherFile);
-        with(new ProcessDelphiChunkJob($this->images, 30, $this->gatherFile, 'test_job_count'))->handle();
+        with(new ProcessDelphiJob($this->image, 30, $this->gatherFile, 'test_job_count'))->handle();
         $this->assertFalse(Cache::has('test_job_count'));
     }
 
@@ -116,7 +114,7 @@ class ProcessDelphiChunkJobTest extends TestCase
         });
 
         File::shouldReceive('delete')->once()->with($this->gatherFile);
-        with(new ProcessDelphiChunkJob($this->images, 30, $this->gatherFile))->handle();
+        with(new ProcessDelphiJob($this->image, 30, $this->gatherFile))->handle();
 
         $expect = [
             'error' => true,
@@ -150,7 +148,7 @@ class ProcessDelphiChunkJobTest extends TestCase
         });
 
         File::shouldReceive('delete')->once()->with($this->gatherFile);
-        with(new ProcessDelphiChunkJob($this->images, 30, $this->gatherFile))->handle();
+        with(new ProcessDelphiJob($this->image, 30, $this->gatherFile))->handle();
 
         $expect = [
             'error' => true,
@@ -164,6 +162,6 @@ class ProcessDelphiChunkJobTest extends TestCase
     public function testFailed()
     {
         File::shouldReceive('delete')->once()->with($this->gatherFile);
-        with(new ProcessDelphiChunkJob($this->images, 30, $this->gatherFile))->failed();
+        with(new ProcessDelphiJob($this->image, 30, $this->gatherFile))->failed();
     }
 }

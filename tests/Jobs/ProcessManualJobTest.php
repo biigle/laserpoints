@@ -9,9 +9,9 @@ use Exception;
 use Biigle\Tests\ImageTest;
 use Biigle\Modules\Laserpoints\Image;
 use Biigle\Modules\Laserpoints\Support\Detect;
-use Biigle\Modules\Laserpoints\Jobs\ProcessManualChunkJob;
+use Biigle\Modules\Laserpoints\Jobs\ProcessManualJob;
 
-class ProcessManualChunkJobTest extends TestCase
+class ProcessManualJobTest extends TestCase
 {
     protected $image;
     protected $points;
@@ -20,9 +20,7 @@ class ProcessManualChunkJobTest extends TestCase
     {
         parent::setUp();
         $this->image = Image::convert(ImageTest::create(['attrs' => ['a' => 1]]));
-        $this->points = collect([
-            $this->image->id => '[[100,100],[200,200],[300,300]]',
-        ]);
+        $this->points = '[[100,100],[200,200],[300,300]]';
     }
 
     public function testHandle()
@@ -43,7 +41,7 @@ class ProcessManualChunkJobTest extends TestCase
             return $mock;
         });
 
-        with(new ProcessManualChunkJob($this->points, 30))->handle();
+        with(new ProcessManualJob($this->image, $this->points, 30))->handle();
 
         $expect = [
             'area' => 100,
@@ -73,7 +71,7 @@ class ProcessManualChunkJobTest extends TestCase
             return $mock;
         });
 
-        with(new ProcessManualChunkJob($this->points, 30))->handle();
+        with(new ProcessManualJob($this->image, $this->points, 30))->handle();
 
         $expect = [
             'error' => true,
@@ -106,7 +104,7 @@ class ProcessManualChunkJobTest extends TestCase
             return $mock;
         });
 
-        with(new ProcessManualChunkJob($this->points, 30))->handle();
+        with(new ProcessManualJob($this->image, $this->points, 30))->handle();
 
         $expect = [
             'error' => true,
