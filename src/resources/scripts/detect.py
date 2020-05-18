@@ -1,6 +1,6 @@
 import sys
 import numpy as np
-from scipy.misc import imread
+from PIL import Image
 import scipy.spatial.distance
 import ast
 import json
@@ -8,7 +8,7 @@ import json
 imgfile = sys.argv[1]
 laserdistparam = sys.argv[2]
 
-img = imread(imgfile)
+img = np.array(Image.open(imgfile))
 if len(img.shape) == 0:
     print(json.dumps({
         "error": True,

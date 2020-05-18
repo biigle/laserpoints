@@ -1,7 +1,7 @@
 import sys
 import json
 import numpy as np
-from scipy.misc import imread
+from PIL import Image
 import scipy.ndimage.morphology
 import scipy.ndimage.measurements
 import scipy.spatial.distance
@@ -19,7 +19,7 @@ all_laserpoints = data['all_laserpoints']
 numLaserpoints = all_laserpoints.shape[1]
 
 try:
-    img = imread(imgfile)
+    img = np.array(Image.open(imgfile))
 except IOError:
     # It may be another error than "cannot identify image file" but we don't print the
     # error message to not expose any internal file paths.
