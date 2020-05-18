@@ -2,7 +2,7 @@ import sys
 import os
 import json
 import numpy as np
-from scipy.misc import imread
+from PIL import Image
 
 '''
 Expected input arguments:
@@ -11,14 +11,15 @@ delphi_gather.py <image_path> <laserpoints> <output_path>
 laserpoints are JSON formatted like: [[10,10],[20,20]].
 '''
 
-delta = 25
+delta = 24
+half_delta = 12
 min_dist = 49
 
 image_path = sys.argv[1]
 laserpoints = json.loads(sys.argv[2])
 output_path = sys.argv[3]
 
-image = imread(image_path)
+image = np.array(Image.open(image_path))
 # If the shape is empty the image wasn't read correctly. We just skip this file.
 # See: https://github.com/biigle/laserpoints/issues/24
 if len(image.shape) == 0:
@@ -40,6 +41,8 @@ else:
 all_laserpoints.append(laserpoints)
 
 for i, point in enumerate(laserpoints):
+    point = np.array(point, dtype=int)
+
     mask_image[
         max(0, point[1] - delta):min(point[1] + delta, height),
         max(0, point[0] - delta):min(point[0] + delta, width)
@@ -48,22 +51,22 @@ for i, point in enumerate(laserpoints):
     lp_prototypes.append(image[point[1], point[0]])
 
     try:
-        lp_neg_prototypes.append(image[point[1] - delta / 2, point[0] - delta / 2])
+        lp_neg_prototypes.append(image[point[1] - half_delta, point[0] - half_delta])
     except IndexError:
         pass
 
     try:
-        lp_neg_prototypes.append(image[point[1] - delta / 2, point[0] + delta / 2])
+        lp_neg_prototypes.append(image[point[1] - half_delta, point[0] + half_delta])
     except IndexError:
         pass
 
     try:
-        lp_neg_prototypes.append(image[point[1] + delta / 2, point[0] - delta / 2])
+        lp_neg_prototypes.append(image[point[1] + half_delta, point[0] - half_delta])
     except IndexError:
         pass
 
     try:
-        lp_neg_prototypes.append(image[point[1] + delta / 2, point[0] + delta / 2])
+        lp_neg_prototypes.append(image[point[1] + half_delta, point[0] + half_delta])
     except IndexError:
         pass
 
