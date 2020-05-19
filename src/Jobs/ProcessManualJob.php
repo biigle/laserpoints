@@ -47,6 +47,7 @@ class ProcessManualJob extends BaseJob implements ShouldQueue
     /**
      * Create a new job instance.
      *
+     * @param Image $image
      * @param string $points
      * @param float $distance
      *

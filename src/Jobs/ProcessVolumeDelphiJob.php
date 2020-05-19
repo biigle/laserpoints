@@ -30,7 +30,7 @@ class ProcessVolumeDelphiJob extends Job
      *
      * @param Volume $volume
      * @param float $distance
-     * @param int $labelid
+     * @param int $labelId
      *
      * @return void
      */

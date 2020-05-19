@@ -10,7 +10,6 @@ trait FiltersInvalidLaserPoints
      * Removes items from the annotations array if the laser point annotations are invalid.
      *
      * @param Collection $annotations Annotations grouped by image
-     * @param Label $label Laser point label
      *
      * @return Filtered points array
      */

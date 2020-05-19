@@ -31,7 +31,7 @@ class LaserpointsController extends Controller
      * @apiParam (Required arguments) {Number} distance The distance between two laser points in cm.
      *
      * @param ComputeImage $request
-     * @param int $id image id
+     *
      * @return \Illuminate\Http\Response
      */
     public function computeImage(ComputeImage $request)
