@@ -73,7 +73,7 @@
                     <div class="alert alert-success" v-cloak v-if="processing">
                         The laser point detection was submitted and will be available soon.
                     </div>
-                    <div class="alert alert-danger" v-cloak v-else v-if="error" v-text="error"></div>
+                    <div class="alert alert-danger" v-cloak v-else-if="error" v-text="error"></div>
                     <form class="" v-if="!processing" v-on:submit.prevent="submit">
                         <div class="form-group">
                             <typeahead id="label" title="Label that was used to annotate laser points" placeholder="Laser point label" class="typeahead--block" :items="labels" v-on:select="handleSelectLabel" v-on:focus="loadLabels">
