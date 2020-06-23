@@ -1,73 +1,79 @@
+import LaserpointsApi from './api/laserpoints';
+import {handleErrorResponse} from './import';
+import {LabelTypeahead} from './import';
+import {LoaderMixin} from './import';
+import {VolumesApi} from './import';
+
 /**
  * The panel requesting a laser point detection on an individual image
  */
-biigle.$viewModel('laserpoints-panel', function (element) {
-    var IMAGE = biigle.$require('laserpoints.image');
-    var DISTANCE = biigle.$require('laserpoints.distance');
-
-    new Vue({
-        el: element,
-        mixins: [biigle.$require('core.mixins.loader')],
-        components: {
-            typeahead: biigle.$require('labelTrees.components.labelTypeahead'),
+export default {
+    mixins: [LoaderMixin],
+    components: {
+        typeahead: LabelTypeahead,
+    },
+    data: {
+        image: null,
+        distance: null,
+        distance: null,
+        processing: false,
+        error: false,
+        labels: [],
+        label: null,
+    },
+    computed: {
+        submitDisabled() {
+            return this.loading || this.processing || !this.distance || !this.label;
         },
-        data: {
-            volumeId: IMAGE.volume_id,
-            distance: DISTANCE,
-            processing: false,
-            error: false,
-            labels: [],
-            label: null,
+        volumeId() {
+            return this.image.volume_id;
         },
-        computed: {
-            submitDisabled: function () {
-                return this.loading || this.processing || !this.distance || !this.label;
-            },
+    },
+    methods: {
+        handleError(response) {
+            if (response.status === 422 && response.body.errors && response.body.errors.id) {
+                this.error = response.body.errors.id.join("\n");
+                this.processing = false;
+            } else {
+                handleErrorResponse(response);
+            }
         },
-        methods: {
-            handleError: function (response) {
-                if (response.status === 422 && response.body.errors && response.body.errors.id) {
-                    this.error = response.body.errors.id.join("\n");
-                    this.processing = false;
-                } else {
-                    biigle.$require('messages.store').handleErrorResponse(response);
-                }
-            },
-            setProcessing: function () {
-                this.processing = true;
-                this.error = false;
-            },
-            setLabels: function (response) {
-                this.labels = response.body;
-            },
-            handleSelectLabel: function (label) {
-                this.label = label;
-            },
-            loadLabels: function () {
-                if (!this.loading && this.labels.length === 0) {
-                    this.startLoading();
-                    biigle.$require('annotations.api.volumes')
-                        .queryAnnotationLabels({id: this.volumeId})
-                        .then(this.setLabels)
-                        // Do not finish loading on error. If the labels can't be loaded,
-                        // the form can't be submitted, too.
-                        .then(this.finishLoading)
-                        .catch(biigle.$require('messages.store').handleErrorResponse);
-                }
-            },
-            submit: function () {
-                if (this.loading) return;
-
+        setProcessing() {
+            this.processing = true;
+            this.error = false;
+        },
+        setLabels(response) {
+            this.labels = response.body;
+        },
+        handleSelectLabel(label) {
+            this.label = label;
+        },
+        loadLabels() {
+            if (!this.loading && this.labels.length === 0) {
                 this.startLoading();
-                biigle.$require('api.laserpoints')
-                    .processImage({image_id: IMAGE.id}, {
-                        distance: this.distance,
-                        label_id: this.label.id,
-                    })
-                    .then(this.setProcessing)
-                    .catch(this.handleError)
-                    .finally(this.finishLoading);
-            },
+                VolumesApi.queryAnnotationLabels({id: this.volumeId})
+                    .then(this.setLabels)
+                    // Do not finish loading on error. If the labels can't be loaded,
+                    // the form can't be submitted, too.
+                    .then(this.finishLoading)
+                    .catch(handleErrorResponse);
+            }
         },
-    });
-});
+        submit() {
+            if (this.loading) return;
+
+            this.startLoading();
+            LaserpointsApi.processImage({image_id: this.image.id}, {
+                    distance: this.distance,
+                    label_id: this.label.id,
+                })
+                .then(this.setProcessing)
+                .catch(this.handleError)
+                .finally(this.finishLoading);
+        },
+    },
+    created() {
+        this.image = biigle.$require('laserpoints.image');
+        this.distance = biigle.$require('laserpoints.distance');
+    },
+};
