@@ -1,3 +1,4 @@
+<script>
 import LaserpointsApi from './api/laserpoints';
 import {handleErrorResponse} from './import';
 import {LabelTypeahead} from './import';
@@ -12,13 +13,15 @@ export default {
     components: {
         typeahead: LabelTypeahead,
     },
-    data: {
-        image: null,
-        distance: null,
-        processing: false,
-        error: false,
-        labels: [],
-        label: null,
+    data() {
+        return {
+            image: null,
+            distance: null,
+            processing: false,
+            error: false,
+            labels: [],
+            label: null,
+        };
     },
     computed: {
         submitDisabled() {
@@ -76,3 +79,4 @@ export default {
         this.distance = biigle.$require('laserpoints.distance');
     },
 };
+</script>
