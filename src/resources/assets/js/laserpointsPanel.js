@@ -15,7 +15,6 @@ export default {
     data: {
         image: null,
         distance: null,
-        distance: null,
         processing: false,
         error: false,
         labels: [],
