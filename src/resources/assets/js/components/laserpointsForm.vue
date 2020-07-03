@@ -1,12 +1,12 @@
 <script>
-import LaserpointsApi from './api/laserpoints';
-import {handleErrorResponse} from './import';
-import {LabelTypeahead} from './import';
-import {LoaderMixin} from './import';
-import {VolumesApi} from './import';
+import LaserpointsApi from '../api/laserpoints';
+import {handleErrorResponse} from '../import';
+import {LabelTypeahead} from '../import';
+import {LoaderMixin} from '../import';
+import {VolumesApi} from '../import';
 
 /**
- * The panel requesting a laser point detection on an individual image
+ * Content of the laser points tab in the volume overview sidebar
  */
 export default {
     mixins: [LoaderMixin],
@@ -15,8 +15,8 @@ export default {
     },
     data() {
         return {
-            image: null,
-            distance: null,
+            volumeId: null,
+            distance: 1,
             processing: false,
             error: false,
             labels: [],
@@ -26,9 +26,6 @@ export default {
     computed: {
         submitDisabled() {
             return this.loading || this.processing || !this.distance || !this.label;
-        },
-        volumeId() {
-            return this.image.volume_id;
         },
     },
     methods: {
@@ -62,10 +59,8 @@ export default {
             }
         },
         submit() {
-            if (this.loading) return;
-
             this.startLoading();
-            LaserpointsApi.processImage({image_id: this.image.id}, {
+            LaserpointsApi.processVolume({volume_id: this.volumeId}, {
                     distance: this.distance,
                     label_id: this.label.id,
                 })
@@ -75,8 +70,7 @@ export default {
         },
     },
     created() {
-        this.image = biigle.$require('laserpoints.image');
-        this.distance = biigle.$require('laserpoints.distance');
+        this.volumeId = biigle.$require('volumes.volumeId');
     },
 };
 </script>

@@ -1,6 +1,7 @@
+import './annotationsSettingsTabPlugins';
 import './laserpointsFilter';
-import './laserpointsTab';
-import './annotationsSettingsTabPlugin';
-import LaserpointsPanel from './laserpointsPanel';
+import LaserpointsForm from './components/laserpointsForm';
+import LaserpointsPanel from './components/laserpointsPanel';
 
 biigle.$mount('laserpoints-panel', LaserpointsPanel);
+Vue.component('laserpoints-form', LaserpointsForm);

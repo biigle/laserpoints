@@ -1,21 +1,22 @@
-import LaserpointsApi from './api/laserpoints';
-import {handleErrorResponse} from './import';
-import {LabelTypeahead} from './import';
-import {LoaderMixin} from './import';
-import {VolumesApi} from './import';
+<script>
+import LaserpointsApi from '../api/laserpoints';
+import {handleErrorResponse} from '../import';
+import {LabelTypeahead} from '../import';
+import {LoaderMixin} from '../import';
+import {VolumesApi} from '../import';
 
 /**
- * Content of the laser points tab in the volume overview sidebar
+ * The panel requesting a laser point detection on an individual image
  */
-Vue.component('laserpoints-form', {
+export default {
     mixins: [LoaderMixin],
     components: {
         typeahead: LabelTypeahead,
     },
     data() {
         return {
-            volumeId: null,
-            distance: 1,
+            image: null,
+            distance: null,
             processing: false,
             error: false,
             labels: [],
@@ -25,6 +26,9 @@ Vue.component('laserpoints-form', {
     computed: {
         submitDisabled() {
             return this.loading || this.processing || !this.distance || !this.label;
+        },
+        volumeId() {
+            return this.image.volume_id;
         },
     },
     methods: {
@@ -58,8 +62,10 @@ Vue.component('laserpoints-form', {
             }
         },
         submit() {
+            if (this.loading) return;
+
             this.startLoading();
-            LaserpointsApi.processVolume({volume_id: this.volumeId}, {
+            LaserpointsApi.processImage({image_id: this.image.id}, {
                     distance: this.distance,
                     label_id: this.label.id,
                 })
@@ -69,6 +75,8 @@ Vue.component('laserpoints-form', {
         },
     },
     created() {
-        this.volumeId = biigle.$require('volumes.volumeId');
+        this.image = biigle.$require('laserpoints.image');
+        this.distance = biigle.$require('laserpoints.distance');
     },
-});
+};
+</script>
