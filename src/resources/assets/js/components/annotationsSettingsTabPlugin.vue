@@ -1,17 +1,28 @@
+<script>
+import Circle from 'ol/style/Circle';
+import Feature from 'ol/Feature';
+import LaserpointsApi from '../api/laserpoints';
+import Point from 'ol/geom/Point';
+import Stroke from 'ol/style/Stroke';
+import Style from 'ol/style/Style';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
+import {Events} from '../import';
+
 /**
  * The plugin component to change the settings for the laser points in the annotation
  * tool.
  *
  * @type {Object}
  */
-biigle.$require('annotations.components.settingsTabPlugins').laserPoints = {
+export default {
     props: {
         settings: {
             type: Object,
             required: true,
         },
     },
-    data: function () {
+    data() {
         return {
             opacityValue: '1',
             currentImageId: null,
@@ -20,32 +31,29 @@ biigle.$require('annotations.components.settingsTabPlugins').laserPoints = {
         };
     },
     computed: {
-        opacity: function () {
+        opacity() {
             return parseFloat(this.opacityValue);
         },
-        shown: function () {
+        shown() {
             return this.opacity > 0;
         },
-        laserpointsApi: function () {
-            return biigle.$require('api.laserpoints');
-        },
-        layer: function () {
-            return new ol.layer.Vector({
-                source: new ol.source.Vector(),
+        layer() {
+            return new VectorLayer({
+                source: new VectorSource(),
                 style: [
-                    new ol.style.Style({
-                        image: new ol.style.Circle({
+                    new Style({
+                        image: new Circle({
                             radius: 6,
-                            stroke: new ol.style.Stroke({
+                            stroke: new Stroke({
                                 color: 'white',
                                 width: 4
                             })
                         })
                     }),
-                    new ol.style.Style({
-                        image: new ol.style.Circle({
+                    new Style({
+                        image: new Circle({
                             radius: 6,
-                            stroke: new ol.style.Stroke({
+                            stroke: new Stroke({
                                 color: '#ff0000',
                                 width: 2,
                                 lineDash: [1]
@@ -60,38 +68,36 @@ biigle.$require('annotations.components.settingsTabPlugins').laserPoints = {
         },
     },
     methods: {
-        maybeFetchLaserpoints: function (id) {
+        maybeFetchLaserpoints(id) {
             if (this.shown && !this.cache.hasOwnProperty(id)) {
-                this.cache[id] = this.laserpointsApi.get({image_id: id})
-                    .then(function (response) {
-                        return response.data;
-                    });
+                this.cache[id] = LaserpointsApi.get({image_id: id})
+                    .then((response) => response.data);
             }
 
             return this.cache[id];
         },
-        updateCurrentImage: function (id, image) {
+        updateCurrentImage(id, image) {
             this.layer.getSource().clear();
             this.currentImageId = id;
             this.currentImage = image;
         },
-        maybeDrawLaserpoints: function (data) {
+        maybeDrawLaserpoints(data) {
             if (data && data.method !== 'manual' && data.points && data.points.length > 0) {
                 var height = this.currentImage.height;
                 this.layer.getSource().addFeatures(data.points.map(function (point) {
-                    return new ol.Feature({geometry: new ol.geom.Point([
+                    return new Feature({geometry: new Point([
                         // Swap y coordinates for OpenLayers.
                         point[0], height - point[1]
                     ])});
                 }));
             }
         },
-        extendMap: function (map) {
+        extendMap(map) {
             map.addLayer(this.layer);
         },
     },
     watch: {
-        opacity: function (opacity, oldOpacity) {
+        opacity(opacity, oldOpacity) {
             if (opacity < 1) {
                 this.settings.set('laserpointOpacity', opacity);
             } else {
@@ -109,20 +115,20 @@ biigle.$require('annotations.components.settingsTabPlugins').laserPoints = {
 
             this.layer.setOpacity(opacity);
         },
-        currentImageId: function (id) {
+        currentImageId(id) {
             if (this.shown) {
                 this.maybeFetchLaserpoints(id).then(this.maybeDrawLaserpoints);
             }
         },
     },
-    created: function () {
+    created() {
         if (this.settings.has('laserpointOpacity')) {
             this.opacityValue = this.settings.get('laserpointOpacity');
         }
 
-        var events = biigle.$require('events');
-        events.$on('images.fetching', this.maybeFetchLaserpoints);
-        events.$on('images.change', this.updateCurrentImage);
-        events.$on('annotations.map.init', this.extendMap);
+        Events.$on('images.fetching', this.maybeFetchLaserpoints);
+        Events.$on('images.change', this.updateCurrentImage);
+        Events.$on('annotations.map.init', this.extendMap);
     },
 };
+</script>

@@ -14,7 +14,7 @@
  *
  * @type {Vue.resource}
  */
-biigle.$declare('api.laserpoints', Vue.resource('api/v1/images{/image_id}/laserpoints', {}, {
+export default Vue.resource('api/v1/images{/image_id}/laserpoints', {}, {
     processVolume: {
         method: 'POST',
         url: 'api/v1/volumes{/volume_id}/laserpoints/area',
@@ -23,4 +23,4 @@ biigle.$declare('api.laserpoints', Vue.resource('api/v1/images{/image_id}/laserp
         method: 'POST',
         url: 'api/v1/images{/image_id}/laserpoints/area',
     },
-}));
+});

@@ -8,4 +8,4 @@
  *
  * @type {Vue.resource}
  */
-biigle.$declare('laserpoints.api.volumes', Vue.resource('api/v1/volumes{/id}/images/filter/laserpoints'));
+export default Vue.resource('api/v1/volumes{/id}/images/filter/laserpoints');

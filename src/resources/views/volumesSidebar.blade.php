@@ -20,7 +20,7 @@
                     <div class="alert alert-success" v-if="processing">
                         The laser point detection was submitted and will be available soon.
                     </div>
-                    <div class="alert alert-danger" v-else v-if="error" v-text="error"></div>
+                    <div class="alert alert-danger" v-else-if="error" v-text="error"></div>
                 </form>
             </laserpoints-form>
         </sidebar-tab>
