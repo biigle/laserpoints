@@ -2,8 +2,6 @@
 
 @unless ($volume->hasTiledImages())
     @push('scripts')
-        <script src="{{ cachebust_asset('vendor/label-trees/scripts/main.js') }}"></script>
-        <script src="{{ cachebust_asset('vendor/annotations/scripts/volumes.js') }}"></script>
         <script src="{{ cachebust_asset('vendor/laserpoints/scripts/main.js') }}"></script>
         <script type="text/javascript">
             biigle.$declare('laserpoints.image', {!! $image->toJson() !!});
