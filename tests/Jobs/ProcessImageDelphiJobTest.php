@@ -43,8 +43,12 @@ class ProcessImageDelphiJobTest extends TestCase
         $job = new ProcessImageDelphiJobStub($image2, 50, $label->id);
         $job->handle();
         Queue::assertPushed(ProcessDelphiJob::class);
-        $expect = [$image->id => '[[1,1],[2,2],[3,3]]'];
-        $this->assertEquals($expect, $job->points->toArray());
+        $points = $job->points->toArray();
+        $this->assertArrayHasKey($image->id, $points);
+        $points = $points[$image->id];
+        $this->assertStringContainsString('[1,1]', $points);
+        $this->assertStringContainsString('[2,2]', $points);
+        $this->assertStringContainsString('[3,3]', $points);
     }
 }
 
