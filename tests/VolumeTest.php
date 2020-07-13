@@ -2,13 +2,13 @@
 
 namespace Biigle\Tests\Modules\Laserpoints;
 
-use TestCase;
-use Exception;
-use Biigle\Image;
 use Biigle\Annotation;
-use Biigle\Tests\LabelTest;
+use Biigle\Image;
 use Biigle\Modules\Laserpoints\Volume;
+use Biigle\Tests\LabelTest;
 use Biigle\Tests\VolumeTest as BaseVolumeTest;
+use Exception;
+use TestCase;
 
 class VolumeTest extends TestCase
 {

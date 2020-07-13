@@ -2,8 +2,8 @@
 
 namespace Biigle\Modules\Laserpoints\Http\Controllers\Api;
 
-use Biigle\Volume;
 use Biigle\Http\Controllers\Api\Controller;
+use Biigle\Volume;
 
 class VolumeImageController extends Controller
 {

@@ -2,18 +2,18 @@
 
 namespace Biigle\Modules\Laserpoints\Http\Controllers\Api;
 
-use Exception;
-use Biigle\Label;
-use Biigle\Volume as BaseVolume;
-use Biigle\Modules\Laserpoints\Image;
-use Biigle\Modules\Laserpoints\Volume;
 use Biigle\Http\Controllers\Api\Controller;
-use Illuminate\Validation\ValidationException;
+use Biigle\Label;
 use Biigle\Modules\Laserpoints\Http\Requests\ComputeImage;
-use Biigle\Modules\Laserpoints\Jobs\ProcessImageManualJob;
-use Biigle\Modules\Laserpoints\Jobs\ProcessImageDelphiJob;
 use Biigle\Modules\Laserpoints\Http\Requests\ComputeVolume;
+use Biigle\Modules\Laserpoints\Image;
+use Biigle\Modules\Laserpoints\Jobs\ProcessImageDelphiJob;
+use Biigle\Modules\Laserpoints\Jobs\ProcessImageManualJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeDelphiJob;
+use Biigle\Modules\Laserpoints\Volume;
+use Biigle\Volume as BaseVolume;
+use Exception;
+use Illuminate\Validation\ValidationException;
 
 class LaserpointsController extends Controller
 {

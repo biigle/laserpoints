@@ -2,9 +2,9 @@
 
 namespace Biigle\Modules\Laserpoints\Http\Controllers\Api;
 
+use Biigle\Http\Controllers\Api\Controller;
 use Biigle\Image;
 use Biigle\Modules\Laserpoints\Image as LaserImage;
-use Biigle\Http\Controllers\Api\Controller;
 
 class ImagesController extends Controller
 {

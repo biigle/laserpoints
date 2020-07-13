@@ -2,8 +2,8 @@
 
 namespace Biigle\Modules\Laserpoints\Console\Commands;
 
-use Illuminate\Console\Command;
 use Biigle\Modules\Laserpoints\LaserpointsServiceProvider as ServiceProvider;
+use Illuminate\Console\Command;
 
 class Publish extends Command
 {

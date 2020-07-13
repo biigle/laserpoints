@@ -3,15 +3,15 @@
 namespace Biigle\Tests\Modules\Laserpoints\Http\Controllers\Api;
 
 use ApiTestCase;
-use Biigle\Shape;
 use Biigle\Image;
-use Biigle\Tests\LabelTest;
-use Biigle\Tests\ImageTest;
-use Biigle\Tests\AnnotationTest;
-use Biigle\Tests\AnnotationLabelTest;
-use Biigle\Modules\Laserpoints\Jobs\ProcessImageManualJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageDelphiJob;
+use Biigle\Modules\Laserpoints\Jobs\ProcessImageManualJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeDelphiJob;
+use Biigle\Shape;
+use Biigle\Tests\AnnotationLabelTest;
+use Biigle\Tests\AnnotationTest;
+use Biigle\Tests\ImageTest;
+use Biigle\Tests\LabelTest;
 
 class LaserpointsControllerTest extends ApiTestCase
 {

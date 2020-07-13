@@ -2,9 +2,9 @@
 
 namespace Biigle\Modules\Laserpoints;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Routing\Router;
 use Biigle\Services\Modules;
+use Illuminate\Routing\Router;
+use Illuminate\Support\ServiceProvider;
 
 class LaserpointsServiceProvider extends ServiceProvider
 {

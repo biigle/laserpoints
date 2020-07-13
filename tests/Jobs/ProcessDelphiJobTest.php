@@ -3,17 +3,17 @@
 namespace Biigle\Tests\Modules\Laserpoints\Jobs;
 
 use App;
-use File;
-use Cache;
-use Storage;
-use Mockery;
-use TestCase;
-use Exception;
-use FileCache;
-use Biigle\Tests\ImageTest;
 use Biigle\Modules\Laserpoints\Image;
-use Biigle\Modules\Laserpoints\Support\DelphiApply;
 use Biigle\Modules\Laserpoints\Jobs\ProcessDelphiJob;
+use Biigle\Modules\Laserpoints\Support\DelphiApply;
+use Biigle\Tests\ImageTest;
+use Cache;
+use Exception;
+use File;
+use FileCache;
+use Mockery;
+use Storage;
+use TestCase;
 
 class ProcessDelphiJobTest extends TestCase
 {

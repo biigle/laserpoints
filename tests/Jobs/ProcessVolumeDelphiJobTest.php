@@ -2,21 +2,21 @@
 
 namespace Biigle\Tests\Modules\Laserpoints\Jobs;
 
-use Queue;
-use Cache;
-use Mockery;
-use Storage;
-use TestCase;
-use FileCache;
-use Biigle\Shape;
-use Biigle\Tests\ImageTest;
-use Biigle\Tests\LabelTest;
-use Biigle\Tests\VolumeTest;
-use Biigle\Modules\Laserpoints\Support\DelphiGather;
 use Biigle\Modules\Laserpoints\Jobs\ProcessDelphiJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessManualJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeDelphiJob;
+use Biigle\Modules\Laserpoints\Support\DelphiGather;
+use Biigle\Shape;
+use Biigle\Tests\ImageTest;
+use Biigle\Tests\LabelTest;
 use Biigle\Tests\Modules\Laserpoints\ImageTest as LpImageTest;
+use Biigle\Tests\VolumeTest;
+use Cache;
+use FileCache;
+use Mockery;
+use Queue;
+use Storage;
+use TestCase;
 
 class ProcessVolumeDelphiJobTest extends TestCase
 {
@@ -90,8 +90,8 @@ class ProcessVolumeDelphiJobTest extends TestCase
 
 class ProcessVolumeDelphiJobStub extends ProcessVolumeDelphiJob
 {
-
-    protected function gather($points) {
+    protected function gather($points)
+    {
         $this->points = $points;
 
         return 'abc';

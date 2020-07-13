@@ -2,20 +2,20 @@
 
 namespace Biigle\Modules\Laserpoints\Jobs;
 
-use DB;
 use App;
-use File;
-use Storage;
-use FileCache;
-use SplFileInfo;
-use Biigle\Image;
-use Biigle\Shape;
 use Biigle\Annotation;
+use Biigle\Image;
 use Biigle\Jobs\Job as BaseJob;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Biigle\Modules\Laserpoints\Support\DelphiGather;
 use Biigle\Modules\Laserpoints\Traits\FiltersInvalidLaserPoints;
+use Biigle\Shape;
+use DB;
+use File;
+use FileCache;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
+use SplFileInfo;
+use Storage;
 
 abstract class Job extends BaseJob implements ShouldQueue
 {

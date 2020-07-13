@@ -3,8 +3,8 @@
 namespace Biigle\Tests\Modules\Laserpoints\Http\Controllers\Api;
 
 use ApiTestCase;
-use Biigle\Tests\ImageTest;
 use Biigle\Modules\Laserpoints\Image;
+use Biigle\Tests\ImageTest;
 
 class VolumeImageControllerTest extends ApiTestCase
 {

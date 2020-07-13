@@ -2,16 +2,16 @@
 
 namespace Biigle\Tests\Modules\Laserpoints;
 
-use TestCase;
-use Exception;
-use Biigle\Label;
-use Biigle\Shape;
-use Biigle\Tests\LabelTest;
 use Biigle\Image as BaseImage;
-use Biigle\Tests\AnnotationTest;
-use Biigle\Tests\AnnotationLabelTest;
+use Biigle\Label;
 use Biigle\Modules\Laserpoints\Image;
+use Biigle\Shape;
+use Biigle\Tests\AnnotationLabelTest;
+use Biigle\Tests\AnnotationTest;
 use Biigle\Tests\ImageTest as BaseImageTest;
+use Biigle\Tests\LabelTest;
+use Exception;
+use TestCase;
 
 class ImageTest extends TestCase
 {

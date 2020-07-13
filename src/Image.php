@@ -2,12 +2,12 @@
 
 namespace Biigle\Modules\Laserpoints;
 
-use DB;
 use Arr;
-use Exception;
-use Biigle\Shape;
-use Biigle\Label;
 use Biigle\Image as BaseImage;
+use Biigle\Label;
+use Biigle\Shape;
+use DB;
+use Exception;
 
 /**
  * Extends the base Biigle image.

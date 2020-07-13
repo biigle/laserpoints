@@ -2,9 +2,9 @@
 
 namespace Biigle\Modules\Laserpoints\Support;
 
-use Log;
-use File;
 use Exception;
+use File;
+use Log;
 
 /**
  * Wrapper for the Delphi gather script.

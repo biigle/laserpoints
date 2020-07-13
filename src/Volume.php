@@ -2,12 +2,12 @@
 
 namespace Biigle\Modules\Laserpoints;
 
-use Exception;
-use Biigle\Shape;
-use Biigle\Label;
 use Biigle\Annotation;
-use Biigle\Volume as BaseVolume;
+use Biigle\Label;
 use Biigle\Modules\Laserpoints\Traits\FiltersInvalidLaserPoints;
+use Biigle\Shape;
+use Biigle\Volume as BaseVolume;
+use Exception;
 
 /**
  * Extends the base Biigle volume.

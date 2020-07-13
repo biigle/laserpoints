@@ -2,12 +2,12 @@
 
 namespace Biigle\Tests\Modules\Laserpoints\Jobs;
 
-use Queue;
-use TestCase;
+use Biigle\Modules\Laserpoints\Jobs\ProcessImageManualJob;
+use Biigle\Modules\Laserpoints\Jobs\ProcessManualJob;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\LabelTest;
-use Biigle\Modules\Laserpoints\Jobs\ProcessManualJob;
-use Biigle\Modules\Laserpoints\Jobs\ProcessImageManualJob;
+use Queue;
+use TestCase;
 
 class ProcessImageManualJobTest extends TestCase
 {

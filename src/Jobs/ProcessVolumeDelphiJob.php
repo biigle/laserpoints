@@ -2,9 +2,9 @@
 
 namespace Biigle\Modules\Laserpoints\Jobs;
 
-use Cache;
-use Biigle\Volume;
 use Biigle\Modules\Laserpoints\Image;
+use Biigle\Volume;
+use Cache;
 use Illuminate\Queue\SerializesModels;
 
 class ProcessVolumeDelphiJob extends Job

@@ -2,9 +2,9 @@
 
 namespace Biigle\Modules\Laserpoints\Jobs;
 
-use DB;
-use Biigle\Shape;
 use Biigle\Image;
+use Biigle\Shape;
+use DB;
 use Illuminate\Queue\SerializesModels;
 
 class ProcessImageManualJob extends Job

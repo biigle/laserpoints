@@ -2,8 +2,8 @@
 
 namespace Biigle\Modules\Laserpoints\Support;
 
-use Log;
 use Exception;
+use Log;
 
 class LaserpointsScript
 {

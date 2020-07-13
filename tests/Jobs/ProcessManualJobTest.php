@@ -3,13 +3,13 @@
 namespace Biigle\Tests\Modules\Laserpoints\Jobs;
 
 use App;
+use Biigle\Modules\Laserpoints\Image;
+use Biigle\Modules\Laserpoints\Jobs\ProcessManualJob;
+use Biigle\Modules\Laserpoints\Support\Detect;
+use Biigle\Tests\ImageTest;
+use Exception;
 use Mockery;
 use TestCase;
-use Exception;
-use Biigle\Tests\ImageTest;
-use Biigle\Modules\Laserpoints\Image;
-use Biigle\Modules\Laserpoints\Support\Detect;
-use Biigle\Modules\Laserpoints\Jobs\ProcessManualJob;
 
 class ProcessManualJobTest extends TestCase
 {

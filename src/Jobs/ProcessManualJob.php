@@ -3,14 +3,14 @@
 namespace Biigle\Modules\Laserpoints\Jobs;
 
 use App;
-use Exception;
-use FileCache;
 use Biigle\Jobs\Job as BaseJob;
 use Biigle\Modules\Laserpoints\Image;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Biigle\Modules\Laserpoints\Support\Detect;
+use Exception;
+use FileCache;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 
 class ProcessManualJob extends BaseJob implements ShouldQueue
 {
