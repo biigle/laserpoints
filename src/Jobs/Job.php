@@ -3,8 +3,8 @@
 namespace Biigle\Modules\Laserpoints\Jobs;
 
 use App;
-use Biigle\Annotation;
 use Biigle\Image;
+use Biigle\ImageAnnotation;
 use Biigle\Jobs\Job as BaseJob;
 use Biigle\Modules\Laserpoints\Support\DelphiGather;
 use Biigle\Modules\Laserpoints\Traits\FiltersInvalidLaserPoints;
@@ -65,12 +65,12 @@ abstract class Job extends BaseJob implements ShouldQueue
      */
     protected function getLaserpointsForVolume($id)
     {
-        return Annotation::join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
-            ->join('images', 'annotations.image_id', '=', 'images.id')
+        return ImageAnnotation::join('image_annotation_labels', 'image_annotation_labels.annotation_id', '=', 'image_annotations.id')
+            ->join('images', 'image_annotations.image_id', '=', 'images.id')
             ->where('images.volume_id', $id)
-            ->where('annotation_labels.label_id', $this->labelId)
-            ->where('annotations.shape_id', Shape::pointId())
-            ->select('annotations.points', 'annotations.image_id')
+            ->where('image_annotation_labels.label_id', $this->labelId)
+            ->where('image_annotations.shape_id', Shape::pointId())
+            ->select('image_annotations.points', 'image_annotations.image_id')
             ->get()
             ->groupBy('image_id')
             ->pipe([$this, 'filterInvalidLaserPoints'])

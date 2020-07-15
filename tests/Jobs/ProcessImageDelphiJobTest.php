@@ -6,8 +6,8 @@ use Biigle\Modules\Laserpoints\Jobs\ProcessDelphiJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageDelphiJob;
 use Biigle\Modules\Laserpoints\Support\DelphiGather;
 use Biigle\Shape;
-use Biigle\Tests\AnnotationLabelTest;
-use Biigle\Tests\AnnotationTest;
+use Biigle\Tests\ImageAnnotationLabelTest;
+use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\LabelTest;
 use Mockery;
@@ -24,12 +24,12 @@ class ProcessImageDelphiJobTest extends TestCase
         $label = LabelTest::create();
         $image = ImageTest::create();
         for ($i = 1; $i <= 3; $i++) {
-            $id = AnnotationTest::create([
+            $id = ImageAnnotationTest::create([
                 'image_id' => $image->id,
                 'points' => [$i, $i],
                 'shape_id' => Shape::pointId(),
             ])->id;
-            AnnotationLabelTest::create([
+            ImageAnnotationLabelTest::create([
                 'annotation_id' => $id,
                 'label_id' => $label->id,
             ]);

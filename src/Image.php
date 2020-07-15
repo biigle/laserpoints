@@ -175,11 +175,11 @@ class Image extends BaseImage
      */
     public function readyForManualDetection(Label $label)
     {
-        $count = DB::table('annotations')
-            ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
-            ->where('annotations.image_id', $this->id)
-            ->where('annotation_labels.label_id', $label->id)
-            ->where('annotations.shape_id', Shape::pointId())
+        $count = DB::table('image_annotations')
+            ->join('image_annotation_labels', 'image_annotation_labels.annotation_id', '=', 'image_annotations.id')
+            ->where('image_annotations.image_id', $this->id)
+            ->where('image_annotation_labels.label_id', $label->id)
+            ->where('image_annotations.shape_id', Shape::pointId())
             ->count();
 
         if ($count > 0) {

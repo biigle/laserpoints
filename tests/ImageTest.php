@@ -6,8 +6,8 @@ use Biigle\Image as BaseImage;
 use Biigle\Label;
 use Biigle\Modules\Laserpoints\Image;
 use Biigle\Shape;
-use Biigle\Tests\AnnotationLabelTest;
-use Biigle\Tests\AnnotationTest;
+use Biigle\Tests\ImageAnnotationLabelTest;
+use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\ImageTest as BaseImageTest;
 use Biigle\Tests\LabelTest;
 use Exception;
@@ -18,11 +18,11 @@ class ImageTest extends TestCase
     public static function addLaserpoints($image, $label, $count = 1)
     {
         for ($i = 0; $i < $count; $i++) {
-            $id = AnnotationTest::create([
+            $id = ImageAnnotationTest::create([
                 'image_id' => $image->id,
                 'shape_id' => Shape::pointId(),
             ])->id;
-            AnnotationLabelTest::create([
+            ImageAnnotationLabelTest::create([
                 'annotation_id' => $id,
                 'label_id' => $label->id,
             ]);
