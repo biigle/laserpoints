@@ -55,18 +55,20 @@ class ProcessVolumeDelphiJob extends Job
                 ->onQueue(config('laserpoints.process_manual_queue'));
         }
 
-        $gatherFile = $this->gather($points);
 
-        $imagesToProcess = $this->volume->images()
-            ->whereNotIn('id', $points->keys())
-            ->get();
+        $query = $this->volume->images()->whereNotIn('id', $points->keys());
 
-        $cacheKey = uniqid('delphi_job_count_');
-        Cache::forever($cacheKey, $imagesToProcess->count());
+        if ($query->exists()) {
+            $imagesToProcess = $query->get();
+            $gatherFile = $this->gather($points);
 
-        foreach ($imagesToProcess as $image) {
-            ProcessDelphiJob::dispatch($image, $this->distance, $gatherFile, $cacheKey)
-                ->onQueue(config('laserpoints.process_delphi_queue'));
+            $cacheKey = uniqid('delphi_job_count_');
+            Cache::forever($cacheKey, $imagesToProcess->count());
+
+            foreach ($imagesToProcess as $image) {
+                ProcessDelphiJob::dispatch($image, $this->distance, $gatherFile, $cacheKey)
+                    ->onQueue(config('laserpoints.process_delphi_queue'));
+            }
         }
     }
 }
