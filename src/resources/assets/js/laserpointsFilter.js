@@ -8,6 +8,7 @@ import {VolumeFilters} from './import';
 if (Array.isArray(VolumeFilters)) {
     VolumeFilters.push({
         id: 'laserpoints',
+        types: ['image'],
         label: 'detected laser points',
         help: "All images that (don't) contain detected laser points.",
         listComponent: {
