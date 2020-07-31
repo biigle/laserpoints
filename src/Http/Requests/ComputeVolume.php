@@ -48,6 +48,10 @@ class ComputeVolume extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
+            if (!$this->volume->isImageVolume()) {
+                $validator->errors()->add('id', 'Laser point detection is only available for image volumes.');
+            }
+
             if ($this->volume->hasTiledImages()) {
                 $validator->errors()->add('id', 'Laser point detection is not available for volumes with very large images.');
             }

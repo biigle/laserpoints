@@ -71,7 +71,7 @@ class LaserpointsController extends Controller
      * @apiGroup Volumes
      * @apiName VolumesComputeImageArea
      * @apiPermission projectEditor
-     * @apiDescription This feature is not available for very large images.
+     * @apiDescription This feature is not available for video volumes and volumes with very large images.
      *
      * @apiParam {Number} id The volume ID.
      * @apiParam (Required arguments) {Number} label_id ID of the laser point label that was used.

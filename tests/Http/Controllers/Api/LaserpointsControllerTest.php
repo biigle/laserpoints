@@ -4,6 +4,7 @@ namespace Biigle\Tests\Modules\Laserpoints\Http\Controllers\Api;
 
 use ApiTestCase;
 use Biigle\Image;
+use Biigle\MediaType;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageDelphiJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageManualJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeDelphiJob;
@@ -219,6 +220,19 @@ class LaserpointsControllerTest extends ApiTestCase
 
         $this->beEditor();
         $this->doesntExpectJobs(ProcessVolumeDelphiJob::class);
+        $this->postJson("/api/v1/volumes/{$id}/laserpoints/area", [
+                'distance' => 50,
+                'label_id' => $label->id,
+            ])
+            ->assertStatus(422);
+    }
+
+    public function testComputeVideoVolume()
+    {
+        $label = LabelTest::create(['name' => 'Laser Point']);
+        $id = $this->volume(['media_type_id' => MediaType::videoId()])->id;
+        $this->beEditor();
+        $this->makeManualAnnotations($label, 3);
         $this->postJson("/api/v1/volumes/{$id}/laserpoints/area", [
                 'distance' => 50,
                 'label_id' => $label->id,
