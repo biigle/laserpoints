@@ -61,13 +61,13 @@ class ProcessImageManualJob extends Job
      */
     protected function getLaserpointsForImage($id)
     {
-        $points = DB::table('annotations')
-            ->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
-            ->where('annotations.image_id', $id)
-            ->where('annotation_labels.label_id', $this->labelId)
-            ->where('annotations.shape_id', Shape::pointId())
-            ->select('annotations.points', 'annotations.image_id')
-            ->pluck('annotations.points');
+        $points = DB::table('image_annotations')
+            ->join('image_annotation_labels', 'image_annotation_labels.annotation_id', '=', 'image_annotations.id')
+            ->where('image_annotations.image_id', $id)
+            ->where('image_annotation_labels.label_id', $this->labelId)
+            ->where('image_annotations.shape_id', Shape::pointId())
+            ->select('image_annotations.points', 'image_annotations.image_id')
+            ->pluck('image_annotations.points');
 
         return '['.$points->implode(',').']';
     }

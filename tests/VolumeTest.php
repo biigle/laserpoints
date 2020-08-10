@@ -2,8 +2,8 @@
 
 namespace Biigle\Tests\Modules\Laserpoints;
 
-use Biigle\Annotation;
 use Biigle\Image;
+use Biigle\ImageAnnotation;
 use Biigle\Modules\Laserpoints\Volume;
 use Biigle\Tests\LabelTest;
 use Biigle\Tests\VolumeTest as BaseVolumeTest;
@@ -65,7 +65,7 @@ class VolumeTest extends TestCase
             $this->assertStringContainsString('can\'t be more than 4 manually annotated laser points per image', $e->getMessage());
         }
 
-        Annotation::getQuery()->delete();
+        ImageAnnotation::getQuery()->delete();
         $images->each(function ($i) use ($label) {
             ImageTest::addLaserpoints($i, $label, 3);
         });

@@ -2,7 +2,7 @@
 
 namespace Biigle\Modules\Laserpoints;
 
-use Biigle\Annotation;
+use Biigle\ImageAnnotation;
 use Biigle\Label;
 use Biigle\Modules\Laserpoints\Traits\FiltersInvalidLaserPoints;
 use Biigle\Shape;
@@ -49,12 +49,12 @@ class Volume extends BaseVolume
      */
     public function readyForDelphiDetection(Label $label)
     {
-        $points = Annotation::join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
-            ->join('images', 'annotations.image_id', '=', 'images.id')
+        $points = ImageAnnotation::join('image_annotation_labels', 'image_annotation_labels.annotation_id', '=', 'image_annotations.id')
+            ->join('images', 'image_annotations.image_id', '=', 'images.id')
             ->where('images.volume_id', $this->id)
-            ->where('annotation_labels.label_id', $label->id)
-            ->where('annotations.shape_id', Shape::pointId())
-            ->select('annotations.points', 'annotations.image_id')
+            ->where('image_annotation_labels.label_id', $label->id)
+            ->where('image_annotations.shape_id', Shape::pointId())
+            ->select('image_annotations.points', 'image_annotations.image_id')
             ->get()
             ->groupBy('image_id')
             ->pipe([$this, 'filterInvalidLaserPoints'])

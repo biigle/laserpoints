@@ -4,12 +4,13 @@ namespace Biigle\Tests\Modules\Laserpoints\Http\Controllers\Api;
 
 use ApiTestCase;
 use Biigle\Image;
+use Biigle\MediaType;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageDelphiJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageManualJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeDelphiJob;
 use Biigle\Shape;
-use Biigle\Tests\AnnotationLabelTest;
-use Biigle\Tests\AnnotationTest;
+use Biigle\Tests\ImageAnnotationLabelTest;
+use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\LabelTest;
 
@@ -226,6 +227,19 @@ class LaserpointsControllerTest extends ApiTestCase
             ->assertStatus(422);
     }
 
+    public function testComputeVideoVolume()
+    {
+        $label = LabelTest::create(['name' => 'Laser Point']);
+        $id = $this->volume(['media_type_id' => MediaType::videoId()])->id;
+        $this->beEditor();
+        $this->makeManualAnnotations($label, 3);
+        $this->postJson("/api/v1/volumes/{$id}/laserpoints/area", [
+                'distance' => 50,
+                'label_id' => $label->id,
+            ])
+            ->assertStatus(422);
+    }
+
     protected function makeManualAnnotations($label, $annotations, $images = 4)
     {
         $annotations = $annotations ?: rand(1, 10);
@@ -236,11 +250,11 @@ class LaserpointsControllerTest extends ApiTestCase
             ]);
 
             for ($j = 0; $j < $annotations; $j++) {
-                $annotation = AnnotationTest::create([
+                $annotation = ImageAnnotationTest::create([
                     'image_id' => $image->id,
                     'shape_id' => Shape::pointId(),
                 ]);
-                AnnotationLabelTest::create([
+                ImageAnnotationLabelTest::create([
                     'annotation_id' => $annotation->id,
                     'label_id' => $label->id,
                 ]);
