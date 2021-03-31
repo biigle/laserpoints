@@ -17,7 +17,7 @@ mix.options({processCssUrls: false});
 
 mix.setPublicPath('src/public');
 
-mix.js('src/resources/assets/js/main.js', 'assets/scripts')
+mix.js('src/resources/assets/js/main.js', 'assets/scripts').vue()
     .publish({
         provider: 'Biigle\\Modules\\Laserpoints\\LaserpointsServiceProvider',
         tag: 'public',
