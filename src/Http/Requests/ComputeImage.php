@@ -35,7 +35,7 @@ class ComputeImage extends FormRequest
     {
         return [
             'distance' => 'required|numeric|min:1',
-            'label_id' => 'required|id|exists:labels,id',
+            'label_id' => 'required|integer|exists:labels,id',
         ];
     }
 
