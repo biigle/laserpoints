@@ -64,54 +64,10 @@ class ProcessDelphiJobTest extends TestCase
         $this->assertEquals($expect, $this->image->fresh()->laserpoints);
         // Previously set attrs should not be lost.
         $this->assertEquals(1, $this->image->fresh()->attrs['a']);
-        $this->assertFalse($disk->exists($this->gatherFile));
-    }
-
-    public function testHandleCountDecrease()
-    {
-        $disk = Storage::disk('laserpoints');
-        $disk->put($this->gatherFile, 'test');
-        Cache::forever('test_job_count', 2);
-
-        $mock = Mockery::mock(DelphiApply::class);
-        $mock->shouldReceive('execute')
-            ->once()
-            ->andReturn([]);
-
-        App::singleton(DelphiApply::class, function () use ($mock) {
-            return $mock;
-        });
-
-        with(new ProcessDelphiJob($this->image, 30, $this->gatherFile, 'test_job_count'))->handle();
-
-        $this->assertEquals(1, Cache::get('test_job_count'));
-        $this->assertTrue($disk->exists($this->gatherFile));
-    }
-
-    public function testHandleCountZero()
-    {
-        $disk = Storage::disk('laserpoints');
-        $disk->put($this->gatherFile, 'test');
-        Cache::forever('test_job_count', 1);
-
-        $mock = Mockery::mock(DelphiApply::class);
-        $mock->shouldReceive('execute')
-            ->once()
-            ->andReturn([]);
-
-        App::singleton(DelphiApply::class, function () use ($mock) {
-            return $mock;
-        });
-
-        with(new ProcessDelphiJob($this->image, 30, $this->gatherFile, 'test_job_count'))->handle();
-        $this->assertFalse(Cache::has('test_job_count'));
-        $this->assertFalse($disk->exists($this->gatherFile));
     }
 
     public function testHandleGracefulError()
     {
-        $disk = Storage::disk('laserpoints');
-        $disk->put($this->gatherFile, 'test');
         $mock = Mockery::mock(DelphiApply::class);
         $mock->shouldReceive('execute')
             ->once()
@@ -133,13 +89,10 @@ class ProcessDelphiJobTest extends TestCase
         ];
 
         $this->assertEquals($expect, $this->image->fresh()->laserpoints);
-        $this->assertFalse($disk->exists($this->gatherFile));
     }
 
     public function testHandleFatalError()
     {
-        $disk = Storage::disk('laserpoints');
-        $disk->put($this->gatherFile, 'test');
         // previous laserpoint detection results should be removed
         $this->image->laserpoints = [
             'area' => 100,
@@ -169,14 +122,5 @@ class ProcessDelphiJobTest extends TestCase
         ];
 
         $this->assertEquals($expect, $this->image->fresh()->laserpoints);
-        $this->assertFalse($disk->exists($this->gatherFile));
-    }
-
-    public function testFailed()
-    {
-        $disk = Storage::disk('laserpoints');
-        $disk->put($this->gatherFile, 'test');
-        with(new ProcessDelphiJob($this->image, 30, $this->gatherFile))->failed();
-        $this->assertFalse($disk->exists($this->gatherFile));
     }
 }

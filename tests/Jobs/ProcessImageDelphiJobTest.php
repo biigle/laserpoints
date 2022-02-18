@@ -4,16 +4,15 @@ namespace Biigle\Tests\Modules\Laserpoints\Jobs;
 
 use Biigle\Modules\Laserpoints\Jobs\ProcessDelphiJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageDelphiJob;
-use Biigle\Modules\Laserpoints\Support\DelphiGather;
 use Biigle\Shape;
 use Biigle\Tests\ImageAnnotationLabelTest;
 use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\LabelTest;
-use Mockery;
-use Queue;
 use Storage;
 use TestCase;
+use Illuminate\Bus\PendingBatch;
+use Illuminate\Support\Facades\Bus;
 
 class ProcessImageDelphiJobTest extends TestCase
 {
@@ -39,10 +38,14 @@ class ProcessImageDelphiJobTest extends TestCase
             'volume_id' => $image->volume_id,
         ]);
 
-        Queue::fake();
+        Bus::fake();
         $job = new ProcessImageDelphiJobStub($image2, 50, $label->id);
         $job->handle();
-        Queue::assertPushed(ProcessDelphiJob::class);
+
+        Bus::assertBatched(function (PendingBatch $batch) {
+            return $batch->jobs->count() === 1 && $batch->jobs[0] instanceof ProcessDelphiJob;
+        });
+
         $points = $job->points->toArray();
         $this->assertArrayHasKey($image->id, $points);
         $points = $points[$image->id];
