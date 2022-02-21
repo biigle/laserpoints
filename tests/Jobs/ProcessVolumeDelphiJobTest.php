@@ -11,12 +11,11 @@ use Biigle\Tests\ImageTest;
 use Biigle\Tests\LabelTest;
 use Biigle\Tests\Modules\Laserpoints\ImageTest as LpImageTest;
 use Biigle\Tests\VolumeTest;
-use Cache;
 use FileCache;
-use Mockery;
-use Queue;
 use Storage;
 use TestCase;
+use Illuminate\Bus\PendingBatch;
+use Illuminate\Support\Facades\Bus;
 
 class ProcessVolumeDelphiJobTest extends TestCase
 {
@@ -37,38 +36,22 @@ class ProcessVolumeDelphiJobTest extends TestCase
             'volume_id' => $image->volume_id,
         ]);
 
-        Cache::shouldReceive('rememberForever')->andReturn(Shape::whereName('Point')->first());
-        Cache::shouldReceive('forever')->once()->with(Mockery::any(), 1);
+        Bus::fake();
 
-        Queue::fake();
         $job = new ProcessVolumeDelphiJobStub($image->volume, 50, $label->id);
         $job->handle();
-        Queue::assertPushed(ProcessDelphiJob::class, 1);
-        Queue::assertPushed(ProcessManualJob::class);
+
+
         $expect = [$image->id => '[[0,0],[0,0],[0,0]]'];
         $this->assertEquals($expect, $job->points->toArray());
-    }
 
-    public function testCacheKey()
-    {
-        $label = LabelTest::create();
-        $volume = VolumeTest::create();
-        for ($i = 0; $i < 2; $i++) {
-            $this->createAnnotatedImage($label, $volume->id);
-            ImageTest::create([
-                'volume_id' => $volume->id,
-                'filename' => uniqid(),
-            ]);
-        }
+        Bus::assertBatched(function (PendingBatch $batch) {
+            return $batch->jobs->count() === 1 && $batch->jobs[0] instanceof ProcessDelphiJob;
+        });
 
-        Cache::shouldReceive('rememberForever')->andReturn(Shape::whereName('Point')->first());
-        Cache::shouldReceive('forever')->once()->with(Mockery::any(), 2);
-
-        Queue::fake();
-        $job = new ProcessVolumeDelphiJobStub($volume, 50, $label->id);
-        $job->handle();
-        Queue::assertPushed(ProcessDelphiJob::class, 2);
-        Queue::assertPushed(ProcessManualJob::class);
+        Bus::assertBatched(function (PendingBatch $batch) {
+            return $batch->jobs->count() === 1 && $batch->jobs[0] instanceof ProcessManualJob;
+        });
     }
 
     protected function createAnnotatedImage($label, $volumeId = null)

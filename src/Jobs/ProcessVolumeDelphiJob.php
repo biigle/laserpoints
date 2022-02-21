@@ -6,6 +6,8 @@ use Biigle\Modules\Laserpoints\Image;
 use Biigle\Volume;
 use Cache;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Bus;
+use Storage;
 
 class ProcessVolumeDelphiJob extends Job
 {
@@ -50,25 +52,30 @@ class ProcessVolumeDelphiJob extends Job
         $points = $this->getLaserpointsForVolume($this->volume->id);
         $images = Image::whereIn('id', $points->keys())->get();
 
-        foreach ($images as $image) {
-            ProcessManualJob::dispatch($image, $points->get($image->id), $this->distance)
-                ->onQueue(config('laserpoints.process_manual_queue'));
-        }
+        $jobs = $images->map(function ($image) use ($points) {
+            return new ProcessManualJob($image, $points->get($image->id), $this->distance);
+        });
 
+        Bus::batch($jobs)
+            ->onQueue(config('laserpoints.process_manual_queue'))
+            ->dispatch();
 
         $query = $this->volume->images()->whereNotIn('id', $points->keys());
 
         if ($query->exists()) {
-            $imagesToProcess = $query->get();
+            $images = $query->get();
             $gatherFile = $this->gather($points);
 
-            $cacheKey = uniqid('delphi_job_count_');
-            Cache::forever($cacheKey, $imagesToProcess->count());
+            $jobs = $images->map(function ($image) use ($gatherFile) {
+                return new ProcessDelphiJob($image, $this->distance, $gatherFile);
+            });
 
-            foreach ($imagesToProcess as $image) {
-                ProcessDelphiJob::dispatch($image, $this->distance, $gatherFile, $cacheKey)
-                    ->onQueue(config('laserpoints.process_delphi_queue'));
-            }
+            Bus::batch($jobs)
+                ->onQueue(config('laserpoints.process_delphi_queue'))
+                ->finally(function () use ($gatherFile) {
+                    Storage::disk(config('laserpoints.disk'))->delete($gatherFile);
+                })
+                ->dispatch();
         }
     }
 }

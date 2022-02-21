@@ -10,6 +10,7 @@ use Cache;
 use Exception;
 use File;
 use FileCache;
+use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
@@ -17,7 +18,7 @@ use Storage;
 
 class ProcessDelphiJob extends BaseJob implements ShouldQueue
 {
-    use InteractsWithQueue, SerializesModels;
+    use Batchable, InteractsWithQueue, SerializesModels;
 
     /**
      * The image to process.
@@ -39,14 +40,6 @@ class ProcessDelphiJob extends BaseJob implements ShouldQueue
      * @var float
      */
     protected $distance;
-
-    /**
-     * Key of the cached count of other jobs that run on the same volume than this one.
-     * The last job should delete the gatherFile.
-     *
-     * @var string
-     */
-    protected $cacheKey;
 
     /**
      * Ignore this job if the image does not exist any more.
@@ -72,13 +65,11 @@ class ProcessDelphiJob extends BaseJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($image, $distance, $gatherFile, $cacheKey = null)
+    public function __construct($image, $distance, $gatherFile)
     {
         $this->image = Image::convert($image);
         $this->gatherFile = $gatherFile;
         $this->distance = $distance;
-        // If null, this job assumes it is the only one accessing the gatherFile.
-        $this->cacheKey = $cacheKey;
     }
 
     /**
@@ -115,40 +106,5 @@ class ProcessDelphiJob extends BaseJob implements ShouldQueue
 
         $this->image->laserpoints = $output;
         $this->image->save();
-
-        $this->maybeDeleteGatherFile();
-    }
-
-    /**
-     * Handle a job failure.
-     *
-     * @return void
-     */
-    public function failed()
-    {
-        $this->maybeDeleteGatherFile();
-    }
-
-    /**
-     * Handles the deletion of the gatherFile once all "sibling" jobs finished.
-     *
-     * If more than one image is processed during a Delphi LP detection, the jobs use the
-     * cache to track how many of them are still running. They need to track this to
-     * determine when the gatherFile can be deleted. This function updates the count
-     * when a job was finished and deletes the gather file if this is the last job to
-     * finish.
-     */
-    protected function maybeDeleteGatherFile()
-    {
-        if ($this->cacheKey) {
-            // This requires an atomic operation to work correctly. BIIGLE uses the
-            // Redis cache which provides these atomic operations.
-            if (Cache::decrement($this->cacheKey) > 0) {
-                return;
-            }
-            Cache::forget($this->cacheKey);
-        }
-
-        Storage::disk(config('laserpoints.disk'))->delete($this->gatherFile);
     }
 }

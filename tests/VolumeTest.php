@@ -25,12 +25,15 @@ class VolumeTest extends TestCase
         $volume = Volume::convert(BaseVolumeTest::create());
         $label = LabelTest::create();
 
-        $images = factory(Image::class, 4)->create()
-            ->each(function ($i) use ($volume) {
-                $i->filename = uniqid();
-                $i->volume_id = $volume->id;
-                $i->save();
-            });
+        $images = Image::class::factory()
+            ->count(4)
+            ->sequence(function ($i) use ($volume) {
+                return [
+                    'filename' => uniqid(),
+                    'volume_id' => $volume->id,
+                ];
+            })
+            ->create();
 
         try {
             $volume->readyForDelphiDetection($label);
@@ -84,14 +87,16 @@ class VolumeTest extends TestCase
         $volume = Volume::convert(BaseVolumeTest::create());
         $label = LabelTest::create();
 
-        $images = factory(Image::class, 4)->create()
-            ->each(function ($i) use ($volume) {
-                $i->filename = uniqid();
-                $i->volume_id = $volume->id;
-                $i->width = 100;
-                $i->height = 100;
-                $i->save();
-            });
+        $images = Image::class::factory()
+            ->count(4)
+            ->sequence(function ($i) use ($volume) {
+                return [
+                    'filename' => uniqid(),
+                    'volume_id' => $volume->id,
+                    'attrs' => ['width' => 100, 'height' => 100],
+                ];
+            })
+            ->create();
 
         $images->each(function ($i) use ($label) {
             ImageTest::addLaserpoints($i, $label, 2);
@@ -115,12 +120,16 @@ class VolumeTest extends TestCase
     public function testHasDetectedLaserpoints()
     {
         $volume = Volume::convert(BaseVolumeTest::create());
-        $images = factory(Image::class, 4)->create()
-            ->each(function ($i) use ($volume) {
-                $i->filename = uniqid();
-                $i->volume_id = $volume->id;
-                $i->save();
-            });
+
+        $images = Image::class::factory()
+            ->count(4)
+            ->sequence(function ($i) use ($volume) {
+                return [
+                    'filename' => uniqid(),
+                    'volume_id' => $volume->id,
+                ];
+            })
+            ->create();
 
         $this->assertFalse($volume->hasDetectedLaserpoints());
 

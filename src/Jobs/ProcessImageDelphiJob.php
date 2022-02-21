@@ -3,6 +3,8 @@
 namespace Biigle\Modules\Laserpoints\Jobs;
 
 use Biigle\Image;
+use Illuminate\Support\Facades\Bus;
+use Storage;
 
 class ProcessImageDelphiJob extends Job
 {
@@ -42,7 +44,13 @@ class ProcessImageDelphiJob extends Job
 
         $points = $this->getLaserpointsForVolume($this->image->volume_id);
         $gatherFile = $this->gather($points);
-        ProcessDelphiJob::dispatch($this->image, $this->distance, $gatherFile)
-            ->onQueue(config('laserpoints.process_delphi_queue'));
+        $job = new ProcessDelphiJob($this->image, $this->distance, $gatherFile);
+
+        Bus::batch([$job])
+            ->onQueue(config('laserpoints.process_delphi_queue'))
+            ->finally(function () use ($gatherFile) {
+                Storage::disk(config('laserpoints.disk'))->delete($gatherFile);
+            })
+            ->dispatch();
     }
 }
