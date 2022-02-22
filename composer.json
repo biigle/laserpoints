@@ -15,7 +15,7 @@
         }
     ],
     "require": {
-        "biigle/laravel-file-cache": "^2.0 | ^3.0 | ^4.0"
+        "biigle/laravel-file-cache": "^2.0 || ^3.0 || ^4.0"
     },
     "autoload": {
         "psr-4": {
