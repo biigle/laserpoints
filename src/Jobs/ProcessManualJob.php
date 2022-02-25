@@ -8,13 +8,14 @@ use Biigle\Modules\Laserpoints\Image;
 use Biigle\Modules\Laserpoints\Support\Detect;
 use Exception;
 use FileCache;
+use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
 class ProcessManualJob extends BaseJob implements ShouldQueue
 {
-    use InteractsWithQueue, SerializesModels;
+    use Batchable, InteractsWithQueue, SerializesModels;
 
     /**
      * The image to process.
