@@ -13,6 +13,7 @@ use Biigle\Tests\ImageAnnotationLabelTest;
 use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\LabelTest;
+use Queue;
 
 class LaserpointsControllerTest extends ApiTestCase
 {
@@ -37,12 +38,13 @@ class LaserpointsControllerTest extends ApiTestCase
 
         $this->makeManualAnnotations($label, 3);
 
-        $this->expectsJobs(ProcessImageDelphiJob::class);
         $this->postJson("/api/v1/images/{$image->id}/laserpoints/area", [
                 'distance' => 50,
                 'label_id' => $label->id,
             ])
             ->assertStatus(200);
+
+        Queue::assertPushed(ProcessImageDelphiJob::class);
 
         // Distance is required.
         $this->postJson("/api/v1/images/{$image->id}/laserpoints/area", [
@@ -82,12 +84,13 @@ class LaserpointsControllerTest extends ApiTestCase
         $this->makeManualAnnotations($label, 2, 1);
         $image = Image::first();
 
-        $this->expectsJobs(ProcessImageManualJob::class);
         $this->post("/api/v1/images/{$image->id}/laserpoints/area", [
                 'distance' => 50,
                 'label_id' => $label->id,
             ])
             ->assertStatus(200);
+
+        Queue::assertPushed(ProcessImageManualJob::class);
     }
 
     public function testComputeImageRemote()
@@ -99,12 +102,12 @@ class LaserpointsControllerTest extends ApiTestCase
         $this->makeManualAnnotations($label, 3);
 
         $this->beEditor();
-        $this->expectsJobs(ProcessImageDelphiJob::class);
         $this->postJson("/api/v1/images/{$image->id}/laserpoints/area", [
                 'distance' => 50,
                 'label_id' => $label->id,
             ])
             ->assertStatus(200);
+        Queue::assertPushed(ProcessImageDelphiJob::class);
     }
 
     public function testComputeImageTiled()
@@ -114,12 +117,12 @@ class LaserpointsControllerTest extends ApiTestCase
         $this->makeManualAnnotations($label, 3);
 
         $this->beEditor();
-        $this->doesntExpectJobs(ProcessImageDelphiJob::class);
         $this->postJson("/api/v1/images/{$image->id}/laserpoints/area", [
                 'distance' => 50,
                 'label_id' => $label->id,
             ])
             ->assertStatus(422);
+        Queue::assertNotPushed(ProcessImageDelphiJob::class);
     }
 
     public function testComputeVolume()
@@ -133,12 +136,12 @@ class LaserpointsControllerTest extends ApiTestCase
 
         $this->beEditor();
         $this->makeManualAnnotations($label, 3);
-        $this->expectsJobs(ProcessVolumeDelphiJob::class);
         $this->postJson("/api/v1/volumes/{$id}/laserpoints/area", [
                 'distance' => 50,
                 'label_id' => $label->id,
             ])
             ->assertStatus(200);
+        Queue::assertPushed(ProcessVolumeDelphiJob::class);
     }
 
     public function testComputeVolumeValidation()
@@ -203,12 +206,12 @@ class LaserpointsControllerTest extends ApiTestCase
         $this->makeManualAnnotations($label, 3);
 
         $this->beEditor();
-        $this->expectsJobs(ProcessVolumeDelphiJob::class);
         $this->postJson("/api/v1/volumes/{$id}/laserpoints/area", [
                 'distance' => 50,
                 'label_id' => $label->id,
             ])
             ->assertStatus(200);
+        Queue::assertPushed(ProcessVolumeDelphiJob::class);
     }
 
     public function testComputeVolumeTiled()
@@ -219,12 +222,12 @@ class LaserpointsControllerTest extends ApiTestCase
         $this->makeManualAnnotations($label, 3);
 
         $this->beEditor();
-        $this->doesntExpectJobs(ProcessVolumeDelphiJob::class);
         $this->postJson("/api/v1/volumes/{$id}/laserpoints/area", [
                 'distance' => 50,
                 'label_id' => $label->id,
             ])
             ->assertStatus(422);
+        Queue::assertNotPushed(ProcessVolumeDelphiJob::class);
     }
 
     public function testComputeVideoVolume()
