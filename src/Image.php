@@ -102,7 +102,7 @@ class Image extends BaseImage
      */
     public function getAreaAttribute()
     {
-        return $this->accessLaserpointsArray('area');
+        return $this->accessLaserpointsArray('area') ?: ($this->metadata['area'] ?? null);
     }
 
     /**

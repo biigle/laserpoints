@@ -54,6 +54,26 @@ class ImageTest extends TestCase
         $this->assertEquals($expect, $image->fresh()->laserpoints);
     }
 
+    public function testAreaAttribute()
+    {
+        $image = Image::convert(BaseImageTest::create());
+        $this->assertNull($image->area);
+
+        $image->metadata = [
+            'area' => 600,
+        ];
+        $image->save();
+        $this->assertEquals(600, $image->fresh()->area);
+
+        // Laser point detection overrides the metadata.
+        $image->laserpoints = [
+            'area' => 500,
+        ];
+        $image->save();
+
+        $this->assertEquals(500, $image->fresh()->area);
+    }
+
     public function testLaserpointsNotThere()
     {
         $image = Image::convert(BaseImageTest::create(['attrs' => ['something' => 'else']]));
