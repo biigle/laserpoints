@@ -1,12 +1,12 @@
 <script>
-import Circle from 'ol/style/Circle';
-import Feature from 'ol/Feature';
+import Circle from '@biigle/ol/style/Circle';
+import Feature from '@biigle/ol/Feature';
 import LaserpointsApi from '../api/laserpoints';
-import Point from 'ol/geom/Point';
-import Stroke from 'ol/style/Stroke';
-import Style from 'ol/style/Style';
-import VectorLayer from 'ol/layer/Vector';
-import VectorSource from 'ol/source/Vector';
+import Point from '@biigle/ol/geom/Point';
+import Stroke from '@biigle/ol/style/Stroke';
+import Style from '@biigle/ol/style/Style';
+import VectorLayer from '@biigle/ol/layer/Vector';
+import VectorSource from '@biigle/ol/source/Vector';
 import {Events} from '../import';
 
 /**
@@ -36,35 +36,6 @@ export default {
         },
         shown() {
             return this.opacity > 0;
-        },
-        layer() {
-            return new VectorLayer({
-                source: new VectorSource(),
-                style: [
-                    new Style({
-                        image: new Circle({
-                            radius: 6,
-                            stroke: new Stroke({
-                                color: 'white',
-                                width: 4
-                            })
-                        })
-                    }),
-                    new Style({
-                        image: new Circle({
-                            radius: 6,
-                            stroke: new Stroke({
-                                color: '#ff0000',
-                                width: 2,
-                                lineDash: [1]
-                            })
-                        })
-                    }),
-                ],
-                zIndex: 3,
-                updateWhileAnimating: true,
-                updateWhileInteracting: true,
-            });
         },
     },
     methods: {
@@ -122,6 +93,34 @@ export default {
         },
     },
     created() {
+        this.layer = new VectorLayer({
+            source: new VectorSource(),
+            style: [
+                new Style({
+                    image: new Circle({
+                        radius: 6,
+                        stroke: new Stroke({
+                            color: 'white',
+                            width: 4
+                        })
+                    })
+                }),
+                new Style({
+                    image: new Circle({
+                        radius: 6,
+                        stroke: new Stroke({
+                            color: '#ff0000',
+                            width: 2,
+                            lineDash: [1]
+                        })
+                    })
+                }),
+            ],
+            zIndex: 3,
+            updateWhileAnimating: true,
+            updateWhileInteracting: true,
+        });
+
         if (this.settings.has('laserpointOpacity')) {
             this.opacityValue = this.settings.get('laserpointOpacity');
         }
