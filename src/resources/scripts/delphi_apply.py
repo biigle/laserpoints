@@ -103,7 +103,15 @@ elif laserpoints.shape[0] == 3:
     s = 1.5 * laserdist
     are = np.sqrt(s * np.power(s - laserdist, 3))
     s = (a + b + c) / 2.
-    apx = np.sqrt(s * (s - a) * (s - b) * (s - c))
+    sqrtinp = s * (s - a) * (s - b) * (s - c)
+    if sqrtinp < 0:
+        print(json.dumps({
+            "error": True,
+            "message": "Computed pixel area is invalid.",
+            "method": detection
+        }))
+        exit(1)
+    apx = np.sqrt(sqrtinp)
     if apx == 0:
         print(json.dumps({
             "error": True,
