@@ -43,7 +43,7 @@ class ProcessVolumeDelphiJobTest extends TestCase
 
 
         $expect = [$image->id => '[[0,0],[0,0],[0,0]]'];
-        $this->assertEquals($expect, $job->points->toArray());
+        $this->assertSame($expect, $job->points->toArray());
 
         Bus::assertBatched(function (PendingBatch $batch) {
             return $batch->jobs->count() === 1 && $batch->jobs[0] instanceof ProcessDelphiJob;

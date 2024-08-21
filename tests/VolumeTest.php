@@ -16,7 +16,7 @@ class VolumeTest extends TestCase
     {
         $volume = BaseVolumeTest::create();
         $laserpointsVolume = Volume::convert($volume);
-        $this->assertEquals($volume->id, $laserpointsVolume->id);
+        $this->assertSame($volume->id, $laserpointsVolume->id);
         $this->assertTrue($laserpointsVolume instanceof Volume);
     }
 
