@@ -53,17 +53,17 @@ class ProcessDelphiJobTest extends TestCase
         with(new ProcessDelphiJob($this->image, 30, $this->gatherFile))->handle();
 
         $expect = [
+            'error' => false,
             'area' => 100,
             'count' => 3,
             'method' => 'delphi',
             'points' => [[100, 100], [200, 200], [300, 300]],
-            'error' => false,
             'distance' => 30,
         ];
 
-        $this->assertEquals($expect, $this->image->fresh()->laserpoints);
+        $this->assertSame($expect, $this->image->fresh()->laserpoints);
         // Previously set attrs should not be lost.
-        $this->assertEquals(1, $this->image->fresh()->attrs['a']);
+        $this->assertSame(1, $this->image->fresh()->attrs['a']);
     }
 
     public function testHandleGracefulError()
@@ -88,7 +88,7 @@ class ProcessDelphiJobTest extends TestCase
             'distance' => 30,
         ];
 
-        $this->assertEquals($expect, $this->image->fresh()->laserpoints);
+        $this->assertSame($expect, $this->image->fresh()->laserpoints);
     }
 
     public function testHandleFatalError()
@@ -121,6 +121,6 @@ class ProcessDelphiJobTest extends TestCase
             'distance' => 30,
         ];
 
-        $this->assertEquals($expect, $this->image->fresh()->laserpoints);
+        $this->assertSame($expect, $this->image->fresh()->laserpoints);
     }
 }

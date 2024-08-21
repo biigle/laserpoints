@@ -44,17 +44,16 @@ class ProcessManualJobTest extends TestCase
         with(new ProcessManualJob($this->image, $this->points, 30))->handle();
 
         $expect = [
+            'error' => false,
             'area' => 100,
             'count' => 3,
             'method' => 'manual',
             'points' => [[100, 100], [200, 200], [300, 300]],
-            'error' => false,
             'distance' => 30,
         ];
-
-        $this->assertEquals($expect, $this->image->fresh()->laserpoints);
+        $this->assertSame($expect, $this->image->fresh()->laserpoints);
         // Previously set attributes should not be lost.
-        $this->assertEquals(1, $this->image->fresh()->attrs['a']);
+        $this->assertSame(1, $this->image->fresh()->attrs['a']);
     }
 
     public function testHandleGracefulError()
@@ -79,7 +78,7 @@ class ProcessManualJobTest extends TestCase
             'distance' => 30,
         ];
 
-        $this->assertEquals($expect, $this->image->fresh()->laserpoints);
+        $this->assertSame($expect, $this->image->fresh()->laserpoints);
     }
 
     public function testHandleFatalError()
@@ -112,6 +111,6 @@ class ProcessManualJobTest extends TestCase
             'distance' => 30,
         ];
 
-        $this->assertEquals($expect, $this->image->fresh()->laserpoints);
+        $this->assertSame($expect, $this->image->fresh()->laserpoints);
     }
 }

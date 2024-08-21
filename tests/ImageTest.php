@@ -35,9 +35,9 @@ class ImageTest extends TestCase
             'attrs' => [Image::LASERPOINTS_ATTRIBUTE => ['area' => 500]],
         ]);
         $laserpointsImage = Image::convert($image);
-        $this->assertEquals($image->id, $laserpointsImage->id);
+        $this->assertSame($image->id, $laserpointsImage->id);
         $this->assertTrue($laserpointsImage instanceof Image);
-        $this->assertEquals(500, $laserpointsImage->laserpoints['area']);
+        $this->assertSame(500, $laserpointsImage->laserpoints['area']);
     }
 
     public function testLaserpoints()
@@ -51,7 +51,7 @@ class ImageTest extends TestCase
         $expect = [
             'area' => 500,
         ];
-        $this->assertEquals($expect, $image->fresh()->laserpoints);
+        $this->assertSame($expect, $image->fresh()->laserpoints);
     }
 
     public function testAreaAttribute()
@@ -63,7 +63,7 @@ class ImageTest extends TestCase
             'area' => 600,
         ];
         $image->save();
-        $this->assertEquals(600, $image->fresh()->area);
+        $this->assertSame(600, $image->fresh()->area);
 
         // Laser point detection overrides the metadata.
         $image->laserpoints = [
@@ -71,7 +71,7 @@ class ImageTest extends TestCase
         ];
         $image->save();
 
-        $this->assertEquals(500, $image->fresh()->area);
+        $this->assertSame(500, $image->fresh()->area);
     }
 
     public function testLaserpointsNotThere()
