@@ -71,13 +71,6 @@ if (aqm <= 0):
         "method": detection,
     }))
     exit(1)
-elif (aqm > 50):
-    print(json.dumps({
-        "error": True,
-        "message": "The estimated image area is too large (max is 50 sqm but was {} sqm).".format(round(aqm)),
-        "method": detection
-    }))
-    exit(1)
 
 # use fliplr to print coordinates as [x, y] tuples instead of [y, x]
 print(json.dumps({
