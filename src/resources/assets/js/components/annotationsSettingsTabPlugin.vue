@@ -53,7 +53,8 @@ export default {
 
             return this.cache[id];
         },
-        updateCurrentImage(id, image) {
+        updateCurrentImage(args) {
+            const {id, image} = args;
             this.layer.getSource().clear();
             this.currentImageId = id;
             this.currentImage = image;
@@ -70,7 +71,9 @@ export default {
             }
         },
         extendMap(map) {
-            map.addLayer(this.layer);
+            // $nextTick is required for some reason, otherwise the layer content will
+            // not be displayed.
+            this.$nextTick(() => map.addLayer(this.layer));
         },
     },
     watch: {
@@ -107,9 +110,9 @@ export default {
                         radius: 6,
                         stroke: new Stroke({
                             color: 'white',
-                            width: 4
-                        })
-                    })
+                            width: 4,
+                        }),
+                    }),
                 }),
                 new Style({
                     image: new Circle({
@@ -117,9 +120,9 @@ export default {
                         stroke: new Stroke({
                             color: '#ff0000',
                             width: 2,
-                            lineDash: [1]
-                        })
-                    })
+                            lineDash: [1],
+                        }),
+                    }),
                 }),
             ],
             zIndex: 3,
