@@ -1,3 +1,22 @@
+<template>
+    <form class="form-stacked" @submit.prevent="submit">
+        <div class="form-group">
+            <label for="label">Laser point label</label>
+            <typeahead id="label" title="Laser point" placeholder="Laser point label" class="typeahead--block" :items="labels" @select="handleSelectLabel" @focus="loadLabels">
+        </div>
+        <div class="form-group">
+            <label for="distance">Laser distance in cm</label>
+            <input v-model="distance" id="distance" type="number" min="1" step="0.1" title="Distance between two laser points in cm" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <button class="btn btn-success btn-block" title="Compute the area of each image in this  volume." :disabled="submitDisabled || null">Submit</button>
+        </div>
+        <div class="alert alert-success" v-if="processing">
+            The laser point detection was submitted and will be available soon.
+        </div>
+        <div class="alert alert-danger" v-else-if="error" v-text="error"></div>
+    </form>
+</template>
 <script>
 import LaserpointsApi from '../api/laserpoints.js';
 import {handleErrorResponse} from '../import.js';

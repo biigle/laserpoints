@@ -1,3 +1,9 @@
+<template>
+    <div class="sidebar-tab__section">
+        <h5>Laser Points Opacity (<span v-if="shown" v-text="opacity"></span><span v-else>hidden</span>)</h5>
+        <input type="range" min="0" max="1" step="0.1" v-model="opacityValue">
+    </div>
+</template>
 <script>
 import Circle from '@biigle/ol/style/Circle';
 import Feature from '@biigle/ol/Feature';
@@ -125,9 +131,9 @@ export default {
             this.opacityValue = this.settings.get('laserpointOpacity');
         }
 
-        Events.$on('images.fetching', this.maybeFetchLaserpoints);
-        Events.$on('images.change', this.updateCurrentImage);
-        Events.$on('annotations.map.init', this.extendMap);
+        Events.on('images.fetching', this.maybeFetchLaserpoints);
+        Events.on('images.change', this.updateCurrentImage);
+        Events.on('annotations.map.init', this.extendMap);
     },
 };
 </script>

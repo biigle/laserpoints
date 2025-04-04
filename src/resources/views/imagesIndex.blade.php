@@ -82,7 +82,7 @@
                                 <input class="form-control" v-model="distance" type="number" min="1" step="0.1" placeholder="Laser distance" title="Distance between two laser points in cm"></input>
                             </div>
                             <div class="col-xs-6">
-                                <button class="btn btn-success btn-block" :disabled="submitDisabled" title="Start a new laser point detection">Submit</button>
+                                <button class="btn btn-success btn-block" :disabled="submitDisabled || null" title="Start a new laser point detection">Submit</button>
                             </div>
                         </div>
                     </form>
