@@ -1,3 +1,5 @@
+import { Resource } from '../import.js';
+
 /**
  * Resource for the laser point detection.
  *
@@ -11,10 +13,8 @@
  *
  * Get the laser point information for an image
  * resource.get({image_id: 1}).then(...);
- *
- * @type {Vue.resource}
  */
-export default Vue.resource('api/v1/images{/image_id}/laserpoints', {}, {
+export default Resource('api/v1/images{/image_id}/laserpoints', {}, {
     processVolume: {
         method: 'POST',
         url: 'api/v1/volumes{/volume_id}/laserpoints/area',

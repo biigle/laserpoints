@@ -2,14 +2,15 @@
 
 @unless ($volume->hasTiledImages())
     @push('scripts')
-        <script src="{{ cachebust_asset('vendor/laserpoints/scripts/main.js') }}"></script>
-        <script type="text/javascript">
+        {{vite_hot(base_path('vendor/biigle/laserpoints/hot'), ['src/resources/assets/js/main.js'], 'vendor/laserpoints')}}
+
+        <script type="module">
             biigle.$declare('laserpoints.image', {!! $image->toJson() !!});
             biigle.$declare('laserpoints.distance', {!! $img->distance ?: 'null' !!});
         </script>
     @endpush
     @push('styles')
-        <link rel="stylesheet" type="text/css" href="{{ cachebust_asset('vendor/label-trees/styles/main.css') }}">
+        {{vite_hot(base_path('vendor/biigle/laserpoints/hot'), ['src/resources/assets/sass/main.scss'], 'vendor/laserpoints')}}
     @endpush
 @endunless
 

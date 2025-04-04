@@ -1,1 +1,1 @@
-<script src="{{ cachebust_asset('vendor/laserpoints/scripts/main.js') }}"></script>
+{{vite_hot(base_path('vendor/biigle/laserpoints/hot'), ['src/resources/assets/js/main.js'], 'vendor/laserpoints')}}

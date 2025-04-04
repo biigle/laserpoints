@@ -1,13 +1,13 @@
 <script>
 import Circle from '@biigle/ol/style/Circle';
 import Feature from '@biigle/ol/Feature';
-import LaserpointsApi from '../api/laserpoints';
+import LaserpointsApi from '../api/laserpoints.js';
 import Point from '@biigle/ol/geom/Point';
 import Stroke from '@biigle/ol/style/Stroke';
 import Style from '@biigle/ol/style/Style';
 import VectorLayer from '@biigle/ol/layer/Vector';
 import VectorSource from '@biigle/ol/source/Vector';
-import {Events} from '../import';
+import {Events} from '../import.js';
 
 /**
  * The plugin component to change the settings for the laser points in the annotation

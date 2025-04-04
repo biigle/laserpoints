@@ -1,9 +1,9 @@
 <script>
-import LaserpointsApi from './api/laserpoints';
-import {handleErrorResponse} from './import';
-import {LabelTypeahead} from './import';
-import {LoaderMixin} from './import';
-import {VolumesApi} from './import';
+import LaserpointsApi from './api/laserpoints.js';
+import {handleErrorResponse} from './import.js';
+import {LabelTypeahead} from './import.js';
+import {LoaderMixin} from './import.js';
+import {VolumesApi} from './import.js';
 
 /**
  * The panel requesting a laser point detection on an individual image

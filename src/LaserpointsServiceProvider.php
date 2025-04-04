@@ -28,7 +28,7 @@ class LaserpointsServiceProvider extends ServiceProvider
         });
 
         $this->publishes([
-            __DIR__.'/public/assets' => public_path('vendor/laserpoints'),
+            __DIR__.'/public' => public_path('vendor/laserpoints'),
         ], 'public');
 
         $this->publishes([
