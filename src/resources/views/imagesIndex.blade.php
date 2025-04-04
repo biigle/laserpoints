@@ -9,9 +9,6 @@
             biigle.$declare('laserpoints.distance', {!! $img->distance ?: 'null' !!});
         </script>
     @endpush
-    @push('styles')
-        {{vite_hot(base_path('vendor/biigle/laserpoints/hot'), ['src/resources/assets/sass/main.scss'], 'vendor/laserpoints')}}
-    @endpush
 @endunless
 
 <div class="col-sm-12 col-lg-6">

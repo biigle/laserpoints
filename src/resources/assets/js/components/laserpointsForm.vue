@@ -2,7 +2,7 @@
     <form class="form-stacked" @submit.prevent="submit">
         <div class="form-group">
             <label for="label">Laser point label</label>
-            <typeahead id="label" title="Laser point" placeholder="Laser point label" class="typeahead--block" :items="labels" @select="handleSelectLabel" @focus="loadLabels">
+            <typeahead id="label" title="Laser point" placeholder="Laser point label" class="typeahead--block" :items="labels" @select="handleSelectLabel" @focus="loadLabels"></typeahead>
         </div>
         <div class="form-group">
             <label for="distance">Laser distance in cm</label>

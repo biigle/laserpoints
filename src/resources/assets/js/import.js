@@ -5,5 +5,6 @@ export let LabelTypeahead = biigle.$require('labelTrees.components.labelTypeahea
 export let LoaderMixin = biigle.$require('core.mixins.loader');
 export let Resource = biigle.$require('resource');
 export let SettingsTabPlugins = biigle.$require('annotations.components.settingsTabPlugins');
+export let VolumeShowPlugins = biigle.$require('volumes.show.plugins');
 export let VolumeFilters = biigle.$require('volumes.stores.filters');
 export let VolumesApi = biigle.$require('annotations.api.volumes');

@@ -5,7 +5,7 @@
         @else
             <sidebar-tab v-cloak name="laserpoints" icon="vector-square" title="Compute the area of each image in this volume">
                 <a href="{{route('manual-tutorials', ['laserpoints', 'laserpoint-detection'])}}" target="_blank" class="btn btn-default btn-xs pull-right" title="What is this?"><span class="fa fa-info-circle" aria-hidden="true"></span></a>
-                <laserpoints-form></laserpoints-form>
+                <component :is="plugins.laserpointsForm"></component>
             </sidebar-tab>
         @endif
     @endcan
