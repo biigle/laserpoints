@@ -1,13 +1,19 @@
+<template>
+    <div class="sidebar-tab__section">
+        <h5>Laser Points Opacity (<span v-if="shown" v-text="opacity"></span><span v-else>hidden</span>)</h5>
+        <input type="range" min="0" max="1" step="0.1" v-model="opacityValue">
+    </div>
+</template>
 <script>
 import Circle from '@biigle/ol/style/Circle';
 import Feature from '@biigle/ol/Feature';
-import LaserpointsApi from '../api/laserpoints';
+import LaserpointsApi from '../api/laserpoints.js';
 import Point from '@biigle/ol/geom/Point';
 import Stroke from '@biigle/ol/style/Stroke';
 import Style from '@biigle/ol/style/Style';
 import VectorLayer from '@biigle/ol/layer/Vector';
 import VectorSource from '@biigle/ol/source/Vector';
-import {Events} from '../import';
+import {Events} from '../import.js';
 
 /**
  * The plugin component to change the settings for the laser points in the annotation
@@ -47,7 +53,8 @@ export default {
 
             return this.cache[id];
         },
-        updateCurrentImage(id, image) {
+        updateCurrentImage(args) {
+            const {id, image} = args;
             this.layer.getSource().clear();
             this.currentImageId = id;
             this.currentImage = image;
@@ -64,7 +71,9 @@ export default {
             }
         },
         extendMap(map) {
-            map.addLayer(this.layer);
+            // $nextTick is required for some reason, otherwise the layer content will
+            // not be displayed.
+            this.$nextTick(() => map.addLayer(this.layer));
         },
     },
     watch: {
@@ -101,9 +110,9 @@ export default {
                         radius: 6,
                         stroke: new Stroke({
                             color: 'white',
-                            width: 4
-                        })
-                    })
+                            width: 4,
+                        }),
+                    }),
                 }),
                 new Style({
                     image: new Circle({
@@ -111,9 +120,9 @@ export default {
                         stroke: new Stroke({
                             color: '#ff0000',
                             width: 2,
-                            lineDash: [1]
-                        })
-                    })
+                            lineDash: [1],
+                        }),
+                    }),
                 }),
             ],
             zIndex: 3,
@@ -125,9 +134,9 @@ export default {
             this.opacityValue = this.settings.get('laserpointOpacity');
         }
 
-        Events.$on('images.fetching', this.maybeFetchLaserpoints);
-        Events.$on('images.change', this.updateCurrentImage);
-        Events.$on('annotations.map.init', this.extendMap);
+        Events.on('images.fetching', this.maybeFetchLaserpoints);
+        Events.on('images.change', this.updateCurrentImage);
+        Events.on('annotations.map.init', this.extendMap);
     },
 };
 </script>

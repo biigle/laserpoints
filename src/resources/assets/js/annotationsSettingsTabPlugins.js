@@ -1,5 +1,5 @@
-import Plugin from './components/annotationsSettingsTabPlugin';
-import {SettingsTabPlugins} from './import';
+import Plugin from './components/annotationsSettingsTabPlugin.vue';
+import {SettingsTabPlugins} from './import.js';
 
 /**
  * The plugin component to change the settings for the laser points in the annotation

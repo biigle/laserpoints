@@ -2,14 +2,12 @@
 
 @unless ($volume->hasTiledImages())
     @push('scripts')
-        <script src="{{ cachebust_asset('vendor/laserpoints/scripts/main.js') }}"></script>
-        <script type="text/javascript">
+        {{vite_hot(base_path('vendor/biigle/laserpoints/hot'), ['src/resources/assets/js/main.js'], 'vendor/laserpoints')}}
+
+        <script type="module">
             biigle.$declare('laserpoints.image', {!! $image->toJson() !!});
             biigle.$declare('laserpoints.distance', {!! $img->distance ?: 'null' !!});
         </script>
-    @endpush
-    @push('styles')
-        <link rel="stylesheet" type="text/css" href="{{ cachebust_asset('vendor/label-trees/styles/main.css') }}">
     @endpush
 @endunless
 
@@ -81,7 +79,7 @@
                                 <input class="form-control" v-model="distance" type="number" min="1" step="0.1" placeholder="Laser distance" title="Distance between two laser points in cm"></input>
                             </div>
                             <div class="col-xs-6">
-                                <button class="btn btn-success btn-block" :disabled="submitDisabled" title="Start a new laser point detection">Submit</button>
+                                <button class="btn btn-success btn-block" :disabled="submitDisabled || null" title="Start a new laser point detection">Submit</button>
                             </div>
                         </div>
                     </form>

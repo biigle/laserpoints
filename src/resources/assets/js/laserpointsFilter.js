@@ -1,6 +1,6 @@
-import VolumesApi from './api/volumes';
-import {FilterList} from './import';
-import {VolumeFilters} from './import';
+import VolumesApi from './api/volumes.js';
+import {FilterList} from './import.js';
+import {VolumeFilters} from './import.js';
 
 /**
  * Laser points filter for the volume overview filters.
