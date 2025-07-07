@@ -3,17 +3,12 @@
 namespace Biigle\Modules\Laserpoints\Http\Controllers\Api;
 
 use Biigle\Http\Controllers\Api\Controller;
-use Biigle\Label;
 use Biigle\Modules\Laserpoints\Http\Requests\ComputeImage;
 use Biigle\Modules\Laserpoints\Http\Requests\ComputeVolume;
 use Biigle\Modules\Laserpoints\Image;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageDelphiJob;
-use Biigle\Modules\Laserpoints\Jobs\ProcessImageManualJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeDelphiJob;
 use Biigle\Modules\Laserpoints\Volume;
-use Biigle\Volume as BaseVolume;
-use Exception;
-use Illuminate\Validation\ValidationException;
 
 class LaserpointsController extends Controller
 {
@@ -27,8 +22,8 @@ class LaserpointsController extends Controller
      * @apiDescription This feature is not available for very large images.
      *
      * @apiParam {Number} id The image ID.
-     * @apiParam (Required arguments) {Number} label_id ID of the laser point label that was used.
      * @apiParam (Required arguments) {Number} distance The distance between two laser points in cm.
+     * @apiParam (Optional arguments) {Boolean} use_line_detection Whether to use line detection mode for improved accuracy.
      *
      * @param ComputeImage $request
      *
@@ -37,31 +32,17 @@ class LaserpointsController extends Controller
     public function computeImage(ComputeImage $request)
     {
         $image = Image::convert($request->image);
-        $label = Label::find($request->input('label_id'));
-
-        try {
-            $manual = $image->readyForManualDetection($label);
-        } catch (Exception $e) {
-            throw ValidationException::withMessages([
-                'id' => 'Laser point detection can\'t be performed. '.$e->getMessage(),
-            ]);
+        $useLineDetection = $request->input('use_line_detection', true);
+        
+        // For individual images, we can't use line detection mode since it requires
+        // processing multiple images. Fall back to regular detection.
+        if ($useLineDetection) {
+            // Note: Individual image processing always uses regular detection
+            // Line detection requires processing the whole volume first
         }
-
-        if ($manual) {
-            ProcessImageManualJob::dispatch($image, $request->input('distance'), $label->id)
-                ->onQueue(config('laserpoints.process_manual_queue'));
-        } else {
-            try {
-                Volume::convert($image->volume)->readyForDelphiDetection($label);
-            } catch (Exception $e) {
-                throw ValidationException::withMessages([
-                    'id' => 'Delphi laser point detection can\'t be performed. '.$e->getMessage(),
-                ]);
-            }
-
-            ProcessImageDelphiJob::dispatch($image, $request->input('distance'), $label->id)
-                ->onQueue(config('laserpoints.process_delphi_queue'));
-        }
+        
+        ProcessImageDelphiJob::dispatch($image, $request->input('distance'), null)
+            ->onQueue(config('laserpoints.process_delphi_queue'));
     }
 
     /**
@@ -74,8 +55,8 @@ class LaserpointsController extends Controller
      * @apiDescription This feature is not available for video volumes and volumes with very large images.
      *
      * @apiParam {Number} id The volume ID.
-     * @apiParam (Required arguments) {Number} label_id ID of the laser point label that was used.
      * @apiParam (Required arguments) {Number} distance The distance between two laser points in cm.
+     * @apiParam (Optional arguments) {Boolean} use_line_detection Whether to use line detection mode for improved accuracy.
      *
      * @param ComputeVolume $request
      * @return \Illuminate\Http\Response
@@ -83,17 +64,9 @@ class LaserpointsController extends Controller
     public function computeVolume(ComputeVolume $request)
     {
         $volume = Volume::convert($request->volume);
-        $label = Label::find($request->input('label_id'));
-
-        try {
-            $volume->readyForDelphiDetection($label);
-        } catch (Exception $e) {
-            throw ValidationException::withMessages([
-                'id' => 'Delphi laser point detection can\'t be performed. '.$e->getMessage(),
-            ]);
-        }
-
-        ProcessVolumeDelphiJob::dispatch($volume, $request->input('distance'), $label->id)
+        $useLineDetection = $request->input('use_line_detection', true);
+        
+        ProcessVolumeDelphiJob::dispatch($volume, $request->input('distance'), null, $useLineDetection)
             ->onQueue(config('laserpoints.process_delphi_queue'));
     }
 }

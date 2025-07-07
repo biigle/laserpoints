@@ -1,15 +1,20 @@
 <template>
     <form class="form-stacked" @submit.prevent="submit">
         <div class="form-group">
-            <label for="label">Laser point label</label>
-            <typeahead id="label" title="Laser point" placeholder="Laser point label" class="typeahead--block" :items="labels" @select="handleSelectLabel" @focus="loadLabels"></typeahead>
-        </div>
-        <div class="form-group">
             <label for="distance">Laser distance in cm</label>
             <input v-model="distance" id="distance" type="number" min="1" step="0.1" title="Distance between two laser points in cm" class="form-control" required>
         </div>
         <div class="form-group">
-            <button class="btn btn-success btn-block" title="Compute the area of each image in this  volume." :disabled="submitDisabled || null">Submit</button>
+            <div class="checkbox">
+                <label>
+                    <input v-model="useLineDetection" type="checkbox" title="Use line fitting to improve detection accuracy">
+                    Use line detection mode
+                    <span class="text-muted">(recommended for better accuracy)</span>
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <button class="btn btn-success btn-block" title="Compute the area of each image in this volume." :disabled="submitDisabled || null">Submit</button>
         </div>
         <div class="alert alert-success" v-if="processing">
             The laser point detection was submitted and will be available soon.
@@ -20,31 +25,25 @@
 <script>
 import LaserpointsApi from '../api/laserpoints.js';
 import {handleErrorResponse} from '../import.js';
-import {LabelTypeahead} from '../import.js';
 import {LoaderMixin} from '../import.js';
-import {VolumesApi} from '../import.js';
 
 /**
  * Content of the laser points tab in the volume overview sidebar
  */
 export default {
     mixins: [LoaderMixin],
-    components: {
-        typeahead: LabelTypeahead,
-    },
     data() {
         return {
             volumeId: null,
             distance: 1,
+            useLineDetection: true,
             processing: false,
             error: false,
-            labels: [],
-            label: null,
         };
     },
     computed: {
         submitDisabled() {
-            return this.loading || this.processing || !this.distance || !this.label;
+            return this.loading || this.processing || !this.distance;
         },
     },
     methods: {
@@ -60,28 +59,11 @@ export default {
             this.processing = true;
             this.error = false;
         },
-        setLabels(response) {
-            this.labels = response.body;
-        },
-        handleSelectLabel(label) {
-            this.label = label;
-        },
-        loadLabels() {
-            if (!this.loading && this.labels.length === 0) {
-                this.startLoading();
-                VolumesApi.queryAnnotationLabels({id: this.volumeId})
-                    .then(this.setLabels)
-                    // Do not finish loading on error. If the labels can't be loaded,
-                    // the form can't be submitted, too.
-                    .then(this.finishLoading)
-                    .catch(handleErrorResponse);
-            }
-        },
         submit() {
             this.startLoading();
             LaserpointsApi.processVolume({volume_id: this.volumeId}, {
                     distance: this.distance,
-                    label_id: this.label.id,
+                    use_line_detection: this.useLineDetection,
                 })
                 .then(this.setProcessing)
                 .catch(this.handleError)

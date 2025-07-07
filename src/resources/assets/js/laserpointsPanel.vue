@@ -1,31 +1,25 @@
 <script>
 import LaserpointsApi from './api/laserpoints.js';
 import {handleErrorResponse} from './import.js';
-import {LabelTypeahead} from './import.js';
 import {LoaderMixin} from './import.js';
-import {VolumesApi} from './import.js';
 
 /**
  * The panel requesting a laser point detection on an individual image
  */
 export default {
     mixins: [LoaderMixin],
-    components: {
-        typeahead: LabelTypeahead,
-    },
     data() {
         return {
             image: null,
             distance: null,
+            useLineDetection: true,
             processing: false,
             error: false,
-            labels: [],
-            label: null,
         };
     },
     computed: {
         submitDisabled() {
-            return this.loading || this.processing || !this.distance || !this.label;
+            return this.loading || this.processing || !this.distance;
         },
         volumeId() {
             return this.image.volume_id;
@@ -44,30 +38,13 @@ export default {
             this.processing = true;
             this.error = false;
         },
-        setLabels(response) {
-            this.labels = response.body;
-        },
-        handleSelectLabel(label) {
-            this.label = label;
-        },
-        loadLabels() {
-            if (!this.loading && this.labels.length === 0) {
-                this.startLoading();
-                VolumesApi.queryAnnotationLabels({id: this.volumeId})
-                    .then(this.setLabels)
-                    // Do not finish loading on error. If the labels can't be loaded,
-                    // the form can't be submitted, too.
-                    .then(this.finishLoading)
-                    .catch(handleErrorResponse);
-            }
-        },
         submit() {
             if (this.loading) return;
 
             this.startLoading();
             LaserpointsApi.processImage({image_id: this.image.id}, {
                     distance: this.distance,
-                    label_id: this.label.id,
+                    use_line_detection: this.useLineDetection,
                 })
                 .then(this.setProcessing)
                 .catch(this.handleError)

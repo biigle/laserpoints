@@ -35,7 +35,7 @@ class ComputeVolume extends FormRequest
     {
         return [
             'distance' => 'required|numeric|min:1',
-            'label_id' => 'required|integer|exists:labels,id',
+            'use_line_detection' => 'boolean',
         ];
     }
 
