@@ -21,7 +21,7 @@ class DelphiApply extends LaserpointsScript
     {
         $python = config('laserpoints.python');
         $script = config('laserpoints.delphi_apply_script');
-        $command = "{$python} {$script} '{$gatherFile}' '{$imageUrl}' '{$distance}' 2>&1";
+        $command = "{$python} {$script} --input '{$imageUrl}' --laserdistance '{$distance}' --mode biigle_mode 2>&1";
 
         return $this->exec($command);
     }

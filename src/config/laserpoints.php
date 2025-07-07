@@ -25,7 +25,7 @@ return [
     /*
     | Path to the Delphi apply script.
     */
-    'delphi_apply_script' => __DIR__.'/../resources/scripts/delphi_apply.py',
+    'delphi_apply_script' => __DIR__.'/../resources/scripts/laser_point_detector.py',
 
     /*
     | Directory for temporary files.
