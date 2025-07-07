@@ -509,6 +509,111 @@ def run_detect_without_lines_mode(args, img_paths: List[Path], img_id_map: Optio
     
     _write_outputs(args, results, json_results)
 
+def run_biigle_mode_with_lines(args, img_paths: List[Path], img_id_map: Optional[Dict[str, Path]], 
+                              colors_to_search: List[int]):
+    """Mode E: Detect laser points with line constraints and output to stdout (BIIGLE format)"""
+    
+    # Load lines from file
+    if not Path(args.lines_file).exists():
+        print(json.dumps({
+            "error": True,
+            "message": f"Lines file not found: {args.lines_file}",
+            "method": "color_threshold (lines_mode)"
+        }))
+        return
+    
+    fitted_lines = load_lines(args.lines_file)
+    
+    # Process the single image (BIIGLE mode expects only one image)
+    result = process_image(img_paths[0], args, colors_to_search, fitted_lines, None)
+    if result:
+        image_info,_,_, simple_points = result
+        width = image_info.width
+        height = image_info.height
+        detection = "color_threshold (lines_mode)"
+        laserpoints = np.array(simple_points)
+
+        if laserpoints.shape[0] == 4:
+            dists = scipy.spatial.distance.pdist(laserpoints)
+            dists.sort()
+            laserdist = float(args.laserdistance) / 100.
+            apx = np.mean(dists[0:4])**2
+
+            if apx == 0:
+                print(json.dumps({
+                    "error": True,
+                    "message": "Computed pixel area is zero.",
+                    "method": detection
+                }))
+                return
+            aqm = laserdist**2 * (float(width) * float(height)) / apx
+        elif laserpoints.shape[0] == 3:
+            a = np.sqrt(np.power(float(laserpoints[0, 0]) - float(laserpoints[1, 0]), 2) + np.power(float(laserpoints[0, 1]) - float(laserpoints[1, 1]), 2))
+            b = np.sqrt(np.power(float(laserpoints[1, 0]) - float(laserpoints[2, 0]), 2) + np.power(float(laserpoints[1, 1]) - float(laserpoints[2, 1]), 2))
+            c = np.sqrt(np.power(float(laserpoints[0, 0]) - float(laserpoints[2, 0]), 2) + np.power(float(laserpoints[0, 1]) - float(laserpoints[2, 1]), 2))
+            laserdist = float(args.laserdistance) / 100.
+            s = 1.5 * laserdist
+            are = np.sqrt(s * np.power(s - laserdist, 3))
+            s = (a + b + c) / 2.
+            sqrtinp = s * (s - a) * (s - b) * (s - c)
+            if sqrtinp < 0:
+                print(json.dumps({
+                    "error": True,
+                    "message": "Computed pixel area is invalid.",
+                    "method": detection
+                }))
+                return
+            apx = np.sqrt(sqrtinp)
+            if apx == 0:
+                print(json.dumps({
+                    "error": True,
+                    "message": "Computed pixel area is zero.",
+                    "method": detection
+                }))
+                return
+            aqm = are * (float(width) * float(height)) / apx
+        elif laserpoints.shape[0] == 2:
+            a = np.sqrt(np.power(float(laserpoints[0, 0]) - float(laserpoints[1, 0]), 2) + np.power(float(laserpoints[0, 1]) - float(laserpoints[1, 1]), 2))
+            flen = float(args.laserdistance) / 100.
+            aqm = (flen * width) / a * (flen * height) / a
+        else:
+            # actually this should never happen
+            print(json.dumps({
+                "error": True,
+                "message": "Unsupported number of laserpoints.",
+                "method": detection
+            }))
+            return
+        if (aqm <= 0):
+            print(json.dumps({
+                "error": True,
+                "message": "The estimated image area is too small (was {} sqm).".format(round(aqm)),
+                "method": detection,
+            }))
+            return
+        elif (aqm > 50):
+            print(json.dumps({
+                "error": True,
+                "message": "The estimated image area is too large (max is 50 sqm but was {} sqm).".format(round(aqm)),
+                "method": detection
+            }))
+            return
+
+        print(json.dumps({
+            "error": False,
+            "area": aqm,
+            "count": laserpoints.shape[0],
+            "method": detection,
+            "points": laserpoints.tolist()
+        }))
+    else:
+        print(json.dumps({
+            "error": True,
+            "message": "No laserpoints could be detected.",
+            "method": "color_threshold (lines_mode)"
+        }))
+
+
 def run_biigle_mode(args, img_paths: List[Path], img_id_map: Optional[Dict[str, Path]], 
                                  colors_to_search: List[int]):
     """Mode D: Detect laser points without any line constraints and output to stdout"""
@@ -534,7 +639,7 @@ def run_biigle_mode(args, img_paths: List[Path], img_id_map: Optional[Dict[str, 
                     "message": "Computed pixel area is zero.",
                     "method": detection
                 }))
-                exit(1)
+                return
             aqm = laserdist**2 * (float(width) * float(height)) / apx
         elif laserpoints.shape[0] == 3:
             a = np.sqrt(np.power(float(laserpoints[0, 0]) - float(laserpoints[1, 0]), 2) + np.power(float(laserpoints[0, 1]) - float(laserpoints[1, 1]), 2))
@@ -551,7 +656,7 @@ def run_biigle_mode(args, img_paths: List[Path], img_id_map: Optional[Dict[str, 
                     "message": "Computed pixel area is invalid.",
                     "method": detection
                 }))
-                exit(1)
+                return
             apx = np.sqrt(sqrtinp)
             if apx == 0:
                 print(json.dumps({
@@ -559,7 +664,7 @@ def run_biigle_mode(args, img_paths: List[Path], img_id_map: Optional[Dict[str, 
                     "message": "Computed pixel area is zero.",
                     "method": detection
                 }))
-                exit(1)
+                return
             aqm = are * (float(width) * float(height)) / apx
         elif laserpoints.shape[0] == 2:
             a = np.sqrt(np.power(float(laserpoints[0, 0]) - float(laserpoints[1, 0]), 2) + np.power(float(laserpoints[0, 1]) - float(laserpoints[1, 1]), 2))
@@ -572,21 +677,21 @@ def run_biigle_mode(args, img_paths: List[Path], img_id_map: Optional[Dict[str, 
                 "message": "Unsupported number of laserpoints.",
                 "method": detection
             }))
-            exit(1)
+            return
         if (aqm <= 0):
             print(json.dumps({
                 "error": True,
                 "message": "The estimated image area is too small (was {} sqm).".format(round(aqm)),
                 "method": detection,
             }))
-            exit(1)
+            return
         elif (aqm > 50):
             print(json.dumps({
                 "error": True,
                 "message": "The estimated image area is too large (max is 50 sqm but was {} sqm).".format(round(aqm)),
                 "method": detection
             }))
-            exit(1)
+            return
 
         print(json.dumps({
             "error": False,
@@ -594,6 +699,12 @@ def run_biigle_mode(args, img_paths: List[Path], img_id_map: Optional[Dict[str, 
             "count": laserpoints.shape[0],
             "method": detection,
             "points": laserpoints.tolist()
+        }))
+    else:
+        print(json.dumps({
+            "error": True,
+            "message": "No laserpoints could be detected.",
+            "method": "color_threshold (biigle_mode)"
         }))
 
 
@@ -705,7 +816,7 @@ def main():
                        help="Draw circles on the image and save them for debugging")
     
     # Mode selection
-    parser.add_argument("--mode", choices=["both", "lines-only", "detect-only", "detect-without-lines", "biigle_mode"],
+    parser.add_argument("--mode", choices=["both", "lines-only", "detect-only", "detect-without-lines", "biigle_mode", "biigle_mode_with_lines"],
                        default="both", help="Run mode")
     parser.add_argument("--subsample-size", type=int, default=100,
                        help="Number of images to subsample for line fitting in lines-only mode")
@@ -810,6 +921,8 @@ def main():
             run_detect_without_lines_mode(args, img_paths, img_id_map, colors_to_search)
         elif args.mode == "biigle_mode":
             run_biigle_mode(args, img_paths, img_id_map, colors_to_search)
+        elif args.mode == "biigle_mode_with_lines":
+            run_biigle_mode_with_lines(args, img_paths, img_id_map, colors_to_search)
         else:
             parser.error(f"Invalid mode: {args.mode}")
     except Exception as e:
