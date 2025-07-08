@@ -6,7 +6,15 @@
         <div class="alert alert-danger" v-cloak v-else-if="error" v-text="error"></div>
         <form class="" v-if="!processing" v-on:submit.prevent="submit">
             <div class="form-group">
-                <typeahead id="label" title="Label that was used to annotate laser points (optional for automatic detection)" placeholder="Laser point label (optional)" class="typeahead--block" :items="availableLabels" @select="handleLabelSelect" @focus="loadLabels"></typeahead>
+                <typeahead 
+                    id="label" 
+                    title="Label that was used to annotate laser points (optional for automatic detection)" 
+                    placeholder="Laser point label (optional)" 
+                    class="typeahead--block" 
+                    :items="availableLabels" 
+                    @select="handleLabelSelect"
+                    :disabled="loading || processing"
+                ></typeahead>
                 <small class="text-muted">Select a label only if you have manually annotated laser points with that label. Leave empty for automatic detection.</small>
             </div>
             <div class="row">
@@ -77,73 +85,34 @@ export default {
         handleLabelSelect(label) {
             this.selectedLabel = label;
         },
-        loadLabels() {
-            if (this.availableLabels.length === 0) {
-                this.loadAvailableLabels();
-            }
-        },
         loadAvailableLabels() {
-            // Try multiple sources for label trees depending on the context
-            let labelTrees = null;
-            
-            // First try laserpoints.labelTrees which is directly passed from the blade template
             try {
-                labelTrees = biigle.$require('laserpoints.labelTrees');
-            } catch (error) {
-                // If not available, try annotations context (for single image views)
+                // First try to get the label trees from the annotations context
+                // This is the most appropriate context for the panel
+                let labelTrees = null;
+                
                 try {
                     labelTrees = biigle.$require('annotations.labelTrees');
-                } catch (error2) {
-                    // If annotations is not available, try volumes context
+                } catch (error) {
                     try {
+                        // Fall back to volumes.labelTrees if annotations context is not available
                         labelTrees = biigle.$require('volumes.labelTrees');
-                    } catch (error3) {
-                        // If volumes is not available, try largo context
-                        try {
-                            labelTrees = biigle.$require('largo.labelTrees');
-                        } catch (error4) {
-                            // If nothing is available, leave empty
-                            labelTrees = [];
-                        }
+                    } catch (error2) {
+                        labelTrees = [];
                     }
                 }
-            }
-            
-            if (labelTrees && Array.isArray(labelTrees) && labelTrees.length > 0) {
-                // We have real labels from a label tree
-                this.availableLabels = labelTrees
-                    .flatMap(tree => (tree.labels || []))
-                    .filter(label => label && label.id && label.name)
-                    .sort((a, b) => a.name.localeCompare(b.name));
-            } else {
-                // No label trees are available, we need to load labels from the image's annotations
-                try {
-                    const image = biigle.$require('laserpoints.image');
-                    
-                    if (image && image.annotations) {
-                        // Extract unique labels from the image's annotations
-                        const uniqueLabels = {};
-                        
-                        image.annotations.forEach(annotation => {
-                            if (annotation.labels && Array.isArray(annotation.labels)) {
-                                annotation.labels.forEach(label => {
-                                    if (label && label.id && label.name) {
-                                        uniqueLabels[label.id] = label;
-                                    }
-                                });
-                            }
-                        });
-                        
-                        // Convert to array and sort
-                        this.availableLabels = Object.values(uniqueLabels)
-                            .sort((a, b) => a.name.localeCompare(b.name));
-                    } else {
-                        this.availableLabels = [];
-                    }
-                } catch (error) {
-                    // Fallback to empty array if we can't get labels
+                
+                if (labelTrees && Array.isArray(labelTrees)) {
+                    this.availableLabels = labelTrees
+                        .flatMap(tree => (tree.labels || []))
+                        .filter(label => label && label.id && label.name)
+                        .sort((a, b) => a.name.localeCompare(b.name));
+                } else {
                     this.availableLabels = [];
                 }
+            } catch (error) {
+                // If any error occurs, use an empty array
+                this.availableLabels = [];
             }
         },
         checkForManualAnnotations() {
