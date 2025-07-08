@@ -9,7 +9,7 @@
                 <label>
                     <input v-model="useLineDetection" type="checkbox" title="Use line fitting to improve detection accuracy">
                     Use line detection mode
-                    <span class="text-muted">(recommended for better accuracy)</span>
+                    <span class="text-muted">(recommended for better accuracy, refer to the manual for limitations)</span>
                 </label>
             </div>
         </div>
