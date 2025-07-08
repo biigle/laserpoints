@@ -34,6 +34,7 @@ import LaserpointsApi from './api/laserpoints.js';
 import {handleErrorResponse} from './import.js';
 import {LoaderMixin} from './import.js';
 import {LabelTypeahead} from './import.js';
+import {VolumesApi} from './import.js';
 
 /**
  * The panel requesting a laser point detection on an individual image
@@ -85,34 +86,18 @@ export default {
         handleLabelSelect(label) {
             this.selectedLabel = label;
         },
+        setLabels(response) {
+            this.availableLabels = response.body;
+        },
         loadAvailableLabels() {
-            try {
-                // First try to get the label trees from the annotations context
-                // This is the most appropriate context for the panel
-                let labelTrees = null;
-                
-                try {
-                    labelTrees = biigle.$require('annotations.labelTrees');
-                } catch (error) {
-                    try {
-                        // Fall back to volumes.labelTrees if annotations context is not available
-                        labelTrees = biigle.$require('volumes.labelTrees');
-                    } catch (error2) {
-                        labelTrees = [];
-                    }
-                }
-                
-                if (labelTrees && Array.isArray(labelTrees)) {
-                    this.availableLabels = labelTrees
-                        .flatMap(tree => (tree.labels || []))
-                        .filter(label => label && label.id && label.name)
-                        .sort((a, b) => a.name.localeCompare(b.name));
-                } else {
-                    this.availableLabels = [];
-                }
-            } catch (error) {
-                // If any error occurs, use an empty array
-                this.availableLabels = [];
+            if (!this.loading && this.availableLabels.length === 0) {
+                this.startLoading();
+                VolumesApi.queryAnnotationLabels({id: this.volumeId})
+                    .then(this.setLabels)
+                    // Do not finish loading on error. If the labels can't be loaded,
+                    // the form can't be submitted, too.
+                    .then(this.finishLoading)
+                    .catch(handleErrorResponse);
             }
         },
         checkForManualAnnotations() {
@@ -147,10 +132,28 @@ export default {
         },
     },
     created() {
-        this.image = biigle.$require('laserpoints.image');
-        this.distance = biigle.$require('laserpoints.distance');
-        this.loadAvailableLabels();
-        this.checkForManualAnnotations();
+        try {
+            this.image = biigle.$require('laserpoints.image');
+            
+            if (this.image === undefined || this.image === null) {
+                // As a fallback, try to get the image from annotations context
+                try {
+                    this.image = biigle.$require('annotations.image');
+                } catch (e) {
+                    console.warn("Could not load image from any context");
+                }
+            }
+            
+            this.distance = biigle.$require('laserpoints.distance');
+        } catch (e) {
+            console.warn("Error loading initial data:", e);
+        }
+        
+        // Only proceed with loading labels after trying to get the image
+        this.$nextTick(() => {
+            this.loadAvailableLabels();
+            this.checkForManualAnnotations();
+        });
     },
 };
 </script>
