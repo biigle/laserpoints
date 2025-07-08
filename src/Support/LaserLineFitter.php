@@ -26,7 +26,7 @@ class LaserLineFitter extends LaserpointsScript
     public function execute(Collection $images, $distance)
     {
         $python = config('laserpoints.python');
-        $script = config('laserpoints.delphi_apply_script');
+        $script = config('laserpoints.automatic_lp_detection_script');
         $tmpDir = config('laserpoints.tmp_dir');
         
         // Limit to subsample size for efficiency

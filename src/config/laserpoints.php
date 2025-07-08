@@ -10,22 +10,12 @@ return [
     /*
     | Path to the detect script.
     */
-    'detect_script' => __DIR__.'/../resources/scripts/detect.py',
-
-    /*
-    | Path to the Delphi gather script.
-    */
-    'delphi_gather_script' => __DIR__.'/../resources/scripts/delphi_gather.py',
-
-    /*
-    | Path to the Delphi gather finish script.
-    */
-    'delphi_gather_finish_script' => __DIR__.'/../resources/scripts/delphi_gather_finish.py',
+    'manual_lp_footprint_computation_script' => __DIR__.'/../resources/scripts/manual_footprint.py',
 
     /*
     | Path to the Delphi apply script.
     */
-    'delphi_apply_script' => __DIR__.'/../resources/scripts/laser_point_detector.py',
+    'automatic_lp_detection_script' => __DIR__.'/../resources/scripts/laser_point_detector.py',
 
     /*
     | Directory for temporary files.

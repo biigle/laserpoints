@@ -20,7 +20,7 @@ class DelphiApply extends LaserpointsScript
     public function execute($gatherFile, $imageUrl, $distance)
     {
         $python = config('laserpoints.python');
-        $script = config('laserpoints.delphi_apply_script');
+        $script = config('laserpoints.automatic_lp_detection_script');
         
         // Check if we have a lines file (new line-based approach)
         if ($gatherFile && \Illuminate\Support\Facades\Storage::disk(config('laserpoints.disk'))->exists($gatherFile)) {

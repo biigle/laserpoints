@@ -6,16 +6,11 @@ use App;
 use Biigle\Image;
 use Biigle\ImageAnnotation;
 use Biigle\Jobs\Job as BaseJob;
-use Biigle\Modules\Laserpoints\Support\DelphiGather;
 use Biigle\Modules\Laserpoints\Traits\FiltersInvalidLaserPoints;
 use Biigle\Shape;
 use DB;
-use File;
-use FileCache;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
-use SplFileInfo;
-use Storage;
 
 abstract class Job extends BaseJob implements ShouldQueue
 {
@@ -77,45 +72,5 @@ abstract class Job extends BaseJob implements ShouldQueue
             ->map(function ($i) {
                 return $i->pluck('points')->toJson();
             });
-    }
-
-    /**
-     * Perform the gather step.
-     *
-     * @param Collection $points Points Collection returned from getLaserpointsForVolume.
-     *
-     * @return string Path to the gather file in the storage disk.
-     */
-    protected function gather($points)
-    {
-        $images = Image::whereIn('id', $points->keys())
-            ->with('volume')
-            ->select('filename', 'id', 'volume_id')
-            // Take only a maximum of 100 images for delphi_gather.
-            ->inRandomOrder()
-            ->limit(100)
-            ->get();
-
-        $gather = App::make(DelphiGather::class);
-        $callback = function ($image, $path) use ($gather, $points) {
-            return $gather->execute($path, $points->get($image->id));
-        };
-
-        $outputPath = $gather->getOutputPath();
-
-        try {
-            foreach ($images as $image) {
-                FileCache::get($image, $callback);
-            }
-
-            $gather->finish();
-
-            $storagePath = Storage::disk(config('laserpoints.disk'))
-                ->putFileAs('', new SplFileInfo($outputPath), File::basename($outputPath));
-        } finally {
-            File::delete($outputPath);
-        }
-
-        return $storagePath;
     }
 }

@@ -19,6 +19,10 @@ if len(img.shape) == 0:
 width = img.shape[0]
 height = img.shape[1]
 laserpoints = np.array(ast.literal_eval(sys.argv[3]))
+
+with open('/tmp/mfa.json', 'w') as f:
+    json.dump(sys.argv, f)
+
 detection = "manual"
 
 if laserpoints.shape[0] == 4:

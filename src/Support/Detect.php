@@ -20,7 +20,7 @@ class Detect extends LaserpointsScript
     public function execute($imageUrl, $distance, $points)
     {
         $python = config('laserpoints.python');
-        $script = config('laserpoints.detect_script');
+        $script = config('laserpoints.manual_lp_footprint_computation_script');
         $command = "{$python} {$script} '{$imageUrl}' '{$distance}' '{$points}' 2>&1";
 
         return $this->exec($command);

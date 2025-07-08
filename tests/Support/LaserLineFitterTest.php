@@ -17,7 +17,7 @@ class LaserLineFitterTest extends TestCase
         Storage::fake('laserpoints');
         config(['laserpoints.tmp_dir' => '/tmp']);
         config(['laserpoints.python' => '/usr/bin/python3']);
-        config(['laserpoints.delphi_apply_script' => __DIR__ . '/../../src/resources/scripts/laser_point_detector.py']);
+        config(['laserpoints.automatic_lp_detection_script' => __DIR__ . '/../../src/resources/scripts/laser_point_detector.py']);
         config(['laserpoints.disk' => 'laserpoints']);
     }
 
@@ -85,7 +85,7 @@ class LaserLineFitterStub extends LaserLineFitter
     public function execute($images, $distance)
     {
         $python = config('laserpoints.python');
-        $script = config('laserpoints.delphi_apply_script');
+        $script = config('laserpoints.automatic_lp_detection_script');
         $tmpDir = config('laserpoints.tmp_dir');
         
         $subsampleImages = $images->take(100);

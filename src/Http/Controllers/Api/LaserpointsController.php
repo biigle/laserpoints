@@ -6,7 +6,8 @@ use Biigle\Http\Controllers\Api\Controller;
 use Biigle\Modules\Laserpoints\Http\Requests\ComputeImage;
 use Biigle\Modules\Laserpoints\Http\Requests\ComputeVolume;
 use Biigle\Modules\Laserpoints\Image;
-use Biigle\Modules\Laserpoints\Jobs\ProcessImageDelphiJob;
+use Biigle\Modules\Laserpoints\Jobs\ProcessDelphiJob;
+use Biigle\Modules\Laserpoints\Jobs\ProcessImageManualJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeDelphiJob;
 use Biigle\Modules\Laserpoints\Volume;
 
@@ -23,6 +24,7 @@ class LaserpointsController extends Controller
      *
      * @apiParam {Number} id The image ID.
      * @apiParam (Required arguments) {Number} distance The distance between two laser points in cm.
+     * @apiParam (Optional arguments) {Number} label_id The ID of the label used for laserpoint annotations (required only if manual annotations exist).
      * @apiParam (Optional arguments) {Boolean} use_line_detection Whether to use line detection mode for improved accuracy.
      *
      * @param ComputeImage $request
@@ -32,17 +34,34 @@ class LaserpointsController extends Controller
     public function computeImage(ComputeImage $request)
     {
         $image = Image::convert($request->image);
-        $useLineDetection = $request->input('use_line_detection', true);
+        $labelId = $request->input('label_id');
         
-        // For individual images, we can't use line detection mode since it requires
-        // processing multiple images. Fall back to regular detection.
-        if ($useLineDetection) {
-            // Note: Individual image processing always uses regular detection
-            // Line detection requires processing the whole volume first
+        // Check if the image has manual annotations
+        if ($labelId) {
+            // If a label is provided, check for manual annotations with that specific label
+            $manualPoints = $image->annotations()
+                ->where('shape_id', \Biigle\Shape::pointId())
+                ->whereHas('labels', function ($query) use ($labelId) {
+                    $query->where('label_id', $labelId);
+                })
+                ->count();
+                
+            if ($manualPoints >= 2) {
+                // Image has manual annotations - use manual processing
+                ProcessImageManualJob::dispatch($image, $request->input('distance'), $labelId)
+                    ->onQueue(config('laserpoints.process_manual_queue'));
+            } else {
+                // Label provided but no matching manual annotations - use automatic detection
+                ProcessDelphiJob::dispatch($image, $request->input('distance'))
+                    ->onQueue(config('laserpoints.process_delphi_queue'));
+            }
+        } else {
+            // No label provided - use automatic detection
+            ProcessDelphiJob::dispatch($image, $request->input('distance'))
+                ->onQueue(config('laserpoints.process_delphi_queue'));
         }
         
-        ProcessImageDelphiJob::dispatch($image, $request->input('distance'), null)
-            ->onQueue(config('laserpoints.process_delphi_queue'));
+        return response()->json(['message' => 'Laser point detection job dispatched successfully.']);
     }
 
     /**
@@ -56,6 +75,7 @@ class LaserpointsController extends Controller
      *
      * @apiParam {Number} id The volume ID.
      * @apiParam (Required arguments) {Number} distance The distance between two laser points in cm.
+     * @apiParam (Optional arguments) {Number} label_id The ID of the label used for laserpoint annotations (required only if manual annotations exist).
      * @apiParam (Optional arguments) {Boolean} use_line_detection Whether to use line detection mode for improved accuracy.
      *
      * @param ComputeVolume $request
@@ -64,9 +84,12 @@ class LaserpointsController extends Controller
     public function computeVolume(ComputeVolume $request)
     {
         $volume = Volume::convert($request->volume);
+        $labelId = $request->input('label_id');
         $useLineDetection = $request->input('use_line_detection', true);
         
-        ProcessVolumeDelphiJob::dispatch($volume, $request->input('distance'), null, $useLineDetection)
+        ProcessVolumeDelphiJob::dispatch($volume, $request->input('distance'), $labelId, $useLineDetection)
             ->onQueue(config('laserpoints.process_delphi_queue'));
+            
+        return response()->json(['message' => 'Laser point detection job dispatched successfully.']);
     }
 }
