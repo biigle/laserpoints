@@ -2,19 +2,19 @@
 
 namespace Biigle\Modules\Laserpoints\Jobs;
 
-use App;
 use Biigle\Jobs\Job as BaseJob;
 use Biigle\Modules\Laserpoints\Image;
 use Biigle\Modules\Laserpoints\Support\DelphiApply;
-use Cache;
 use Exception;
-use File;
 use FileCache;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Storage;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class ProcessDelphiJob extends BaseJob implements ShouldQueue
 {
@@ -28,11 +28,18 @@ class ProcessDelphiJob extends BaseJob implements ShouldQueue
     protected $image;
 
     /**
-     * Path to the output of the Delphi gather script.
+     * Path to the output of the Delphi gather script or lines file.
      *
-     * @var string
+     * @var string|null
      */
     protected $gatherFile;
+
+    /**
+     * Volume ID for accessing cached lines file.
+     *
+     * @var int|null
+     */
+    protected $volumeId;
 
     /**
      * Distance between laser points im cm to use for computation.
@@ -60,16 +67,17 @@ class ProcessDelphiJob extends BaseJob implements ShouldQueue
      *
      * @param Image $image
      * @param float $distance
-     * @param string $gatherFile
-     * @param string $cacheKey
+     * @param string|null $gatherFile
+     * @param int|null $volumeId
      *
      * @return void
      */
-    public function __construct($image, $distance, $gatherFile)
+    public function __construct($image, $distance, $gatherFile = null, $volumeId = null)
     {
         $this->image = Image::convert($image);
         $this->gatherFile = $gatherFile;
         $this->distance = $distance;
+        $this->volumeId = $volumeId;
     }
 
     /**
@@ -79,16 +87,18 @@ class ProcessDelphiJob extends BaseJob implements ShouldQueue
      */
     public function handle()
     {
-        $tmpDir = config('laserpoints.tmp_dir');
-        $localGatherPath = "{$tmpDir}/{$this->gatherFile}";
-        $stream = Storage::disk(config('laserpoints.disk'))
-            ->readStream($this->gatherFile);
-        File::put($localGatherPath, $stream);
+        // Determine the lines file path - either from parameter or cache
+        $linesFilePath = $this->gatherFile;
+        
+        if (!$linesFilePath && $this->volumeId) {
+            // Try to get lines file from cache if volume ID is provided
+            $cacheKey = "laserpoint_lines_volume_{$this->volumeId}";
+            $linesFilePath = Cache::get($cacheKey);
+        }
 
-        $callback = function ($image, $path) use ($localGatherPath) {
+        $callback = function ($image, $path) use ($linesFilePath) {
             $delphi = App::make(DelphiApply::class);
-
-            return $delphi->execute($localGatherPath, $path, $this->distance);
+            return $delphi->execute($linesFilePath, $path, $this->distance);
         };
 
         try {
@@ -98,8 +108,6 @@ class ProcessDelphiJob extends BaseJob implements ShouldQueue
                 'error' => true,
                 'message' => $e->getMessage(),
             ];
-        } finally {
-            File::delete($localGatherPath);
         }
 
         $output['distance'] = $this->distance;
