@@ -1,5 +1,6 @@
 <script>
 import LaserpointsApi from './api/laserpoints.js';
+import LaserpointsForm from './components/laserpointsForm.vue';
 import {handleErrorResponse} from './import.js';
 import {LabelTypeahead} from './import.js';
 import {LoaderMixin} from './import.js';
@@ -12,6 +13,7 @@ export default {
     mixins: [LoaderMixin],
     components: {
         typeahead: LabelTypeahead,
+        laserpointsForm: LaserpointsForm,
     },
     data() {
         return {

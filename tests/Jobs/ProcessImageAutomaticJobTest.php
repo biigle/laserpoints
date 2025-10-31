@@ -3,52 +3,87 @@
 namespace Biigle\Tests\Modules\Laserpoints\Jobs;
 
 use App;
+use Biigle\Label;
+use Biigle\Shape;
+use Biigle\ImageAnnotation;
+use Biigle\ImageAnnotationLabel;
 use Biigle\Modules\Laserpoints\Image;
-use Biigle\Modules\Laserpoints\Jobs\ProcessManualJob;
-use Biigle\Modules\Laserpoints\Support\Detect;
+use Biigle\Modules\Laserpoints\Jobs\ProcessImageAutomaticJob;
+use Biigle\Modules\Laserpoints\Support\DetectAutomatic;
 use Biigle\Tests\ImageTest;
 use Exception;
 use Mockery;
 use TestCase;
 
-class ProcessManualJobTest extends TestCase
+class ProcessImageAutomaticJobTest extends TestCase
 {
     protected $image;
-    protected $points;
 
     public function setUp(): void
     {
         parent::setUp();
         $this->image = Image::convert(ImageTest::create(['attrs' => ['a' => 1]]));
-        $this->points = '[[100,100],[200,200],[300,300]]';
     }
 
     public function testHandle()
     {
-        $mock = Mockery::mock(Detect::class);
+        $mock = Mockery::mock(DetectAutomatic::class);
         $mock->shouldReceive('execute')
             ->once()
-            ->with(Mockery::any(), 30, '[[100,100],[200,200],[300,300]]')
+            ->with(Mockery::any(), 30, null)
             ->andReturn([
                 'error' => false,
                 'area' => 100,
                 'count' => 3,
                 'method' => 'manual',
-                'points' => [[100, 100], [200, 200], [300, 300]],
+                'points' => [[100, 100], [100, 100], [100, 100]],
             ]);
 
-        App::singleton(Detect::class, function () use ($mock) {
+        App::singleton(DetectAutomatic::class, function () use ($mock) {
             return $mock;
         });
 
-        with(new ProcessManualJob($this->image, $this->points, 30))->handle();
+        with(new ProcessImageAutomaticJob($this->image, 30))->handle();
 
         $expect = [
             'error' => false,
             'area' => 100,
             'count' => 3,
             'method' => 'manual',
-            'points' => [[100, 100], [200, 200], [300, 300]],
+            'points' => [[100, 100], [100, 100], [100, 100]],
+            'distance' => 30,
+        ];
+        $this->assertSame($expect, $this->image->fresh()->laserpoints);
+        // Previously set attributes should not be lost.
+        $this->assertSame(1, $this->image->fresh()->attrs['a']);
+    }
+
+    public function testHandleLineInfo()
+    {
+        $mock = Mockery::mock(DetectAutomatic::class);
+        $mock->shouldReceive('execute')
+            ->once()
+            ->with(Mockery::any(), 30, 'lineinfo')
+            ->andReturn([
+                'error' => false,
+                'area' => 100,
+                'count' => 3,
+                'method' => 'manual',
+                'points' => [[100, 100], [100, 100], [100, 100]],
+            ]);
+
+        App::singleton(DetectAutomatic::class, function () use ($mock) {
+            return $mock;
+        });
+
+        with(new ProcessImageAutomaticJob($this->image, 30, 'lineinfo'))->handle();
+
+        $expect = [
+            'error' => false,
+            'area' => 100,
+            'count' => 3,
+            'method' => 'manual',
+            'points' => [[100, 100], [100, 100], [100, 100]],
             'distance' => 30,
         ];
         $this->assertSame($expect, $this->image->fresh()->laserpoints);
@@ -58,7 +93,7 @@ class ProcessManualJobTest extends TestCase
 
     public function testHandleGracefulError()
     {
-        $mock = Mockery::mock(Detect::class);
+        $mock = Mockery::mock(DetectAutomatic::class);
         $mock->shouldReceive('execute')
             ->once()
             ->andReturn([
@@ -66,11 +101,11 @@ class ProcessManualJobTest extends TestCase
                 'message' => 'Some expected error occurred.',
             ]);
 
-        App::singleton(Detect::class, function () use ($mock) {
+        App::singleton(DetectAutomatic::class, function () use ($mock) {
             return $mock;
         });
 
-        with(new ProcessManualJob($this->image, $this->points, 30))->handle();
+        with(new ProcessImageAutomaticJob($this->image, 30))->handle();
 
         $expect = [
             'error' => true,
@@ -88,22 +123,22 @@ class ProcessManualJobTest extends TestCase
             'area' => 100,
             'count' => 3,
             'method' => 'manual',
-            'points' => [[100, 100], [200, 200], [300, 300]],
+            'points' => [[100, 100], [100, 100], [100, 100]],
             'error' => false,
             'distance' => 30,
         ];
         $this->image->save();
 
-        $mock = Mockery::mock(Detect::class);
+        $mock = Mockery::mock(DetectAutomatic::class);
         $mock->shouldReceive('execute')
             ->once()
             ->andThrow(new Exception('Fatal error message.'));
 
-        App::singleton(Detect::class, function () use ($mock) {
+        App::singleton(DetectAutomatic::class, function () use ($mock) {
             return $mock;
         });
 
-        with(new ProcessManualJob($this->image, $this->points, 30))->handle();
+        with(new ProcessImageAutomaticJob($this->image, 30))->handle();
 
         $expect = [
             'error' => true,
