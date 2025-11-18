@@ -2,21 +2,24 @@
 
 namespace Biigle\Modules\Laserpoints\Jobs;
 
-use Biigle\Image;
+use App;
+use Biigle\Jobs\Job;
+use Biigle\Label;
+use Biigle\Modules\Laserpoints\Image;
+use Biigle\Modules\Laserpoints\Support\DetectManual;
 use Biigle\Shape;
-use DB;
+use Exception;
+use FileCache;
+use Illuminate\Bus\Batchable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class ProcessImageManualJob extends Job
+class ProcessImageManualJob extends Job implements ShouldQueue
 {
-    use SerializesModels;
+    use Batchable, InteractsWithQueue, SerializesModels;
 
-    /**
-     * The image to compute the area for.
-     *
-     * @var Image
-     */
-    protected $image;
+    public $tries = 1;
 
     /**
      * Ignore this job if the image does not exist any more.
@@ -28,16 +31,19 @@ class ProcessImageManualJob extends Job
     /**
      * Create a new job instance.
      *
-     * @param Image $image
-     * @param float $distance
-     * @param int $labelId
+     * @param Image $image The image to process.
+     * @param Label $label The laser point label.
+     * @param float $distance Distance between laser points im cm to use for computation.
      *
      * @return void
      */
-    public function __construct(Image $image, $distance, $labelId)
+    public function __construct(
+        public Image $image,
+        public Label $label,
+        public float $distance,
+    )
     {
-        parent::__construct($distance, $labelId);
-        $this->image = $image;
+        //
     }
 
     /**
@@ -47,28 +53,39 @@ class ProcessImageManualJob extends Job
      */
     public function handle()
     {
-        $points = $this->getLaserpointsForImage($this->image->id);
-        ProcessManualJob::dispatch($this->image, $points, $this->distance)
-            ->onQueue(config('laserpoints.process_manual_queue'));
+        try {
+            // TODO implement this without loading the image. dimensions are available in the image model. this can be enabled for tiled images too then.
+            $output = FileCache::get($this->image, function ($image, $path) {
+                $detect = App::make(DetectManual::class);
+                $points = $this->getLaserpoints();
+
+                return $detect->execute($path, $this->distance, $points);
+            });
+        } catch (Exception $e) {
+            $output = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+
+        $output['distance'] = $this->distance;
+
+        $this->image->laserpoints = $output;
+        $this->image->save();
     }
 
     /**
      * Collects the laser point annotations of the given image.
      *
-     * @param int $id Image ID
-     *
      * @return string JSON encoded array of annotation coordinates
      */
-    protected function getLaserpointsForImage($id)
+    protected function getLaserpoints()
     {
-        $points = DB::table('image_annotations')
+        return $this->image->annotations()
             ->join('image_annotation_labels', 'image_annotation_labels.annotation_id', '=', 'image_annotations.id')
-            ->where('image_annotations.image_id', $id)
-            ->where('image_annotation_labels.label_id', $this->labelId)
+            ->where('image_annotation_labels.label_id', $this->label->id)
             ->where('image_annotations.shape_id', Shape::pointId())
-            ->select('image_annotations.points', 'image_annotations.image_id')
-            ->pluck('image_annotations.points');
-
-        return '['.$points->implode(',').']';
+            ->pluck('image_annotations.points')
+            ->toJson();
     }
 }
