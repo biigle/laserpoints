@@ -60,6 +60,7 @@ class Image extends BaseImage
      */
     public static function convert(BaseImage $image)
     {
+        // TODO: still needed?
         $instance = new static;
         $instance->setRawAttributes($image->attributes);
         $instance->exists = $image->exists;

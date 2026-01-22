@@ -3,9 +3,10 @@
 namespace Biigle\Modules\Laserpoints\Jobs;
 
 use App;
-use Biigle\Jobs\Job as BaseJob;
+use Biigle\Jobs\Job;
+use Biigle\Shape;
 use Biigle\Modules\Laserpoints\Image;
-use Biigle\Modules\Laserpoints\Support\Detect;
+use Biigle\Modules\Laserpoints\Support\DetectAutomatic;
 use Exception;
 use FileCache;
 use Illuminate\Bus\Batchable;
@@ -13,30 +14,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class ProcessManualJob extends BaseJob implements ShouldQueue
+class ProcessImageAutomaticJob extends Job implements ShouldQueue
 {
     use Batchable, InteractsWithQueue, SerializesModels;
 
-    /**
-     * The image to process.
-     *
-     * @var Image
-     */
-    protected $image;
-
-    /**
-     * Laser point coordinates for the image.
-     *
-     * @var string
-     */
-    protected $points;
-
-    /**
-     * Distance between laser points im cm to use for computation.
-     *
-     * @var float
-     */
-    protected $distance;
+    public $tries = 1;
 
     /**
      * Ignore this job if the image does not exist any more.
@@ -48,17 +30,19 @@ class ProcessManualJob extends BaseJob implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param Image $image
-     * @param string $points
-     * @param float $distance
+     * @param Image $image The image to process.
+     * @param float $distance Distance between laser points im cm to use for computation.
+     * @param ?string $lineInfo JSON string from the line detection
      *
      * @return void
      */
-    public function __construct($image, $points, $distance)
+    public function __construct(
+        public Image $image,
+        public float $distance,
+        public ?string $lineInfo = null,
+    )
     {
-        $this->image = $image;
-        $this->points = $points;
-        $this->distance = $distance;
+        //
     }
 
     /**
@@ -69,10 +53,10 @@ class ProcessManualJob extends BaseJob implements ShouldQueue
     public function handle()
     {
         try {
-            $output = FileCache::getOnce($this->image, function ($image, $path) {
-                $detect = App::make(Detect::class);
+            $output = FileCache::get($this->image, function ($image, $path) {
+                $detect = App::make(DetectAutomatic::class);
 
-                return $detect->execute($path, $this->distance, $this->points);
+                return $detect->execute($path, $this->distance, $this->lineInfo);
             });
         } catch (Exception $e) {
             $output = [

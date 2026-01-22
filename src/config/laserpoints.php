@@ -8,24 +8,14 @@ return [
     'python' => '/usr/bin/python3',
 
     /*
-    | Path to the detect script.
+    | Path to the manual detection script.
     */
-    'detect_script' => __DIR__.'/../resources/scripts/detect.py',
+    'manual_script' => __DIR__.'/../resources/scripts/manual.py',
 
     /*
-    | Path to the Delphi gather script.
+    | Path to the automatic detection script.
     */
-    'delphi_gather_script' => __DIR__.'/../resources/scripts/delphi_gather.py',
-
-    /*
-    | Path to the Delphi gather finish script.
-    */
-    'delphi_gather_finish_script' => __DIR__.'/../resources/scripts/delphi_gather_finish.py',
-
-    /*
-    | Path to the Delphi apply script.
-    */
-    'delphi_apply_script' => __DIR__.'/../resources/scripts/delphi_apply.py',
+    'automatic_script' => __DIR__.'/../resources/scripts/automatic.py',
 
     /*
     | Directory for temporary files.
@@ -33,13 +23,8 @@ return [
     'tmp_dir' => sys_get_temp_dir(),
 
     /*
-    | Storage disk to store Delphi gather files that are shared by queued jobs.
-    */
-    'disk' => env('LASERPOINTS_STORAGE_DISK', 'laserpoints'),
-
-    /*
      | Specifies which queue should be used for which job.
      */
-    'process_delphi_queue' => env('LASERPOINTS_PROCESS_DELPHI_QUEUE', 'default'),
+    'process_automatic_queue' => env('LASERPOINTS_PROCESS_AUTOMATIC_QUEUE', env('LASERPOINTS_PROCESS_DELPHI_QUEUE', 'default')),
     'process_manual_queue' => env('LASERPOINTS_PROCESS_MANUAL_QUEUE', 'default'),
 ];

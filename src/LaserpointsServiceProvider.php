@@ -58,29 +58,5 @@ class LaserpointsServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(__DIR__.'/config/laserpoints.php', 'laserpoints');
-
-        $this->app->singleton('command.laserpoints.publish', function ($app) {
-            return new \Biigle\Modules\Laserpoints\Console\Commands\Publish();
-        });
-        $this->app->singleton('command.laserpoints.config', function ($app) {
-            return new \Biigle\Modules\Laserpoints\Console\Commands\Config();
-        });
-
-        $this->commands([
-            'command.laserpoints.publish',
-            'command.laserpoints.config',
-        ]);
-    }
-    /**
-     * Get the services provided by the provider.
-     *
-     * @return array
-     */
-    public function provides()
-    {
-        return [
-            'command.laserpoints.publish',
-            'command.laserpoints.config',
-        ];
     }
 }

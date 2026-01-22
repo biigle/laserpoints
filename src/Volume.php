@@ -17,14 +17,6 @@ class Volume extends BaseVolume
     use FiltersInvalidLaserPoints;
 
     /**
-     * Minimum number of manually annotated images required for Delphi laser point
-     * detection.
-     *
-     * @var int
-     */
-    const MIN_DELPHI_IMAGES = 4;
-
-    /**
      * Converts a regular Biigle volume to a Laserpoints volume.
      *
      * @param BaseVolume $volume Regular Biigle volume instance
@@ -41,13 +33,13 @@ class Volume extends BaseVolume
     }
 
     /**
-     * Determines if the images of this volume can be processed with Delphi.
+     * Determines if the images of this volume have a valid number of manually annotated laser points.
      *
      * @param Label $label The laser point label.
      *
-     * @throws Exception If the images of this volume can't be processed with Delphi
+     * @throws Exception If the images of this volume have an invalid count of manually annotated laser points
      */
-    public function readyForDelphiDetection(Label $label)
+    public function readyForManualDetection(Label $label)
     {
         $points = ImageAnnotation::join('image_annotation_labels', 'image_annotation_labels.annotation_id', '=', 'image_annotations.id')
             ->join('images', 'image_annotations.image_id', '=', 'images.id')
@@ -61,10 +53,6 @@ class Volume extends BaseVolume
             ->map(function ($annotations) {
                 return $annotations->count();
             });
-
-        if ($points->count() < self::MIN_DELPHI_IMAGES) {
-            throw new Exception('Only '.$points->count().' images have manually annotated laser points. At least '.self::MIN_DELPHI_IMAGES.' are required.');
-        }
 
         $reference = $points->first();
         if ($reference < Image::MIN_MANUAL_POINTS) {
