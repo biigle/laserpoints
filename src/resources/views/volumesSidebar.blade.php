@@ -8,7 +8,6 @@
                     :is="plugins.laserpointsForm"
                     :volume-id="{{$volume->id}}"
                     ></component>
-                <a class="pull-right" href="{{route('manual-tutorials', ['laserpoints', 'laserpoint-detection'])}}" target="_blank">What is this?</a>
             </sidebar-tab>
         @endif
     @endcan

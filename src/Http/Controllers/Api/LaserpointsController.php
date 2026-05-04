@@ -27,6 +27,7 @@ class LaserpointsController extends Controller
      * @apiParam {Number} id The image ID.
      * @apiParam (Required arguments) {Number} label_id ID of the laser point label that was used.
      * @apiParam (Required arguments) {Number} distance The distance between two laser points in cm.
+     * @apiParam (Required arguments) {Number} num_laserpoints Number of laser points to search for.
      *
      * @param Request $request
      * @param int $id
@@ -73,6 +74,7 @@ class LaserpointsController extends Controller
      *
      * @apiParam {Number} id The image ID.
      * @apiParam (Required arguments) {Number} distance The distance between two laser points in cm.
+     * @apiParam (Required arguments) {Number} num_laserpoints Number of laser points to search for.
      *
      * @param Request $request
      * @param int $id
@@ -90,9 +92,10 @@ class LaserpointsController extends Controller
         }
         $request->validate([
             'distance' => 'required|numeric|min:1',
+            'num_laserpoints' => 'required|integer|min:1',
         ]);
 
-        ProcessImageAutomaticJob::dispatch($image, $request->input('distance'))
+        ProcessImageAutomaticJob::dispatch($image, $request->input('distance'), null, $request->input('num_laserpoints'))
             ->onQueue(config('laserpoints.process_automatic_queue'));
     }
 
@@ -158,9 +161,9 @@ class LaserpointsController extends Controller
      * @apiPermission projectEditor
      * @apiDescription This feature is not available for video volumes and volumes with very large images.
      *
-     * @apiParam {Number} id The image ID.
-     * @apiParam (Required arguments) {Number} distance The distance between two laser points in cm.
-     * @apiParam (Optional arguments) {boolean} disable_line_detection Set to true if the laser pointers can move relative to the camera (e.g. laser points could move even if the vehicle does not move).
+        * @apiParam {Number} id The image ID.
+        * @apiParam (Required arguments) {Number} distance The distance between two laser points in cm.
+        * @apiParam (Required arguments) {Number} num_laserpoints Number of laser points to search for.
      *
      * @param Request $request
      * @param int $id
@@ -188,10 +191,10 @@ class LaserpointsController extends Controller
 
         $request->validate([
             'distance' => 'required|numeric|min:1',
-            'disable_line_detection' => 'boolean',
+            'num_laserpoints' => 'required|integer|min:1',
         ]);
 
-        ProcessVolumeAutomaticJob::dispatch($volume, $request->input('distance'), $request->input('disable_line_detection', false))
+        ProcessVolumeAutomaticJob::dispatch($volume, $request->input('distance'), $request->input('num_laserpoints'))
             ->onQueue(config('laserpoints.process_automatic_queue'));
     }
 }

@@ -22,14 +22,13 @@
             <label for="distance">Laser distance in cm</label>
             <input v-model="distance" id="distance" type="number" min="1" step="0.1" title="Distance between two laser points in cm" class="form-control" required>
         </div>
+        <div class="form-group" v-show="!manualMode">
+            <label for="num_laserpoints">Number of laser points</label>
+            <input v-model.number="numLaserpoints" id="num_laserpoints" type="number" min="1" step="1" title="Number of laser points to detect" class="form-control" required>
+        </div>
         <div v-show="manualMode" class="form-group">
             <label for="label">Laser point label</label>
             <typeahead id="label" title="Laser point" placeholder="Laser point label" class="typeahead--block" :items="labels" @select="handleSelectLabel" @focus="loadLabels"></typeahead>
-        </div>
-        <div v-show="!manualMode && !imageId" class="form-group">
-            <label for="disable_line_detection" :class="lineDetectionClass">
-                <input v-model="disableLineDetection" type="checkbox" name="disable_line_detection" id="disable_line_detection"> Disable line detection
-            </label>
         </div>
         <div class="form-group">
             <button class="btn btn-success btn-block" title="Compute the area of each image in this  volume." :disabled="submitDisabled || null">Submit</button>
@@ -68,12 +67,12 @@ export default {
     data() {
         return {
             distance: null,
+            numLaserpoints: 2,
             processing: false,
             error: false,
             labels: [],
             label: null,
             manualMode: false,
-            disableLineDetection: false,
         };
     },
     computed: {
@@ -85,9 +84,6 @@ export default {
         },
         manualButtonClass() {
             return this.manualMode ? 'active' : '';
-        },
-        lineDetectionClass() {
-            return this.disableLineDetection ? 'text-warning' : '';
         },
     },
     methods: {
@@ -142,12 +138,15 @@ export default {
                 }
             } else {
                 if (this.imageId) {
-                    promise = LaserpointsApi.processImageAutomatic({image_id: this.imageId}, {distance: this.distance});
+                    promise = LaserpointsApi.processImageAutomatic({image_id: this.imageId}, {
+                        distance: this.distance,
+                        num_laserpoints: this.numLaserpoints,
+                    });
                 } else {
                     promise = LaserpointsApi.processVolumeAutomatic({volume_id: this.volumeId},
                     {
                         distance: this.distance,
-                        disable_line_detection: this.disable_line_detection,
+                        num_laserpoints: this.numLaserpoints,
                     }
                 );
                 }

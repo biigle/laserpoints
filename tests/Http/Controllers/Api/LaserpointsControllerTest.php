@@ -108,8 +108,15 @@ class LaserpointsControllerTest extends ApiTestCase
         $this->postJson("/api/v1/images/{$image->id}/laserpoints/automatic")
             ->assertStatus(422);
 
+        // Number of laser points is required.
+        $this->postJson("/api/v1/images/{$image->id}/laserpoints/automatic", [
+                'distance' => 50,
+            ])
+            ->assertStatus(422);
+
         $this->post("/api/v1/images/{$image->id}/laserpoints/automatic", [
                 'distance' => 50,
+                'num_laserpoints' => 2,
             ])
             ->assertStatus(200);
 
@@ -223,14 +230,12 @@ class LaserpointsControllerTest extends ApiTestCase
         $this->post("/api/v1/volumes/{$id}/laserpoints/automatic")->assertStatus(403);
 
         $this->beEditor();
-        $this->postJson("/api/v1/volumes/{$id}/laserpoints/automatic", [
-                'distance' => 50,
-            ])
-            ->assertStatus(200);
+        $this->postJson("/api/v1/volumes/{$id}/laserpoints/automatic")
+            ->assertStatus(422);
 
         $this->postJson("/api/v1/volumes/{$id}/laserpoints/automatic", [
                 'distance' => 50,
-                'disable_line_detection' => '1',
+                'num_laserpoints' => 2,
             ])
             ->assertStatus(200);
         Queue::assertPushed(ProcessVolumeAutomaticJob::class);

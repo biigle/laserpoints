@@ -30,7 +30,7 @@ class ProcessImageAutomaticJobTest extends TestCase
         $mock = Mockery::mock(DetectAutomatic::class);
         $mock->shouldReceive('execute')
             ->once()
-            ->with(Mockery::any(), 30, null)
+            ->with(Mockery::any(), 30, null, 2)
             ->andReturn([
                 'error' => false,
                 'area' => 100,
@@ -58,12 +58,12 @@ class ProcessImageAutomaticJobTest extends TestCase
         $this->assertSame(1, $this->image->fresh()->attrs['a']);
     }
 
-    public function testHandleLineInfo()
+    public function testHandleChannelMode()
     {
         $mock = Mockery::mock(DetectAutomatic::class);
         $mock->shouldReceive('execute')
             ->once()
-            ->with(Mockery::any(), 30, 'lineinfo')
+            ->with(Mockery::any(), 30, 'red', 2)
             ->andReturn([
                 'error' => false,
                 'area' => 100,
@@ -76,7 +76,7 @@ class ProcessImageAutomaticJobTest extends TestCase
             return $mock;
         });
 
-        with(new ProcessImageAutomaticJob($this->image, 30, 'lineinfo'))->handle();
+        with(new ProcessImageAutomaticJob($this->image, 30, 'red'))->handle();
 
         $expect = [
             'error' => false,

@@ -4,23 +4,24 @@ namespace Biigle\Modules\Laserpoints\Support;
 
 use File;
 
-class DetectLines extends LaserpointsScript
+class DetectColor extends LaserpointsScript
 {
     /**
-     * Execute the laser point detection script in line detection mode.
+     * Execute the laser point color detection on a subset of images.
      *
      * @param array $input Map of image IDs to cached file paths.
-     * @param float $distance Distance of the laser points in cm
+     * @param int $numLaserpoints Number of laser points to search for
      *
-     * @return ?string The JSON object produced by the script as string
+     * @return ?string The detected channel mode (red/green/blue/gray)
      */
-    public function execute($input, $distance)
+    public function execute($input, $numLaserpoints = 2)
     {
         $python = config('laserpoints.python');
         $script = config('laserpoints.automatic_script');
         $tmpDir = config('laserpoints.tmp_dir');
-        $workDir = $tmpDir.'/'.uniqid('biigle_laser_lines_output_');
+        $workDir = $tmpDir.'/'.uniqid('biigle_laser_color_output_');
         $inputJsonPath = $workDir.'/input.json';
+        $colorFile = 'color.txt';
         File::makeDirectory($workDir);
 
         try {
@@ -29,21 +30,22 @@ class DetectLines extends LaserpointsScript
             $command = "{$python} {$script} " .
                 "--input-json '{$inputJsonPath}' " .
                 "--output '{$workDir}' " .
-                "--mode lines-only " .
-                "--lines-file fitted_lines.json " .
-                "--laserdistance '{$distance}' 2>&1";
+                "--mode lpcolor " .
+                "--color-file '{$colorFile}' " .
+                "--num-laserpoints '{$numLaserpoints}' 2>&1";
 
             $this->exec($command, decode: false);
-            $linesInfo = File::get($workDir.'/fitted_lines.json');
+
+            $color = trim(File::get($workDir.'/'.$colorFile));
         } finally {
             File::deleteDirectory($workDir);
         }
 
-        $linesJson = json_decode($linesInfo);
-        if (!$linesJson || empty($linesInfo->lines)) {
+        $color = strtolower($color);
+        if (!in_array($color, ['red', 'green', 'blue', 'gray'], true)) {
             return null;
         }
 
-        return $linesInfo;
+        return $color;
     }
 }

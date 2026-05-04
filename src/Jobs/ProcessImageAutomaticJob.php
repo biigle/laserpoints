@@ -32,14 +32,16 @@ class ProcessImageAutomaticJob extends Job implements ShouldQueue
      *
      * @param Image $image The image to process.
      * @param float $distance Distance between laser points im cm to use for computation.
-     * @param ?string $lineInfo JSON string from the line detection
+     * @param ?string $channelMode Channel mode override (red/green/blue/gray)
+     * @param int $numLaserpoints Number of laser points to search for.
      *
      * @return void
      */
     public function __construct(
         public Image $image,
         public float $distance,
-        public ?string $lineInfo = null,
+        public ?string $channelMode = null,
+        public int $numLaserpoints = 2,
     )
     {
         //
@@ -56,7 +58,7 @@ class ProcessImageAutomaticJob extends Job implements ShouldQueue
             $output = FileCache::get($this->image, function ($image, $path) {
                 $detect = App::make(DetectAutomatic::class);
 
-                return $detect->execute($path, $this->distance, $this->lineInfo);
+                return $detect->execute($path, $this->distance, $this->channelMode, $this->numLaserpoints);
             });
         } catch (Exception $e) {
             $output = [
