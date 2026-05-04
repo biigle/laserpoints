@@ -280,20 +280,14 @@ def determine_best_mode(image_paths, num_points=3, sample_size=100):
 
 
 # ---------------------------------------------------------------------------
-# Channel mode resolution from biigleauto.py-style color flags
+# Channel mode resolution from color flags
 # ---------------------------------------------------------------------------
 
 def resolve_channel_mode(args, img_paths, sample_size=100):
-    """
-    Resolve the effective channel mode from the various CLI flags.
-    Supports both the --channel flag (ai_gemini style) and
-    --red/--green/--blue flags (biigleauto style).
-    """
     # If an explicit --channel was given and is not 'auto', use it directly
     if hasattr(args, 'channel') and args.channel and args.channel != "auto":
         return args.channel
 
-    # Map biigleauto-style color flags
     selected = []
     if args.red:
         selected.append("red")
@@ -366,14 +360,14 @@ def process_image(img_path: Path, args, channel_mode: str,
 
 
 # ---------------------------------------------------------------------------
-# Area calculation helpers (identical to biigleauto.py)
+# Area calculation helpers
 # ---------------------------------------------------------------------------
 
 def _compute_area(laserpoints: np.ndarray, width: int, height: int,
                   laserdistance: float, method_name: str) -> Optional[dict]:
     """
     Compute the image area (in m²) from detected laser points.
-    Returns a JSON-serialisable dict identical to the biigleauto.py output.
+    Returns a JSON-serialisable dict
     """
     n = laserpoints.shape[0]
     laserdist = float(laserdistance) / 100.0
@@ -507,7 +501,7 @@ def run_biigle_mode(args, img_paths: List[Path], img_id_map: Optional[Dict[str, 
 
 def _write_outputs(args, results: List[Tuple[ImageInfo, List[Annotation]]],
                    json_results: Dict[str, List[List[int]]]):
-    """Write COCO and JSON outputs (matching biigleauto.py)."""
+    """Write COCO and JSON outputs"""
     logger = logging.getLogger(__name__)
 
     coco = Coco(
@@ -543,16 +537,15 @@ def _write_outputs(args, results: List[Tuple[ImageInfo, List[Annotation]]],
 
 
 # ---------------------------------------------------------------------------
-# CLI – mirrors biigleauto.py argument parser exactly
+# CLI
 # ---------------------------------------------------------------------------
 
 def main():
     parser = argparse.ArgumentParser(
         description="Find laser points using Difference of Gaussians (DoG). "
-                    "Drop-in replacement for biigleauto.py."
     )
 
-    # Input/output arguments (identical to biigleauto.py)
+    # Input/output arguments
     parser.add_argument("-i", "--input", nargs="+", type=Path,
                         help="Path to input image(s) or directory")
     parser.add_argument("--input-json", type=Path,
