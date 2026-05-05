@@ -7,6 +7,7 @@
         <script type="module">
             biigle.$declare('laserpoints.image', {!! $image->toJson() !!});
             biigle.$declare('laserpoints.distance', {!! $img->distance ?: 'null' !!});
+            biigle.$declare('laserpoints.channel_mode', {!! json_encode($img->channel_mode) !!});
         </script>
     @endpush
 @endunless
@@ -48,6 +49,13 @@
                         <tr>
                             <th>Distance between laser points</th>
                             <td>{{ $img->distance }} cm</td>
+                        </tr>
+                    @endif
+
+                    @if ($img->channel_mode)
+                        <tr>
+                            <th>Color channel</th>
+                            <td>{{ ucfirst($img->channel_mode) }}</td>
                         </tr>
                     @endif
                 </table>

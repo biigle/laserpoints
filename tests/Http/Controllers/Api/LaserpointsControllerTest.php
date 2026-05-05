@@ -114,13 +114,51 @@ class LaserpointsControllerTest extends ApiTestCase
             ])
             ->assertStatus(422);
 
+        // Channel mode is required for per-image detection.
+        $this->postJson("/api/v1/images/{$image->id}/laserpoints/automatic", [
+                'distance' => 50,
+                'num_laserpoints' => 2,
+            ])
+            ->assertStatus(422);
+
         $this->post("/api/v1/images/{$image->id}/laserpoints/automatic", [
                 'distance' => 50,
                 'num_laserpoints' => 2,
+                'channel_mode' => 'red',
             ])
             ->assertStatus(200);
 
         Queue::assertPushed(ProcessImageAutomaticJob::class);
+    }
+
+    public function testImageAutomaticWithChannelMode()
+    {
+        $image = ImageTest::create(['volume_id' => $this->volume()->id]);
+        $this->beEditor();
+
+        $this->post("/api/v1/images/{$image->id}/laserpoints/automatic", [
+                'distance' => 50,
+                'num_laserpoints' => 2,
+                'channel_mode' => 'red',
+            ])
+            ->assertStatus(200);
+
+        Queue::assertPushed(ProcessImageAutomaticJob::class, function ($job) {
+            return $job->channelMode === 'red';
+        });
+    }
+
+    public function testImageAutomaticInvalidChannelMode()
+    {
+        $image = ImageTest::create(['volume_id' => $this->volume()->id]);
+        $this->beEditor();
+
+        $this->postJson("/api/v1/images/{$image->id}/laserpoints/automatic", [
+                'distance' => 50,
+                'num_laserpoints' => 2,
+                'channel_mode' => 'invalid',
+            ])
+            ->assertStatus(422);
     }
 
     public function testImageAutomaticTiled()

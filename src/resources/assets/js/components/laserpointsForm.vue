@@ -26,6 +26,16 @@
             <label for="num_laserpoints">Number of laser points</label>
             <input v-model.number="numLaserpoints" id="num_laserpoints" type="number" min="1" step="1" title="Number of laser points to detect" class="form-control" required>
         </div>
+        <div class="form-group" v-if="imageId && !manualMode">
+            <label for="channel_mode">Color channel</label>
+            <select v-model="channelMode" id="channel_mode" title="Color channel to use for laser point detection." class="form-control" required>
+                <option value="">Select channel...</option>
+                <option value="red">Red</option>
+                <option value="green">Green</option>
+                <option value="blue">Blue</option>
+                <option value="gray">Gray</option>
+            </select>
+        </div>
         <div v-show="manualMode" class="form-group">
             <label for="label">Laser point label</label>
             <typeahead id="label" title="Laser point" placeholder="Laser point label" class="typeahead--block" :items="labels" @select="handleSelectLabel" @focus="loadLabels"></typeahead>
@@ -68,6 +78,7 @@ export default {
         return {
             distance: null,
             numLaserpoints: 2,
+            channelMode: '',
             processing: false,
             error: false,
             labels: [],
@@ -77,7 +88,15 @@ export default {
     },
     computed: {
         submitDisabled() {
-            return this.loading || this.processing || !this.distance || this.manualMode && !this.label;
+            if (this.manualMode) {
+                return this.loading || this.processing || !this.distance || !this.label;
+            }
+            // For per-image automatic, channel_mode is required
+            if (this.imageId && !this.manualMode) {
+                return this.loading || this.processing || !this.distance || !this.channelMode;
+            }
+            // For volume automatic, channel_mode is not required
+            return this.loading || this.processing || !this.distance;
         },
         automaticButtonClass() {
             return this.manualMode ? '' : 'active';
@@ -137,18 +156,18 @@ export default {
                     promise = LaserpointsApi.processVolumeManual({volume_id: this.volumeId}, payload);
                 }
             } else {
+                const payload = {
+                    distance: this.distance,
+                    num_laserpoints: this.numLaserpoints,
+                };
+                if (this.channelMode) {
+                    payload.channel_mode = this.channelMode;
+                }
+
                 if (this.imageId) {
-                    promise = LaserpointsApi.processImageAutomatic({image_id: this.imageId}, {
-                        distance: this.distance,
-                        num_laserpoints: this.numLaserpoints,
-                    });
+                    promise = LaserpointsApi.processImageAutomatic({image_id: this.imageId}, payload);
                 } else {
-                    promise = LaserpointsApi.processVolumeAutomatic({volume_id: this.volumeId},
-                    {
-                        distance: this.distance,
-                        num_laserpoints: this.numLaserpoints,
-                    }
-                );
+                    promise = LaserpointsApi.processVolumeAutomatic({volume_id: this.volumeId}, payload);
                 }
             }
 
@@ -156,6 +175,14 @@ export default {
                 .catch(this.handleError)
                 .finally(this.finishLoading);
         },
+    },
+    mounted() {
+        // For per-image detection, use previous channel_mode if available, otherwise default to gray
+        if (this.imageId && window.biigle && window.biigle.laserpoints && window.biigle.laserpoints.channel_mode) {
+            this.channelMode = window.biigle.laserpoints.channel_mode;
+        } else if (this.imageId) {
+            this.channelMode = 'gray';
+        }
     },
 };
 </script>

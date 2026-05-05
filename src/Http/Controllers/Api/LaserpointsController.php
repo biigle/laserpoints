@@ -75,6 +75,7 @@ class LaserpointsController extends Controller
      * @apiParam {Number} id The image ID.
      * @apiParam (Required arguments) {Number} distance The distance between two laser points in cm.
      * @apiParam (Required arguments) {Number} num_laserpoints Number of laser points to search for.
+     * @apiParam (Optional arguments) {String} channel_mode Channel mode to use (red/green/blue/gray).
      *
      * @param Request $request
      * @param int $id
@@ -93,9 +94,10 @@ class LaserpointsController extends Controller
         $request->validate([
             'distance' => 'required|numeric|min:1',
             'num_laserpoints' => 'required|integer|min:1',
+            'channel_mode' => 'required|in:red,green,blue,gray',
         ]);
 
-        ProcessImageAutomaticJob::dispatch($image, $request->input('distance'), null, $request->input('num_laserpoints'))
+        ProcessImageAutomaticJob::dispatch($image, $request->input('distance'), $request->input('channel_mode'), $request->input('num_laserpoints'))
             ->onQueue(config('laserpoints.process_automatic_queue'));
     }
 

@@ -37,6 +37,7 @@ class ProcessImageAutomaticJobTest extends TestCase
                 'count' => 3,
                 'method' => 'manual',
                 'points' => [[100, 100], [100, 100], [100, 100]],
+                'channel_mode' => 'red',
             ]);
 
         App::singleton(DetectAutomatic::class, function () use ($mock) {
@@ -45,15 +46,14 @@ class ProcessImageAutomaticJobTest extends TestCase
 
         with(new ProcessImageAutomaticJob($this->image, 30))->handle();
 
-        $expect = [
-            'error' => false,
-            'area' => 100,
-            'count' => 3,
-            'method' => 'manual',
-            'points' => [[100, 100], [100, 100], [100, 100]],
-            'distance' => 30,
-        ];
-        $this->assertSame($expect, $this->image->fresh()->laserpoints);
+        $actual = $this->image->fresh()->laserpoints;
+        $this->assertSame(false, $actual['error']);
+        $this->assertSame(100, $actual['area']);
+        $this->assertSame(3, $actual['count']);
+        $this->assertSame('manual', $actual['method']);
+        $this->assertSame([[100, 100], [100, 100], [100, 100]], $actual['points']);
+        $this->assertSame(30, $actual['distance']);
+        $this->assertSame('red', $actual['channel_mode']);
         // Previously set attributes should not be lost.
         $this->assertSame(1, $this->image->fresh()->attrs['a']);
     }
@@ -78,15 +78,14 @@ class ProcessImageAutomaticJobTest extends TestCase
 
         with(new ProcessImageAutomaticJob($this->image, 30, 'red'))->handle();
 
-        $expect = [
-            'error' => false,
-            'area' => 100,
-            'count' => 3,
-            'method' => 'manual',
-            'points' => [[100, 100], [100, 100], [100, 100]],
-            'distance' => 30,
-        ];
-        $this->assertSame($expect, $this->image->fresh()->laserpoints);
+        $actual = $this->image->fresh()->laserpoints;
+        $this->assertSame(false, $actual['error']);
+        $this->assertSame(100, $actual['area']);
+        $this->assertSame(3, $actual['count']);
+        $this->assertSame('manual', $actual['method']);
+        $this->assertSame([[100, 100], [100, 100], [100, 100]], $actual['points']);
+        $this->assertSame(30, $actual['distance']);
+        $this->assertSame('red', $actual['channel_mode']);
         // Previously set attributes should not be lost.
         $this->assertSame(1, $this->image->fresh()->attrs['a']);
     }
@@ -107,13 +106,10 @@ class ProcessImageAutomaticJobTest extends TestCase
 
         with(new ProcessImageAutomaticJob($this->image, 30))->handle();
 
-        $expect = [
-            'error' => true,
-            'message' => 'Some expected error occurred.',
-            'distance' => 30,
-        ];
-
-        $this->assertSame($expect, $this->image->fresh()->laserpoints);
+        $actual = $this->image->fresh()->laserpoints;
+        $this->assertSame(true, $actual['error']);
+        $this->assertSame('Some expected error occurred.', $actual['message']);
+        $this->assertSame(30, $actual['distance']);
     }
 
     public function testHandleFatalError()
@@ -140,12 +136,9 @@ class ProcessImageAutomaticJobTest extends TestCase
 
         with(new ProcessImageAutomaticJob($this->image, 30))->handle();
 
-        $expect = [
-            'error' => true,
-            'message' => 'Fatal error message.',
-            'distance' => 30,
-        ];
-
-        $this->assertSame($expect, $this->image->fresh()->laserpoints);
+        $actual = $this->image->fresh()->laserpoints;
+        $this->assertSame(true, $actual['error']);
+        $this->assertSame('Fatal error message.', $actual['message']);
+        $this->assertSame(30, $actual['distance']);
     }
 }

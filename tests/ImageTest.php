@@ -109,4 +109,18 @@ class ImageTest extends TestCase
             $this->assertStringContainsString('can\'t have more than 4 manually annotated laser points', $e->getMessage());
         }
     }
+
+    public function testChannelModeAttribute()
+    {
+        $image = Image::convert(BaseImageTest::create());
+        $this->assertNull($image->channel_mode);
+
+        $image->laserpoints = [
+            'area' => 500,
+            'channel_mode' => 'red',
+        ];
+        $image->save();
+
+        $this->assertSame('red', $image->fresh()->channel_mode);
+    }
 }

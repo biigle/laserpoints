@@ -68,6 +68,9 @@ class ProcessImageAutomaticJob extends Job implements ShouldQueue
         }
 
         $output['distance'] = $this->distance;
+        if ($this->channelMode) {
+            $output['channel_mode'] = $this->channelMode;
+        }
 
         $this->image->laserpoints = $output;
         $this->image->save();

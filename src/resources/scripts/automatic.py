@@ -486,6 +486,7 @@ def run_biigle_mode(args, img_paths: List[Path], img_id_map: Optional[Dict[str, 
 
         area_result = _compute_area(laserpoints, image_info.width, image_info.height,
                                     args.laserdistance, detection)
+        area_result["channel_mode"] = channel_mode
         print(json.dumps(area_result))
     else:
         print(json.dumps({

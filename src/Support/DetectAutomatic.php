@@ -9,7 +9,7 @@ class DetectAutomatic extends LaserpointsScript
      *
      * @param string $imagePath Absolute path to the image file to detect laserpoints on
      * @param float $distance Distance of the laser points in cm
-     * @param ?string $channelMode Channel mode override (red/green/blue/gray)
+     * @param ?string $channelMode Channel mode (red/green/blue/gray) or null for auto-detection
      * @param int $numLaserpoints Number of laser points to search for
      *
      * @return array The JSON object returned by the detect script as array
@@ -18,13 +18,13 @@ class DetectAutomatic extends LaserpointsScript
     {
         $python = config('laserpoints.python');
         $script = config('laserpoints.automatic_script');
-        $channelMode = $channelMode ? strtolower($channelMode) : null;
+        $channelMode = $channelMode ? strtolower($channelMode) : 'auto';
 
         $command = "{$python} {$script} " .
             "--input '{$imagePath}' " .
             "--laserdistance '{$distance}' " .
             "--num-laserpoints '{$numLaserpoints}' " .
-            ($channelMode ? "--channel '{$channelMode}' " : "") .
+            "--channel '{$channelMode}' " .
             "--mode biigle_mode 2>&1";
 
         return $this->exec($command);
