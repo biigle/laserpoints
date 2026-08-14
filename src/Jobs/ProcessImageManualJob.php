@@ -5,8 +5,10 @@ namespace Biigle\Modules\Laserpoints\Jobs;
 use Biigle\Image;
 use Biigle\Shape;
 use DB;
+use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
 use Illuminate\Queue\SerializesModels;
 
+#[DeleteWhenMissingModels]
 class ProcessImageManualJob extends Job
 {
     use SerializesModels;
@@ -17,13 +19,6 @@ class ProcessImageManualJob extends Job
      * @var Image
      */
     protected $image;
-
-    /**
-     * Ignore this job if the image does not exist any more.
-     *
-     * @var bool
-     */
-    protected $deleteWhenMissingModels = true;
 
     /**
      * Create a new job instance.

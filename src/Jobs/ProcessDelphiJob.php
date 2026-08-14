@@ -12,10 +12,12 @@ use File;
 use FileCache;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Storage;
 
+#[DeleteWhenMissingModels]
 class ProcessDelphiJob extends BaseJob implements ShouldQueue
 {
     use Batchable, InteractsWithQueue, SerializesModels;
@@ -40,13 +42,6 @@ class ProcessDelphiJob extends BaseJob implements ShouldQueue
      * @var float
      */
     protected $distance;
-
-    /**
-     * Ignore this job if the image does not exist any more.
-     *
-     * @var bool
-     */
-    protected $deleteWhenMissingModels = true;
 
     /**
      * The number of times the job may be attempted.

@@ -5,10 +5,12 @@ namespace Biigle\Modules\Laserpoints\Jobs;
 use Biigle\Modules\Laserpoints\Image;
 use Biigle\Volume;
 use Cache;
+use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Bus;
 use Storage;
 
+#[DeleteWhenMissingModels]
 class ProcessVolumeDelphiJob extends Job
 {
     use SerializesModels;
@@ -19,13 +21,6 @@ class ProcessVolumeDelphiJob extends Job
      * @var Volume
      */
     protected $volume;
-
-    /**
-     * Ignore this job if the image does not exist any more.
-     *
-     * @var bool
-     */
-    protected $deleteWhenMissingModels = true;
 
     /**
      * Create a new job instance.
