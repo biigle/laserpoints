@@ -10,9 +10,11 @@ use Exception;
 use FileCache;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
+#[DeleteWhenMissingModels]
 class ProcessManualJob extends BaseJob implements ShouldQueue
 {
     use Batchable, InteractsWithQueue, SerializesModels;
@@ -37,13 +39,6 @@ class ProcessManualJob extends BaseJob implements ShouldQueue
      * @var float
      */
     protected $distance;
-
-    /**
-     * Ignore this job if the image does not exist any more.
-     *
-     * @var bool
-     */
-    protected $deleteWhenMissingModels = true;
 
     /**
      * Create a new job instance.
