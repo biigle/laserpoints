@@ -49,7 +49,15 @@ class Image extends BaseImage
         'points',
         'error',
         'message',
+        'channel_mode',
     ];
+
+    /**
+     * Attributes that should be appended during serialization.
+     *
+     * @var array
+     */
+    protected $appends = ['laserpoints'];
 
     /**
      * Converts a regular Biigle image to a Laserpoints image.
@@ -60,6 +68,7 @@ class Image extends BaseImage
      */
     public static function convert(BaseImage $image)
     {
+        // TODO: still needed?
         $instance = new static;
         $instance->setRawAttributes($image->attributes);
         $instance->exists = $image->exists;
@@ -163,6 +172,16 @@ class Image extends BaseImage
     public function getMessageAttribute()
     {
         return $this->accessLaserpointsArray('message');
+    }
+
+    /**
+     * Get the channel mode attribute from the laser point detection.
+     *
+     * @return ?string
+     */
+    public function getChannelModeAttribute()
+    {
+        return $this->accessLaserpointsArray('channel_mode');
     }
 
     /**

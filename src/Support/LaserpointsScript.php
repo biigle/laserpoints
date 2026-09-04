@@ -15,15 +15,18 @@ class LaserpointsScript
      *
      * @return array The JSON object returned by the detection script as array
      */
-    public function exec($command)
+    public function exec($command, $decode = true)
     {
         $code = 0;
         $lines = [];
-        $output = json_decode(exec($command, $lines, $code), true);
+        $output = exec($command, $lines, $code);
+        if ($decode) {
+            $output = json_decode($output, true);
+        }
 
         // Common script errors are handled gracefully with JSON error output. If the
         // output is no valid JSON with an 'error' property the script crashed fatally.
-        if ($output === null || !array_key_exists('error', $output)) {
+        if ($code !== 0 || $decode && ($output === null || !array_key_exists('error', $output))) {
             $message = "Fatal error with laser point detection (code {$code}).";
             Log::error($message, [
                 'command' => $command,
