@@ -12,21 +12,16 @@ use Exception;
 use FileCache;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
+#[DeleteWhenMissingModels]
 class ProcessImageManualJob extends Job implements ShouldQueue
 {
     use Batchable, InteractsWithQueue, SerializesModels;
 
     public $tries = 1;
-
-    /**
-     * Ignore this job if the image does not exist any more.
-     *
-     * @var bool
-     */
-    protected $deleteWhenMissingModels = true;
 
     /**
      * Create a new job instance.

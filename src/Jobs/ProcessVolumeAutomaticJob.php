@@ -8,20 +8,15 @@ use Biigle\Modules\Laserpoints\Image;
 use Biigle\Modules\Laserpoints\Support\DetectColor;
 use Biigle\Volume;
 use FileCache;
+use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
 use Illuminate\Queue\SerializesModels;
 
+#[DeleteWhenMissingModels]
 class ProcessVolumeAutomaticJob extends Job
 {
     use SerializesModels;
 
     public $tries = 1;
-
-    /**
-     * Ignore this job if the image does not exist any more.
-     *
-     * @var bool
-     */
-    protected $deleteWhenMissingModels = true;
 
     /**
      * Create a new job instance.

@@ -7,20 +7,15 @@ use Biigle\Label;
 use Biigle\Modules\Laserpoints\Image;
 use Biigle\Shape;
 use Biigle\Volume;
+use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
 use Illuminate\Queue\SerializesModels;
 
+#[DeleteWhenMissingModels]
 class ProcessVolumeManualJob extends Job
 {
     use SerializesModels;
 
     public $tries = 1;
-
-    /**
-     * Ignore this job if the image does not exist any more.
-     *
-     * @var bool
-     */
-    protected $deleteWhenMissingModels = true;
 
     /**
      * Create a new job instance.
