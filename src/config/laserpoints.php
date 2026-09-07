@@ -8,11 +8,6 @@ return [
     'python' => '/usr/bin/python3',
 
     /*
-    | Path to the manual detection script.
-    */
-    'manual_script' => __DIR__.'/../resources/scripts/manual.py',
-
-    /*
     | Path to the automatic detection script.
     */
     'automatic_script' => __DIR__.'/../resources/scripts/automatic.py',

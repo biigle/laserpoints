@@ -38,7 +38,9 @@ class LaserpointsController extends Controller
     {
         $image = Image::with('volume')->findOrFail($id);
         $this->authorize('edit-in', $image->volume);
-        // TODO manual is possible for tiled images? how does the script get the dimensions? do we need a python script for this at all?
+        // The manual detection itself works for tiled images, too, as it only needs
+        // the image dimensions. This restriction can be lifted once the UI offers the
+        // manual detection for volumes with very large images.
         if ($image->tiled) {
             throw ValidationException::withMessages([
                 'id' => 'Laser point detection is not available for very large images.',
@@ -129,7 +131,9 @@ class LaserpointsController extends Controller
                 'id' => 'Laser point detection is only available for image volumes.',
             ]);
         }
-        // TODO manual is possible for tiled images? how does the script get the dimensions? do we need a python script for this at all?
+        // The manual detection itself works for tiled images, too, as it only needs
+        // the image dimensions. This restriction can be lifted once the UI offers the
+        // manual detection for volumes with very large images.
         if ($volume->hasTiledImages()) {
             throw ValidationException::withMessages([
                 'id' => 'Laser point detection is not available for volumes with very large images.',
