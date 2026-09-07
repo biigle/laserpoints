@@ -9,7 +9,6 @@ use Biigle\Modules\Laserpoints\Image;
 use Biigle\Modules\Laserpoints\Support\DetectManual;
 use Biigle\Shape;
 use Exception;
-use FileCache;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
@@ -49,13 +48,13 @@ class ProcessImageManualJob extends Job implements ShouldQueue
     public function handle()
     {
         try {
-            // TODO implement this without loading the image. dimensions are available in the image model. this can be enabled for tiled images too then.
-            $output = FileCache::get($this->image, function ($image, $path) {
-                $detect = App::make(DetectManual::class);
-                $points = $this->getLaserpoints();
-
-                return $detect->execute($path, $this->distance, $points);
-            });
+            $detect = App::make(DetectManual::class);
+            $output = $detect->execute(
+                $this->image->width,
+                $this->image->height,
+                $this->distance,
+                $this->getLaserpoints()
+            );
         } catch (Exception $e) {
             $output = [
                 'error' => true,
@@ -72,7 +71,7 @@ class ProcessImageManualJob extends Job implements ShouldQueue
     /**
      * Collects the laser point annotations of the given image.
      *
-     * @return string JSON encoded array of annotation coordinates
+     * @return array Array of annotation coordinates as `[x, y]` pairs
      */
     protected function getLaserpoints()
     {
@@ -81,6 +80,6 @@ class ProcessImageManualJob extends Job implements ShouldQueue
             ->where('image_annotation_labels.label_id', $this->label->id)
             ->where('image_annotations.shape_id', Shape::pointId())
             ->pluck('image_annotations.points')
-            ->toJson();
+            ->toArray();
     }
 }

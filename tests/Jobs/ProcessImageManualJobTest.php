@@ -23,7 +23,9 @@ class ProcessImageManualJobTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        $this->image = Image::convert(ImageTest::create(['attrs' => ['a' => 1]]));
+        $this->image = Image::convert(ImageTest::create([
+            'attrs' => ['a' => 1, 'width' => 1000, 'height' => 800],
+        ]));
         $this->label = Label::factory()->create();
         ImageAnnotationLabel::factory()->create([
             'label_id' => $this->label->id,
@@ -56,7 +58,7 @@ class ProcessImageManualJobTest extends TestCase
         $mock = Mockery::mock(DetectManual::class);
         $mock->shouldReceive('execute')
             ->once()
-            ->with(Mockery::any(), 30, '[[100,100],[100,100],[100,100]]')
+            ->with(1000, 800, 30, [[100, 100], [100, 100], [100, 100]])
             ->andReturn([
                 'error' => false,
                 'area' => 100,
