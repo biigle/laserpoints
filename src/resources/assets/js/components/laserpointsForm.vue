@@ -24,7 +24,7 @@
         </div>
         <div class="form-group" v-show="!manualMode">
             <label for="num_laserpoints">Number of laser points</label>
-            <input v-model.number="numLaserpoints" id="num_laserpoints" type="number" min="1" step="1" title="Number of laser points to detect" class="form-control" required>
+            <input v-model.number="numLaserpoints" id="num_laserpoints" type="number" min="2" max="4" step="1" title="Number of laser points to detect (2, 3 or 4)" class="form-control" required>
         </div>
         <div class="form-group" v-if="imageId && !manualMode">
             <label for="channel_mode">Color channel</label>

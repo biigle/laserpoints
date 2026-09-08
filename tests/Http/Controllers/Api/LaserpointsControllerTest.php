@@ -161,6 +161,33 @@ class LaserpointsControllerTest extends ApiTestCase
             ->assertStatus(422);
     }
 
+    public function testImageAutomaticNumLaserpointsRange()
+    {
+        $image = ImageTest::create(['volume_id' => $this->volume()->id]);
+        $this->beEditor();
+
+        // Only 2, 3 and 4 laser points are supported by the area computation.
+        foreach ([1, 5] as $numLaserpoints) {
+            $this->postJson("/api/v1/images/{$image->id}/laserpoints/automatic", [
+                    'distance' => 50,
+                    'num_laserpoints' => $numLaserpoints,
+                    'channel_mode' => 'red',
+                ])
+                ->assertStatus(422);
+        }
+
+        Queue::assertNotPushed(ProcessImageAutomaticJob::class);
+
+        foreach ([2, 3, 4] as $numLaserpoints) {
+            $this->postJson("/api/v1/images/{$image->id}/laserpoints/automatic", [
+                    'distance' => 50,
+                    'num_laserpoints' => $numLaserpoints,
+                    'channel_mode' => 'red',
+                ])
+                ->assertStatus(200);
+        }
+    }
+
     public function testImageAutomaticTiled()
     {
         $image = ImageTest::create(['tiled' => true, 'volume_id' => $this->volume()->id]);
@@ -277,6 +304,31 @@ class LaserpointsControllerTest extends ApiTestCase
             ])
             ->assertStatus(200);
         Queue::assertPushed(ProcessVolumeAutomaticJob::class);
+    }
+
+    public function testVolumeAutomaticNumLaserpointsRange()
+    {
+        $id = $this->volume()->id;
+        $this->beEditor();
+
+        // Only 2, 3 and 4 laser points are supported by the area computation.
+        foreach ([1, 5] as $numLaserpoints) {
+            $this->postJson("/api/v1/volumes/{$id}/laserpoints/automatic", [
+                    'distance' => 50,
+                    'num_laserpoints' => $numLaserpoints,
+                ])
+                ->assertStatus(422);
+        }
+
+        Queue::assertNotPushed(ProcessVolumeAutomaticJob::class);
+
+        foreach ([2, 3, 4] as $numLaserpoints) {
+            $this->postJson("/api/v1/volumes/{$id}/laserpoints/automatic", [
+                    'distance' => 50,
+                    'num_laserpoints' => $numLaserpoints,
+                ])
+                ->assertStatus(200);
+        }
     }
 
     public function testVolumeAutomaticTiled()
