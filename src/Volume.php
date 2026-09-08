@@ -41,11 +41,13 @@ class Volume extends BaseVolume
      */
     public function readyForManualDetection(Label $label)
     {
-        $points = ImageAnnotation::join('image_annotation_labels', 'image_annotation_labels.annotation_id', '=', 'image_annotations.id')
-            ->join('images', 'image_annotations.image_id', '=', 'images.id')
+        // Use an exists constraint instead of a join on the annotation labels because the
+        // same label can be attached to the same annotation by multiple users. A join
+        // would count these annotations more than once.
+        $points = ImageAnnotation::join('images', 'image_annotations.image_id', '=', 'images.id')
             ->where('images.volume_id', $this->id)
-            ->where('image_annotation_labels.label_id', $label->id)
             ->where('image_annotations.shape_id', Shape::pointId())
+            ->whereHas('labels', fn ($query) => $query->where('label_id', $label->id))
             ->select('image_annotations.points', 'image_annotations.image_id')
             ->get()
             ->groupBy('image_id')

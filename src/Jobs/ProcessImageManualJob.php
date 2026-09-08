@@ -75,11 +75,15 @@ class ProcessImageManualJob extends Job implements ShouldQueue
      */
     protected function getLaserpoints()
     {
+        // Use an exists constraint instead of a join because the same label can be
+        // attached to the same annotation by multiple users. A join would return the
+        // points of these annotations more than once, which would distort the computed
+        // image area.
         return $this->image->annotations()
-            ->join('image_annotation_labels', 'image_annotation_labels.annotation_id', '=', 'image_annotations.id')
-            ->where('image_annotation_labels.label_id', $this->label->id)
-            ->where('image_annotations.shape_id', Shape::pointId())
-            ->pluck('image_annotations.points')
+            ->where('shape_id', Shape::pointId())
+            ->whereHas('labels', fn ($query) => $query->where('label_id', $this->label->id))
+            ->orderBy('id')
+            ->pluck('points')
             ->toArray();
     }
 }
