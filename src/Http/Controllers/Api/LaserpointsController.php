@@ -9,10 +9,13 @@ use Biigle\Modules\Laserpoints\Jobs\ProcessImageAutomaticJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageManualJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeAutomaticJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeManualJob;
+use Biigle\Modules\Laserpoints\Support\DetectionLock;
 use Biigle\Modules\Laserpoints\Volume;
+use Bus;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class LaserpointsController extends Controller
 {
@@ -60,8 +63,15 @@ class LaserpointsController extends Controller
             ]);
         }
 
-        ProcessImageManualJob::dispatch($image, $label, $request->input('distance'))
-            ->onQueue(config('laserpoints.process_manual_queue'));
+        $this->acquireImageLock($image);
+
+        try {
+            ProcessImageManualJob::dispatch($image, $label, $request->input('distance'))
+                ->onQueue(config('laserpoints.process_manual_queue'));
+        } catch (Throwable $e) {
+            DetectionLock::releaseImage($image->volume_id, $image->id);
+            throw $e;
+        }
     }
 
     /**
@@ -98,8 +108,15 @@ class LaserpointsController extends Controller
             'channel_mode' => 'required|in:red,green,blue,gray',
         ]);
 
-        ProcessImageAutomaticJob::dispatch($image, $request->input('distance'), $request->input('channel_mode'), $request->input('num_laserpoints'))
-            ->onQueue(config('laserpoints.process_automatic_queue'));
+        $this->acquireImageLock($image);
+
+        try {
+            ProcessImageAutomaticJob::dispatch($image, $request->input('distance'), $request->input('channel_mode'), $request->input('num_laserpoints'))
+                ->onQueue(config('laserpoints.process_automatic_queue'));
+        } catch (Throwable $e) {
+            DetectionLock::releaseImage($image->volume_id, $image->id);
+            throw $e;
+        }
     }
 
     /**
@@ -121,8 +138,6 @@ class LaserpointsController extends Controller
      */
     public function volumeManual(Request $request, $id)
     {
-        // TODO use cache key to prevent users from submitting multiple jobs at the same
-        // time
         $volume = Volume::findOrFail($id);
         $this->authorize('edit-in', $volume);
         if (!$volume->isImageVolume()) {
@@ -153,8 +168,13 @@ class LaserpointsController extends Controller
             ]);
         }
 
-        ProcessVolumeManualJob::dispatch($volume, $label, $request->input('distance'))
-            ->onQueue(config('laserpoints.process_manual_queue'));
+        $this->acquireVolumeLock($volume);
+
+        $this->dispatchVolumeBatch(
+            $volume,
+            new ProcessVolumeManualJob($volume, $label, $request->input('distance')),
+            config('laserpoints.process_manual_queue')
+        );
     }
 
     /**
@@ -177,8 +197,6 @@ class LaserpointsController extends Controller
      */
     public function volumeAutomatic(Request $request, $id)
     {
-        // TODO use cache key to track which image job should delete cache data
-        // and to prevent users from submitting multiple jobs at the same time
         $volume = Volume::findOrFail($id);
         $this->authorize('edit-in', $volume);
 
@@ -199,7 +217,72 @@ class LaserpointsController extends Controller
             'num_laserpoints' => 'required|integer|min:'.Image::MIN_POINTS.'|max:'.Image::MAX_POINTS,
         ]);
 
-        ProcessVolumeAutomaticJob::dispatch($volume, $request->input('distance'), $request->input('num_laserpoints'))
-            ->onQueue(config('laserpoints.process_automatic_queue'));
+        $this->acquireVolumeLock($volume);
+
+        $this->dispatchVolumeBatch(
+            $volume,
+            new ProcessVolumeAutomaticJob($volume, $request->input('distance'), $request->input('num_laserpoints')),
+            config('laserpoints.process_automatic_queue')
+        );
+    }
+
+    /**
+     * Dispatch a volume job as a batch that releases the volume lock when it's
+     * finished. The volume job adds the image jobs to the same batch in chunks. The
+     * batch can't finish before all image jobs were added because the volume job is
+     * part of it.
+     *
+     * @param Volume $volume
+     * @param object $job
+     * @param string $queue
+     */
+    protected function dispatchVolumeBatch(Volume $volume, $job, $queue)
+    {
+        $volumeId = $volume->id;
+
+        try {
+            // The closure is static so the controller is not serialized with it.
+            Bus::batch([$job])
+                ->onQueue($queue)
+                ->allowFailures()
+                ->finally(static fn () => DetectionLock::releaseVolume($volumeId))
+                ->dispatch();
+        } catch (Throwable $e) {
+            DetectionLock::releaseVolume($volumeId);
+            throw $e;
+        }
+    }
+
+    /**
+     * Prevent a new volume detection while another detection runs in the volume.
+     *
+     * @param Volume $volume
+     *
+     * @throws ValidationException
+     */
+    protected function acquireVolumeLock(Volume $volume)
+    {
+        if (!DetectionLock::acquireVolume($volume->id)) {
+            throw ValidationException::withMessages([
+                'id' => 'A laser point detection is already running for this volume.',
+            ]);
+        }
+    }
+
+    /**
+     * Prevent a new image detection while a volume detection or another detection of
+     * the same image runs.
+     *
+     * @param Image $image
+     *
+     * @throws ValidationException
+     */
+    protected function acquireImageLock(Image $image)
+    {
+        if (!DetectionLock::acquireImage($image->volume_id, $image->id)) {
+            throw ValidationException::withMessages([
+                'id' => 'A laser point detection is already running for this image or its volume.',
+            ]);
+        }
     }
 }
