@@ -9,7 +9,7 @@ use Biigle\Label;
 use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeManualJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageManualJob;
 use Biigle\Shape;
-use Queue;
+use Biigle\Volume;
 use TestCase;
 
 class ProcessVolumeManualJobTest extends TestCase
@@ -58,14 +58,25 @@ class ProcessVolumeManualJobTest extends TestCase
             ])->id,
         ]);
 
-        (new ProcessVolumeManualJob($image->volume, $label, 30))->handle();
-        Queue::assertPushed(ProcessImageManualJob::class, function ($j) use ($image, $label) {
-            $this->assertEquals($image->id, $j->image->id);
-            $this->assertEquals($label->id, $j->label->id);
-            $this->assertEquals(30, $j->distance);
-            return true;
-        });
+        [$job, $batch] = (new ProcessVolumeManualJob($image->volume, $label, 30))->withFakeBatch();
+        $job->handle();
+        $this->assertCount(1, $batch->added);
+        $j = $batch->added[0];
+        $this->assertInstanceOf(ProcessImageManualJob::class, $j);
+        $this->assertEquals($image->id, $j->imageId);
+        $this->assertEquals($image->volume_id, $j->volumeId);
+        $this->assertEquals($label->id, $j->label->id);
+        $this->assertEquals(30, $j->distance);
+        $this->assertTrue($j->batch);
+    }
 
-        Queue::assertPushed(ProcessImageManualJob::class, 1);
+    public function testHandleNoImages()
+    {
+        $volume = Volume::factory()->create();
+        $label = Label::factory()->create();
+
+        [$job, $batch] = (new ProcessVolumeManualJob($volume, $label, 30))->withFakeBatch();
+        $job->handle();
+        $this->assertEmpty($batch->added);
     }
 }
