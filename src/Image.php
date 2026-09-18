@@ -6,7 +6,6 @@ use Arr;
 use Biigle\Image as BaseImage;
 use Biigle\Label;
 use Biigle\Shape;
-use DB;
 use Exception;
 
 /**
@@ -23,18 +22,18 @@ class Image extends BaseImage
     const LASERPOINTS_ATTRIBUTE = 'laserpoints';
 
     /**
-     * Minimum number of required manual laser point annotations per image.
+     * Minimum number of laser points per image (manual and automatic detection).
      *
      * @var int
      */
-    const MIN_MANUAL_POINTS = 2;
+    const MIN_POINTS = 2;
 
     /**
-     * Maximum number of supported manual laser point annotations per image.
+     * Maximum number of laser points per image (manual and automatic detection).
      *
      * @var int
      */
-    const MAX_MANUAL_POINTS = 4;
+    const MAX_POINTS = 4;
 
     /**
      * Properties of the laser points object.
@@ -49,7 +48,15 @@ class Image extends BaseImage
         'points',
         'error',
         'message',
+        'channel_mode',
     ];
+
+    /**
+     * Attributes that should be appended during serialization.
+     *
+     * @var array
+     */
+    protected $appends = ['laserpoints'];
 
     /**
      * Converts a regular Biigle image to a Laserpoints image.
@@ -60,6 +67,7 @@ class Image extends BaseImage
      */
     public static function convert(BaseImage $image)
     {
+        // TODO: still needed?
         $instance = new static;
         $instance->setRawAttributes($image->attributes);
         $instance->exists = $image->exists;
@@ -166,6 +174,16 @@ class Image extends BaseImage
     }
 
     /**
+     * Get the channel mode attribute from the laser point detection.
+     *
+     * @return ?string
+     */
+    public function getChannelModeAttribute()
+    {
+        return $this->accessLaserpointsArray('channel_mode');
+    }
+
+    /**
      * Determines if this image has a valid number of manually annotated laser points.
      *
      * @param Label $label The laser point label.
@@ -175,18 +193,19 @@ class Image extends BaseImage
      */
     public function readyForManualDetection(Label $label)
     {
-        $count = DB::table('image_annotations')
-            ->join('image_annotation_labels', 'image_annotation_labels.annotation_id', '=', 'image_annotations.id')
-            ->where('image_annotations.image_id', $this->id)
-            ->where('image_annotation_labels.label_id', $label->id)
-            ->where('image_annotations.shape_id', Shape::pointId())
+        // Use an exists constraint instead of a join because the same label can be
+        // attached to the same annotation by multiple users. A join would count these
+        // annotations more than once.
+        $count = $this->annotations()
+            ->where('shape_id', Shape::pointId())
+            ->whereHas('labels', fn ($query) => $query->where('label_id', $label->id))
             ->count();
 
         if ($count > 0) {
-            if ($count < self::MIN_MANUAL_POINTS) {
-                throw new Exception('An image must have at least '.self::MIN_MANUAL_POINTS.' manually annotated laser points (has '.$count.').');
-            } elseif ($count > self::MAX_MANUAL_POINTS) {
-                throw new Exception('An image can\'t have more than '.self::MAX_MANUAL_POINTS.' manually annotated laser points (has '.$count.').');
+            if ($count < self::MIN_POINTS) {
+                throw new Exception('An image must have at least '.self::MIN_POINTS.' manually annotated laser points (has '.$count.').');
+            } elseif ($count > self::MAX_POINTS) {
+                throw new Exception('An image can\'t have more than '.self::MAX_POINTS.' manually annotated laser points (has '.$count.').');
             }
         }
 

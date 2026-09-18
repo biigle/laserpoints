@@ -1,12 +1,56 @@
 <template>
     <form class="form-stacked" @submit.prevent="submit">
-        <div class="form-group">
-            <label for="label">Laser point label</label>
-            <typeahead id="label" title="Laser point" placeholder="Laser point label" class="typeahead--block" :items="labels" @select="handleSelectLabel" @focus="loadLabels"></typeahead>
+        <div class="btn-group btn-group-justified">
+            <div class="btn-group">
+              <button
+                type="button"
+                class="btn btn-default"
+                :class="automaticButtonClass"
+                @click="selectAutomatic"
+                >Automatic</button>
+            </div>
+            <div class="btn-group">
+              <button
+                type="button"
+                class="btn btn-default"
+                :class="manualButtonClass"
+                @click="selectManual"
+                >Manual</button>
+            </div>
         </div>
         <div class="form-group">
             <label for="distance">Laser distance in cm</label>
             <input v-model="distance" id="distance" type="number" min="1" step="0.1" title="Distance between two laser points in cm" class="form-control" required>
+        </div>
+        <div class="form-group" v-show="!manualMode">
+            <label>Number of laser points</label>
+            <div class="btn-group btn-group-justified">
+                <div class="btn-group" v-for="count in [2, 3, 4]" :key="count">
+                    <button
+                        type="button"
+                        class="btn btn-default"
+                        :class="{active: numLaserpoints === count}"
+                        @click="numLaserpoints = count"
+                        >{{ count }}</button>
+                </div>
+            </div>
+        </div>
+        <div class="form-group" v-if="imageId && !manualMode">
+            <label>Color channel</label>
+            <div class="btn-group btn-group-justified">
+                <div class="btn-group" v-for="mode in channelModes" :key="mode">
+                    <button
+                        type="button"
+                        class="btn btn-default text-capitalize"
+                        :class="{active: channelMode === mode}"
+                        @click="channelMode = mode"
+                        >{{ mode }}</button>
+                </div>
+            </div>
+        </div>
+        <div v-show="manualMode" class="form-group">
+            <label for="label">Laser point label</label>
+            <typeahead id="label" title="Laser point" placeholder="Laser point label" class="typeahead--block" :items="labels" @select="handleSelectLabel" @focus="loadLabels"></typeahead>
         </div>
         <div class="form-group">
             <button class="btn btn-success btn-block" title="Compute the area of each image in this  volume." :disabled="submitDisabled || null">Submit</button>
@@ -32,22 +76,55 @@ export default {
     components: {
         typeahead: LabelTypeahead,
     },
+    props: {
+        volumeId: {
+            type: Number,
+            required: true,
+        },
+        imageId: {
+            type: Number,
+            default: null,
+        },
+    },
     data() {
         return {
-            volumeId: null,
-            distance: 1,
+            distance: null,
+            numLaserpoints: 2,
+            channelMode: '',
+            channelModes: ['gray', 'red', 'green', 'blue'],
             processing: false,
             error: false,
             labels: [],
             label: null,
+            manualMode: false,
         };
     },
     computed: {
         submitDisabled() {
-            return this.loading || this.processing || !this.distance || !this.label;
+            if (this.manualMode) {
+                return this.loading || this.processing || !this.distance || !this.label;
+            }
+            // For per-image automatic, channel_mode is required
+            if (this.imageId && !this.manualMode) {
+                return this.loading || this.processing || !this.distance || !this.channelMode;
+            }
+            // For volume automatic, channel_mode is not required
+            return this.loading || this.processing || !this.distance;
+        },
+        automaticButtonClass() {
+            return this.manualMode ? '' : 'active';
+        },
+        manualButtonClass() {
+            return this.manualMode ? 'active' : '';
         },
     },
     methods: {
+        selectAutomatic() {
+            this.manualMode = false;
+        },
+        selectManual() {
+            this.manualMode = true;
+        },
         handleError(response) {
             if (response.status === 422 && response.body.errors && response.body.errors.id) {
                 this.error = response.body.errors.id.join("\n");
@@ -79,17 +156,52 @@ export default {
         },
         submit() {
             this.startLoading();
-            LaserpointsApi.processVolume({volume_id: this.volumeId}, {
+            let promise;
+            if (this.manualMode) {
+                const payload = {
                     distance: this.distance,
                     label_id: this.label.id,
-                })
-                .then(this.setProcessing)
+                };
+
+                if (this.imageId) {
+                    promise = LaserpointsApi.processImageManual({image_id: this.imageId}, payload);
+                } else {
+                    promise = LaserpointsApi.processVolumeManual({volume_id: this.volumeId}, payload);
+                }
+            } else {
+                const payload = {
+                    distance: this.distance,
+                    num_laserpoints: this.numLaserpoints,
+                };
+                if (this.channelMode) {
+                    payload.channel_mode = this.channelMode;
+                }
+
+                if (this.imageId) {
+                    promise = LaserpointsApi.processImageAutomatic({image_id: this.imageId}, payload);
+                } else {
+                    promise = LaserpointsApi.processVolumeAutomatic({volume_id: this.volumeId}, payload);
+                }
+            }
+
+            promise.then(this.setProcessing)
                 .catch(this.handleError)
                 .finally(this.finishLoading);
         },
     },
-    created() {
-        this.volumeId = biigle.$require('volumes.volumeId');
+    mounted() {
+        // For per-image detection, use previous channel_mode if available, otherwise default to gray
+        if (this.imageId && window.biigle && window.biigle.laserpoints && window.biigle.laserpoints.channel_mode) {
+            this.channelMode = window.biigle.laserpoints.channel_mode;
+        } else if (this.imageId) {
+            this.channelMode = 'gray';
+        }
     },
 };
 </script>
+
+<style scoped>
+    .btn-group-justified {
+        margin-bottom: 15px;
+    }
+</style>

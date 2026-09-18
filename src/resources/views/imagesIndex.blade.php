@@ -7,6 +7,7 @@
         <script type="module">
             biigle.$declare('laserpoints.image', {!! $image->toJson() !!});
             biigle.$declare('laserpoints.distance', {!! $img->distance ?: 'null' !!});
+            biigle.$declare('laserpoints.channel_mode', {!! json_encode($img->channel_mode) !!});
         </script>
     @endpush
 @endunless
@@ -50,6 +51,13 @@
                             <td>{{ $img->distance }} cm</td>
                         </tr>
                     @endif
+
+                    @if ($img->channel_mode)
+                        <tr>
+                            <th>Color channel</th>
+                            <td>{{ ucfirst($img->channel_mode) }}</td>
+                        </tr>
+                    @endif
                 </table>
             @endif
             <div id="laserpoints-panel" class="panel-body">
@@ -66,25 +74,12 @@
                     </div>
                 @endif
                 @can('edit-in', $volume)
-                    <div class="alert alert-success" v-cloak v-if="processing">
-                        The laser point detection was submitted and will be available soon.
-                    </div>
-                    <div class="alert alert-danger" v-cloak v-else-if="error" v-text="error"></div>
-                    <form class="" v-if="!processing" v-on:submit.prevent="submit">
-                        <div class="form-group">
-                            <typeahead id="label" title="Label that was used to annotate laser points" placeholder="Laser point label" class="typeahead--block" :items="labels" v-on:select="handleSelectLabel" v-on:focus="loadLabels">
-                        </div>
-                        <div class="row">
-                            <div class="form-group col-xs-6">
-                                <input class="form-control" v-model="distance" type="number" min="1" step="0.1" placeholder="Laser distance" title="Distance between two laser points in cm"></input>
-                            </div>
-                            <div class="col-xs-6">
-                                <button class="btn btn-success btn-block" :disabled="submitDisabled || null" title="Start a new laser point detection">Submit</button>
-                            </div>
-                        </div>
-                    </form>
+                    <laserpoints-form
+                        :volume-id="{{$img->volume_id}}"
+                        :image-id="{{$img->id}}"
+                        ></laserpoints-form>
                 @endcan
-            @endif
-        </div>
+            </div>
+        @endif
     </div>
 </div>

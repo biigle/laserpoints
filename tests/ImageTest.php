@@ -109,4 +109,34 @@ class ImageTest extends TestCase
             $this->assertStringContainsString('can\'t have more than 4 manually annotated laser points', $e->getMessage());
         }
     }
+
+    public function testReadyForManualDetectionDuplicateLabels()
+    {
+        $label = LabelTest::create();
+        $image = Image::convert(BaseImageTest::create());
+        static::addLaserpoints($image, $label, Image::MAX_POINTS);
+
+        // The same label can be attached to the same annotation by multiple users. This
+        // must not be counted as an additional laser point.
+        ImageAnnotationLabelTest::create([
+            'annotation_id' => $image->annotations()->first()->id,
+            'label_id' => $label->id,
+        ]);
+
+        $this->assertTrue($image->readyForManualDetection($label));
+    }
+
+    public function testChannelModeAttribute()
+    {
+        $image = Image::convert(BaseImageTest::create());
+        $this->assertNull($image->channel_mode);
+
+        $image->laserpoints = [
+            'area' => 500,
+            'channel_mode' => 'red',
+        ];
+        $image->save();
+
+        $this->assertSame('red', $image->fresh()->channel_mode);
+    }
 }

@@ -2,37 +2,42 @@
 
 namespace Biigle\Modules\Laserpoints\Jobs;
 
-use Biigle\Image;
+use App;
+use Biigle\Jobs\Job;
+use Biigle\Label;
+use Biigle\Modules\Laserpoints\Image;
+use Biigle\Modules\Laserpoints\Support\DetectManual;
 use Biigle\Shape;
-use DB;
+use Exception;
+use Illuminate\Bus\Batchable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
 #[DeleteWhenMissingModels]
-class ProcessImageManualJob extends Job
+class ProcessImageManualJob extends Job implements ShouldQueue
 {
-    use SerializesModels;
+    use Batchable, InteractsWithQueue, SerializesModels;
 
-    /**
-     * The image to compute the area for.
-     *
-     * @var Image
-     */
-    protected $image;
+    public $tries = 1;
 
     /**
      * Create a new job instance.
      *
-     * @param Image $image
-     * @param float $distance
-     * @param int $labelId
+     * @param Image $image The image to process.
+     * @param Label $label The laser point label.
+     * @param float $distance Distance between laser points im cm to use for computation.
      *
      * @return void
      */
-    public function __construct(Image $image, $distance, $labelId)
+    public function __construct(
+        public Image $image,
+        public Label $label,
+        public float $distance,
+    )
     {
-        parent::__construct($distance, $labelId);
-        $this->image = $image;
+        //
     }
 
     /**
@@ -42,28 +47,43 @@ class ProcessImageManualJob extends Job
      */
     public function handle()
     {
-        $points = $this->getLaserpointsForImage($this->image->id);
-        ProcessManualJob::dispatch($this->image, $points, $this->distance)
-            ->onQueue(config('laserpoints.process_manual_queue'));
+        try {
+            $detect = App::make(DetectManual::class);
+            $output = $detect->execute(
+                $this->image->width,
+                $this->image->height,
+                $this->distance,
+                $this->getLaserpoints()
+            );
+        } catch (Exception $e) {
+            $output = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+
+        $output['distance'] = $this->distance;
+
+        $this->image->laserpoints = $output;
+        $this->image->save();
     }
 
     /**
      * Collects the laser point annotations of the given image.
      *
-     * @param int $id Image ID
-     *
-     * @return string JSON encoded array of annotation coordinates
+     * @return array Array of annotation coordinates as `[x, y]` pairs
      */
-    protected function getLaserpointsForImage($id)
+    protected function getLaserpoints()
     {
-        $points = DB::table('image_annotations')
-            ->join('image_annotation_labels', 'image_annotation_labels.annotation_id', '=', 'image_annotations.id')
-            ->where('image_annotations.image_id', $id)
-            ->where('image_annotation_labels.label_id', $this->labelId)
-            ->where('image_annotations.shape_id', Shape::pointId())
-            ->select('image_annotations.points', 'image_annotations.image_id')
-            ->pluck('image_annotations.points');
-
-        return '['.$points->implode(',').']';
+        // Use an exists constraint instead of a join because the same label can be
+        // attached to the same annotation by multiple users. A join would return the
+        // points of these annotations more than once, which would distort the computed
+        // image area.
+        return $this->image->annotations()
+            ->where('shape_id', Shape::pointId())
+            ->whereHas('labels', fn ($query) => $query->where('label_id', $this->label->id))
+            ->orderBy('id')
+            ->pluck('points')
+            ->toArray();
     }
 }
