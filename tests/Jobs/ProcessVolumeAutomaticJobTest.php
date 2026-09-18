@@ -8,6 +8,7 @@ use Biigle\Modules\Laserpoints\Jobs\ProcessImageAutomaticJob;
 use Biigle\Modules\Laserpoints\Support\DetectColor;
 use Biigle\Shape;
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Queue;
 use TestCase;
 use Mockery;
@@ -42,6 +43,8 @@ class ProcessVolumeAutomaticJobTest extends TestCase
 
     public function testHandleColorDetectionFailure()
     {
+        // Suppress the expected Log::warning() call so it doesn't pollute the log output.
+        Log::spy();
         $mock = Mockery::mock(DetectColor::class);
         $mock->shouldReceive('execute')
             ->once()
