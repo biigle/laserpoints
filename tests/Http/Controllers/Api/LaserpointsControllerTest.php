@@ -5,6 +5,7 @@ namespace Biigle\Tests\Modules\Laserpoints\Http\Controllers\Api;
 use ApiTestCase;
 use Biigle\Image;
 use Biigle\MediaType;
+use Biigle\Modules\Laserpoints\Image as LaserpointsImage;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageAutomaticJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageManualJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeAutomaticJob;
@@ -161,6 +162,37 @@ class LaserpointsControllerTest extends ApiTestCase
             ->assertStatus(422);
     }
 
+    public function testImageAutomaticNumLaserpoints()
+    {
+        $image = ImageTest::create(['volume_id' => $this->volume()->id]);
+        $this->beEditor();
+
+        $this->postJson("/api/v1/images/{$image->id}/laserpoints/automatic", [
+                'distance' => 50,
+                'num_laserpoints' => LaserpointsImage::MIN_POINTS - 1,
+                'channel_mode' => 'red',
+            ])
+            ->assertStatus(422);
+
+        $this->postJson("/api/v1/images/{$image->id}/laserpoints/automatic", [
+                'distance' => 50,
+                'num_laserpoints' => LaserpointsImage::MAX_POINTS + 1,
+                'channel_mode' => 'red',
+            ])
+            ->assertStatus(422);
+
+        Queue::assertNotPushed(ProcessImageAutomaticJob::class);
+
+        $this->postJson("/api/v1/images/{$image->id}/laserpoints/automatic", [
+                'distance' => 50,
+                'num_laserpoints' => LaserpointsImage::MAX_POINTS,
+                'channel_mode' => 'red',
+            ])
+            ->assertStatus(200);
+
+        Queue::assertPushed(ProcessImageAutomaticJob::class);
+    }
+
     public function testImageAutomaticTiled()
     {
         $image = ImageTest::create(['tiled' => true, 'volume_id' => $this->volume()->id]);
@@ -276,6 +308,34 @@ class LaserpointsControllerTest extends ApiTestCase
                 'num_laserpoints' => 2,
             ])
             ->assertStatus(200);
+        Queue::assertPushed(ProcessVolumeAutomaticJob::class);
+    }
+
+    public function testVolumeAutomaticNumLaserpoints()
+    {
+        $id = $this->volume()->id;
+        $this->beEditor();
+
+        $this->postJson("/api/v1/volumes/{$id}/laserpoints/automatic", [
+                'distance' => 50,
+                'num_laserpoints' => LaserpointsImage::MIN_POINTS - 1,
+            ])
+            ->assertStatus(422);
+
+        $this->postJson("/api/v1/volumes/{$id}/laserpoints/automatic", [
+                'distance' => 50,
+                'num_laserpoints' => LaserpointsImage::MAX_POINTS + 1,
+            ])
+            ->assertStatus(422);
+
+        Queue::assertNotPushed(ProcessVolumeAutomaticJob::class);
+
+        $this->postJson("/api/v1/volumes/{$id}/laserpoints/automatic", [
+                'distance' => 50,
+                'num_laserpoints' => LaserpointsImage::MAX_POINTS,
+            ])
+            ->assertStatus(200);
+
         Queue::assertPushed(ProcessVolumeAutomaticJob::class);
     }
 

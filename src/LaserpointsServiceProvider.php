@@ -44,7 +44,6 @@ class LaserpointsServiceProvider extends ServiceProvider
                 'annotationsScripts',
                 'manualTutorial',
                 'annotationsManualSidebarSettings',
-                'manualReferences',
             ],
             'apidoc' => [__DIR__.'/Http/Controllers/Api/'],
         ]);

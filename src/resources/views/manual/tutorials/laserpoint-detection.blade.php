@@ -32,10 +32,7 @@
     <div class="row">
         <h2><a name="automatic"></a>Automatic detection</h2>
         <p>
-            The automatic detection finds the laser points in each image on its own. In contrast to previous versions of BIIGLE, it does not require any example annotations to be trained on. You can run it on a volume right after the images were imported.
-        </p>
-        <p>
-            The detection looks for the laser points as small spots that are much brighter than their immediate surroundings (a "difference of Gaussians" filter). It does not process the whole color image but only a single color channel, so laser points of a distinct color clearly stand out from the sea floor. The strongest spots that are found this way are the candidates for the laser points. Of these candidates, the group is chosen that has the strongest response <em>and</em> a plausible geometry for a laser rig. Candidates that are very close to the image border, as well as groups of points that are too close together or too far apart relative to the image size, are discarded.
+            The automatic detection looks for the laser points as small spots that are much brighter than their immediate surroundings (a "difference of Gaussians" filter). It does not process the whole color image but only a single color channel, so laser points of a distinct color clearly stand out from the sea floor. The strongest spots that are found this way are the candidates for the laser points. Of these candidates, the group is chosen that has the strongest response <em>and</em> a plausible geometry for a laser rig. Candidates that are very close to the image border, as well as groups of points that are too close together or too far apart relative to the image size, are discarded.
         </p>
         <p>
             You have to configure the following for an automatic detection:
@@ -52,9 +49,6 @@
             </li>
         </ul>
         <p>
-            If you request the automatic detection for a whole volume, you do not have to choose a color channel. BIIGLE determines the most suitable channel itself, based on a random sample of up to 100 images of the volume, and then uses this channel for all images of the volume. If you request the detection for a single image, you have to choose the channel yourself. The form suggests the channel that was used for the previous detection run of the image (or gray if there was none).
-        </p>
-        <p>
             The automatic detection fails for an image if it can not find the configured number of laser points or if the resulting image footprint is implausible (not positive or larger than 50 m²). In this case the image information page shows an error message. You can always annotate the laser points of the image manually and run the manual computation instead.
         </p>
     </div>
@@ -65,14 +59,14 @@
             Instead of the automatic detection you can annotate the laser points yourself with point annotations and let BIIGLE compute the visual footprint from these annotations. This is the most accurate method to determine the visual footprint but it may be very time consuming.
         </p>
         <p>
-            Use the same label for all laser point annotations, as you have to select this label when you request the computation. Each image must have between {{Biigle\Modules\Laserpoints\Image::MIN_MANUAL_POINTS}} and {{Biigle\Modules\Laserpoints\Image::MAX_MANUAL_POINTS}} laser point annotations, and all images of a volume must have the same number of laser point annotations. Images without any annotation of the selected label are skipped.
+            Use the same label for all laser point annotations, as you have to select this label when you request the computation. Each image must have between {{Biigle\Modules\Laserpoints\Image::MIN_POINTS}} and {{Biigle\Modules\Laserpoints\Image::MAX_POINTS}} laser point annotations, and all images of a volume must have the same number of laser point annotations. Images without any annotation of the selected label are skipped.
         </p>
     </div>
 
     <div class="row">
         <h2>Requesting the detection</h2>
         <p>
-            The laser point detection can be requested for a whole image volume in the volume overview. Open the laser point tab in the sidebar on the left (<button class="btn btn-default btn-xs" onclick="$biiglePostMessage('info', 'Try the button in the volume overview 🙂')"><span class="fa fa-vector-square" aria-hidden="true"></span></button>), choose "Automatic" or "Manual", fill in the form and submit your request.
+            The laser point detection can be requested for a whole image volume in the volume overview. Open the laser point tab in the sidebar on the left (<button class="btn btn-default btn-xs"><span class="fa fa-vector-square" aria-hidden="true"></span></button>), choose "Automatic" or "Manual", fill in the form and submit your request.
         </p>
         <p>
             The detection can also be requested for an individual image on the image information page (<button class="btn btn-default btn-xs"><span class="fa fa-info-circle" aria-hidden="true"></span></button>). This page shows the results of the previous detection run of the image, too: the area covered by the image, the number of laser points, the detection method, the distance between the laser points and the color channel that was used.
@@ -87,12 +81,5 @@
         <p>
             If you choose to detect laser points automatically, make sure you check the results before further processing your data. The easiest way is to apply the "detected laser points" filter in the image volume overview and then cycle through all images that contain automatically detected laser points using the image annotation tool. Detected laser points will be displayed as small circles on the image. If the detected laser points were not correct for an image, annotate them manually and resubmit the laser point detection for the image.
         </p>
-    </div>
-
-    <div class="row">
-        <h3>References</h3>
-        <ol>
-            <li><a name="ref1"></a> Schoening, T., Kuhn, T., Bergmann, M., & Nattkemper, T. W. (2015). DELPHI—fast and adaptive computational laser point detection and visual footprint quantification for arbitrary underwater image collections. Frontiers in Marine Science, 2, 20. doi: <a href="https://doi.org/10.3389/fmars.2015.00020">10.3389/fmars.2015.00020</a><br>The formulas that BIIGLE uses to compute the visual footprint from the laser points were adopted from this method, which also performed the automatic laser point detection in previous versions of BIIGLE.</li>
-        </ol>
     </div>
 @endsection

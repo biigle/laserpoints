@@ -27,7 +27,6 @@ class LaserpointsController extends Controller
      * @apiParam {Number} id The image ID.
      * @apiParam (Required arguments) {Number} label_id ID of the laser point label that was used.
      * @apiParam (Required arguments) {Number} distance The distance between two laser points in cm.
-     * @apiParam (Required arguments) {Number} num_laserpoints Number of laser points to search for.
      *
      * @param Request $request
      * @param int $id
@@ -76,8 +75,8 @@ class LaserpointsController extends Controller
      *
      * @apiParam {Number} id The image ID.
      * @apiParam (Required arguments) {Number} distance The distance between two laser points in cm.
-     * @apiParam (Required arguments) {Number} num_laserpoints Number of laser points to search for.
-     * @apiParam (Optional arguments) {String} channel_mode Channel mode to use (red/green/blue/gray).
+     * @apiParam (Required arguments) {Number} num_laserpoints Number of laser points to search for (2-4).
+     * @apiParam (Required arguments) {String} channel_mode Color channel to use (red/green/blue/gray).
      *
      * @param Request $request
      * @param int $id
@@ -95,7 +94,7 @@ class LaserpointsController extends Controller
         }
         $request->validate([
             'distance' => 'required|numeric|min:1',
-            'num_laserpoints' => 'required|integer|min:1',
+            'num_laserpoints' => 'required|integer|min:'.Image::MIN_POINTS.'|max:'.Image::MAX_POINTS,
             'channel_mode' => 'required|in:red,green,blue,gray',
         ]);
 
@@ -167,9 +166,9 @@ class LaserpointsController extends Controller
      * @apiPermission projectEditor
      * @apiDescription This feature is not available for video volumes and volumes with very large images.
      *
-        * @apiParam {Number} id The image ID.
-        * @apiParam (Required arguments) {Number} distance The distance between two laser points in cm.
-        * @apiParam (Required arguments) {Number} num_laserpoints Number of laser points to search for.
+     * @apiParam {Number} id The volume ID.
+     * @apiParam (Required arguments) {Number} distance The distance between two laser points in cm.
+     * @apiParam (Required arguments) {Number} num_laserpoints Number of laser points to search for (2-4).
      *
      * @param Request $request
      * @param int $id
@@ -197,7 +196,7 @@ class LaserpointsController extends Controller
 
         $request->validate([
             'distance' => 'required|numeric|min:1',
-            'num_laserpoints' => 'required|integer|min:1',
+            'num_laserpoints' => 'required|integer|min:'.Image::MIN_POINTS.'|max:'.Image::MAX_POINTS,
         ]);
 
         ProcessVolumeAutomaticJob::dispatch($volume, $request->input('distance'), $request->input('num_laserpoints'))

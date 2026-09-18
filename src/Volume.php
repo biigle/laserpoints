@@ -55,12 +55,12 @@ class Volume extends BaseVolume
             });
 
         $reference = $points->first();
-        if ($reference < Image::MIN_MANUAL_POINTS) {
-            throw new Exception('There must be at least '.Image::MIN_MANUAL_POINTS.' manually annotated laser points per image ('.$reference.' found).');
+        if ($reference < Image::MIN_POINTS) {
+            throw new Exception('There must be at least '.Image::MIN_POINTS.' manually annotated laser points per image ('.$reference.' found).');
         }
 
-        if ($reference > Image::MAX_MANUAL_POINTS) {
-            throw new Exception('There can\'t be more than '.Image::MAX_MANUAL_POINTS.' manually annotated laser points per image ('.$reference.' found).');
+        if ($reference > Image::MAX_POINTS) {
+            throw new Exception('There can\'t be more than '.Image::MAX_POINTS.' manually annotated laser points per image ('.$reference.' found).');
         }
 
         $points->each(function ($count) use ($reference) {

@@ -23,18 +23,30 @@
             <input v-model="distance" id="distance" type="number" min="1" step="0.1" title="Distance between two laser points in cm" class="form-control" required>
         </div>
         <div class="form-group" v-show="!manualMode">
-            <label for="num_laserpoints">Number of laser points</label>
-            <input v-model.number="numLaserpoints" id="num_laserpoints" type="number" min="1" step="1" title="Number of laser points to detect" class="form-control" required>
+            <label>Number of laser points</label>
+            <div class="btn-group btn-group-justified">
+                <div class="btn-group" v-for="count in [2, 3, 4]" :key="count">
+                    <button
+                        type="button"
+                        class="btn btn-default"
+                        :class="{active: numLaserpoints === count}"
+                        @click="numLaserpoints = count"
+                        >{{ count }}</button>
+                </div>
+            </div>
         </div>
         <div class="form-group" v-if="imageId && !manualMode">
-            <label for="channel_mode">Color channel</label>
-            <select v-model="channelMode" id="channel_mode" title="Color channel to use for laser point detection." class="form-control" required>
-                <option value="">Select channel...</option>
-                <option value="red">Red</option>
-                <option value="green">Green</option>
-                <option value="blue">Blue</option>
-                <option value="gray">Gray</option>
-            </select>
+            <label>Color channel</label>
+            <div class="btn-group btn-group-justified">
+                <div class="btn-group" v-for="mode in channelModes" :key="mode">
+                    <button
+                        type="button"
+                        class="btn btn-default text-capitalize"
+                        :class="{active: channelMode === mode}"
+                        @click="channelMode = mode"
+                        >{{ mode }}</button>
+                </div>
+            </div>
         </div>
         <div v-show="manualMode" class="form-group">
             <label for="label">Laser point label</label>
@@ -79,6 +91,7 @@ export default {
             distance: null,
             numLaserpoints: 2,
             channelMode: '',
+            channelModes: ['gray', 'red', 'green', 'blue'],
             processing: false,
             error: false,
             labels: [],

@@ -23,18 +23,18 @@ class Image extends BaseImage
     const LASERPOINTS_ATTRIBUTE = 'laserpoints';
 
     /**
-     * Minimum number of required manual laser point annotations per image.
+     * Minimum number of laser points per image (manual and automatic detection).
      *
      * @var int
      */
-    const MIN_MANUAL_POINTS = 2;
+    const MIN_POINTS = 2;
 
     /**
-     * Maximum number of supported manual laser point annotations per image.
+     * Maximum number of laser points per image (manual and automatic detection).
      *
      * @var int
      */
-    const MAX_MANUAL_POINTS = 4;
+    const MAX_POINTS = 4;
 
     /**
      * Properties of the laser points object.
@@ -202,10 +202,10 @@ class Image extends BaseImage
             ->count();
 
         if ($count > 0) {
-            if ($count < self::MIN_MANUAL_POINTS) {
-                throw new Exception('An image must have at least '.self::MIN_MANUAL_POINTS.' manually annotated laser points (has '.$count.').');
-            } elseif ($count > self::MAX_MANUAL_POINTS) {
-                throw new Exception('An image can\'t have more than '.self::MAX_MANUAL_POINTS.' manually annotated laser points (has '.$count.').');
+            if ($count < self::MIN_POINTS) {
+                throw new Exception('An image must have at least '.self::MIN_POINTS.' manually annotated laser points (has '.$count.').');
+            } elseif ($count > self::MAX_POINTS) {
+                throw new Exception('An image can\'t have more than '.self::MAX_POINTS.' manually annotated laser points (has '.$count.').');
             }
         }
 
