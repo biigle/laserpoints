@@ -5,6 +5,7 @@ namespace Biigle\Tests\Modules\Laserpoints;
 use Biigle\Image;
 use Biigle\ImageAnnotation;
 use Biigle\Modules\Laserpoints\Volume;
+use Biigle\Tests\ImageAnnotationLabelTest;
 use Biigle\Tests\LabelTest;
 use Biigle\Tests\VolumeTest as BaseVolumeTest;
 use Exception;
@@ -102,6 +103,38 @@ class VolumeTest extends TestCase
         // The point is outside the image boundaries.
         $annotation->points = [50, 101];
         $annotation->save();
+
+        // No exception is thrown.
+        $volume->readyForManualDetection($label);
+        $this->expectNotToPerformAssertions();
+    }
+
+    public function testReadyForManualDetectionDuplicateLabels()
+    {
+        $volume = Volume::convert(BaseVolumeTest::create());
+        $label = LabelTest::create();
+
+        $images = Image::class::factory()
+            ->count(2)
+            ->sequence(function ($i) use ($volume) {
+                return [
+                    'filename' => uniqid(),
+                    'volume_id' => $volume->id,
+                ];
+            })
+            ->create();
+
+        $images->each(function ($i) use ($label) {
+            ImageTest::addLaserpoints($i, $label, 2);
+        });
+
+        // The same label can be attached to the same annotation by multiple users. This
+        // must not be counted as an additional laser point, else the images would appear
+        // to have a different count of laser points.
+        ImageAnnotationLabelTest::create([
+            'annotation_id' => $images->first()->annotations()->first()->id,
+            'label_id' => $label->id,
+        ]);
 
         // No exception is thrown.
         $volume->readyForManualDetection($label);

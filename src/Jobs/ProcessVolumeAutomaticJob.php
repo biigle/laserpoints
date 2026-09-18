@@ -7,9 +7,11 @@ use Biigle\Jobs\Job;
 use Biigle\Modules\Laserpoints\Image;
 use Biigle\Modules\Laserpoints\Support\DetectColor;
 use Biigle\Volume;
+use Exception;
 use FileCache;
 use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
 use Illuminate\Queue\SerializesModels;
+use Log;
 
 #[DeleteWhenMissingModels]
 class ProcessVolumeAutomaticJob extends Job
@@ -48,9 +50,19 @@ class ProcessVolumeAutomaticJob extends Job
             ->take(100)
             ->get()
             ->all();
-        $channelMode = FileCache::batch($colorSampleImages, function ($images, $paths) {
-            return $this->performColorDetection($images, $paths);
-        });
+
+        try {
+            $channelMode = FileCache::batch($colorSampleImages, function ($images, $paths) {
+                return $this->performColorDetection($images, $paths);
+            });
+        } catch (Exception $e) {
+            // Fall back to the automatic channel detection of each individual image
+            // instead of failing the detection for the whole volume.
+            Log::warning('Laser point color detection failed for volume '.$this->volume->id.'. Falling back to automatic detection per image.', [
+                'exception' => $e->getMessage(),
+            ]);
+            $channelMode = null;
+        }
 
         $this->volume->images()
             ->eachById(function ($image) use ($channelMode) {

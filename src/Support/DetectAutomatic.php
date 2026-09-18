@@ -20,13 +20,13 @@ class DetectAutomatic extends LaserpointsScript
         $script = config('laserpoints.automatic_script');
         $channelMode = $channelMode ? strtolower($channelMode) : 'auto';
 
-        $command = "{$python} {$script} " .
-            "--input '{$imagePath}' " .
-            "--laserdistance '{$distance}' " .
-            "--num-laserpoints '{$numLaserpoints}' " .
-            "--channel '{$channelMode}' " .
-            "--mode biigle_mode 2>&1";
-
-        return $this->exec($command);
+        return $this->exec([
+            $python, $script,
+            '--input', $imagePath,
+            '--laserdistance', (string) $distance,
+            '--num-laserpoints', (string) $numLaserpoints,
+            '--channel', $channelMode,
+            '--mode', 'biigle_mode',
+        ]);
     }
 }
