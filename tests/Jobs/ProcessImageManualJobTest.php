@@ -86,6 +86,35 @@ class ProcessImageManualJobTest extends TestCase
         $this->assertSame(1, $this->image->fresh()->attrs['a']);
     }
 
+    public function testHandleDuplicateLabels()
+    {
+        // The same label can be attached to the same annotation by multiple users. The
+        // points of such an annotation must be collected only once, else the computed
+        // image area would be wrong.
+        ImageAnnotationLabel::factory()->create([
+            'label_id' => $this->label->id,
+            'annotation_id' => $this->image->annotations()->first()->id,
+        ]);
+
+        $mock = Mockery::mock(DetectManual::class);
+        $mock->shouldReceive('execute')
+            ->once()
+            ->with(1000, 800, 30, [[100, 100], [100, 100], [100, 100]])
+            ->andReturn([
+                'error' => false,
+                'area' => 100,
+                'count' => 3,
+                'method' => 'manual',
+                'points' => [[100, 100], [100, 100], [100, 100]],
+            ]);
+
+        App::singleton(DetectManual::class, function () use ($mock) {
+            return $mock;
+        });
+
+        with(new ProcessImageManualJob($this->image, $this->label, 30))->handle();
+    }
+
     public function testHandleGracefulError()
     {
         $mock = Mockery::mock(DetectManual::class);

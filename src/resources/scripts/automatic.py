@@ -615,8 +615,11 @@ def main():
 
 
 
-    # Create output directory
-    args.output.mkdir(parents=True, exist_ok=True)
+    # Create the output directory only for the modes that actually write files to it.
+    # In particular biigle_mode returns its result on stdout and would otherwise create
+    # the default output directory in the current working directory of the caller.
+    if args.mode in ("detect-without-lines", "lpcolor"):
+        args.output.mkdir(parents=True, exist_ok=True)
 
     # Process input – either from file paths or JSON mapping
     img_paths: List[Path] = []

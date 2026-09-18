@@ -6,7 +6,6 @@ use Arr;
 use Biigle\Image as BaseImage;
 use Biigle\Label;
 use Biigle\Shape;
-use DB;
 use Exception;
 
 /**
@@ -194,11 +193,12 @@ class Image extends BaseImage
      */
     public function readyForManualDetection(Label $label)
     {
-        $count = DB::table('image_annotations')
-            ->join('image_annotation_labels', 'image_annotation_labels.annotation_id', '=', 'image_annotations.id')
-            ->where('image_annotations.image_id', $this->id)
-            ->where('image_annotation_labels.label_id', $label->id)
-            ->where('image_annotations.shape_id', Shape::pointId())
+        // Use an exists constraint instead of a join because the same label can be
+        // attached to the same annotation by multiple users. A join would count these
+        // annotations more than once.
+        $count = $this->annotations()
+            ->where('shape_id', Shape::pointId())
+            ->whereHas('labels', fn ($query) => $query->where('label_id', $label->id))
             ->count();
 
         if ($count > 0) {
