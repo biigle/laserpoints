@@ -4,72 +4,75 @@ namespace Biigle\Tests\Modules\Laserpoints\Support;
 
 use Biigle\Modules\Laserpoints\Support\LaserpointsScript;
 use Exception;
+use Illuminate\Support\Facades\Process;
 use TestCase;
 
 class LaserpointsScriptTest extends TestCase
 {
     public function testExec()
     {
+        Process::fake([
+            '*' => Process::result(json_encode(['error' => false, 'area' => 1.5])),
+        ]);
+
         $script = new LaserpointsScript;
-        $json = json_encode(['error' => false, 'area' => 1.5]);
 
         $this->assertSame(
             ['error' => false, 'area' => 1.5],
-            $script->exec('echo '.escapeshellarg($json))
+            $script->exec(['python', 'script.py', '--input', 'my image.jpg'])
         );
+
+        Process::assertRan(fn ($process) => $process->command === ['python', 'script.py', '--input', 'my image.jpg']);
     }
 
-    public function testExecIgnoresTrailingLogOutput()
+    public function testExecIgnoresErrorOutput()
     {
-        $script = new LaserpointsScript;
-        $json = json_encode(['error' => false, 'area' => 1.5]);
-        // The detection scripts log to STDERR, which is merged into STDOUT by the
-        // commands of this module. The JSON result is not necessarily the last line of
-        // the output.
-        $command = '(echo '.escapeshellarg($json).'; echo "INFO - Total execution time" >&2) 2>&1';
+        // The detection scripts log to STDERR which must not interfere with the result.
+        Process::fake([
+            '*' => Process::result(
+                output: json_encode(['error' => true, 'message' => 'Expected error.']),
+                errorOutput: "INFO - Using channel mode: red\nINFO - Total execution time",
+            ),
+        ]);
 
-        $this->assertSame(
-            ['error' => false, 'area' => 1.5],
-            $script->exec($command)
-        );
-    }
-
-    public function testExecIgnoresLeadingLogOutput()
-    {
         $script = new LaserpointsScript;
-        $json = json_encode(['error' => true, 'message' => 'Expected error.']);
-        $command = '(echo "INFO - Using channel mode: red" >&2; echo '.escapeshellarg($json).') 2>&1';
 
         $this->assertSame(
             ['error' => true, 'message' => 'Expected error.'],
-            $script->exec($command)
+            $script->exec(['python', 'script.py'])
         );
     }
 
     public function testExecNoJsonOutput()
     {
+        Process::fake(['*' => Process::result('INFO - Total execution time')]);
         $script = new LaserpointsScript;
         $this->expectException(Exception::class);
-        $script->exec('echo "INFO - Total execution time"');
+        $script->exec(['python', 'script.py']);
     }
 
     public function testExecJsonWithoutErrorProperty()
     {
+        Process::fake(['*' => Process::result(json_encode(['area' => 1.5]))]);
         $script = new LaserpointsScript;
         $this->expectException(Exception::class);
-        $script->exec('echo '.escapeshellarg(json_encode(['area' => 1.5])));
+        $script->exec(['python', 'script.py']);
     }
 
     public function testExecNonZeroExitCode()
     {
+        Process::fake([
+            '*' => Process::result(json_encode(['error' => true]), 'Traceback', 1),
+        ]);
         $script = new LaserpointsScript;
         $this->expectException(Exception::class);
-        $script->exec('echo '.escapeshellarg(json_encode(['error' => true])).'; exit 1');
+        $script->exec(['python', 'script.py']);
     }
 
     public function testExecWithoutDecoding()
     {
+        Process::fake(['*' => Process::result("done\n", 'INFO - Saved color')]);
         $script = new LaserpointsScript;
-        $this->assertSame('done', $script->exec('echo "done"', decode: false));
+        $this->assertSame('done', $script->exec(['python', 'script.py'], decode: false));
     }
 }

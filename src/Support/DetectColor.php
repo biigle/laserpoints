@@ -27,14 +27,14 @@ class DetectColor extends LaserpointsScript
         try {
             File::put($inputJsonPath, json_encode($input));
 
-            $command = "{$python} {$script} " .
-                "--input-json '{$inputJsonPath}' " .
-                "--output '{$workDir}' " .
-                "--mode lpcolor " .
-                "--color-file '{$colorFile}' " .
-                "--num-laserpoints '{$numLaserpoints}' 2>&1";
-
-            $this->exec($command, decode: false);
+            $this->exec([
+                $python, $script,
+                '--input-json', $inputJsonPath,
+                '--output', $workDir,
+                '--mode', 'lpcolor',
+                '--color-file', $colorFile,
+                '--num-laserpoints', (string) $numLaserpoints,
+            ], decode: false);
 
             $color = trim(File::get($workDir.'/'.$colorFile));
         } finally {
