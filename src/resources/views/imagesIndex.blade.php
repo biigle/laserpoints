@@ -71,6 +71,7 @@
                     :volume-id="{{$img->volume_id}}"
                     :image-id="{{$img->id}}"
                     :manual-only="{{$img->tiled ? 'true' : 'false'}}"
+                    manual-url="{{route('manual-tutorials', ['laserpoints', 'laserpoint-detection'])}}"
                     ></laserpoints-form>
             @endcan
         </div>

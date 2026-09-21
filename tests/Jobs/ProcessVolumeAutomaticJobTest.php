@@ -44,6 +44,20 @@ class ProcessVolumeAutomaticJobTest extends TestCase
         $this->assertTrue($j->batch);
     }
 
+    public function testHandleChannelMode()
+    {
+        $mock = Mockery::mock(DetectColor::class);
+        $mock->shouldNotReceive('execute');
+        App::singleton(DetectColor::class, fn () => $mock);
+
+        $image = Image::factory()->create();
+
+        [$job, $batch] = (new ProcessVolumeAutomaticJob($image->volume, 30, 2, 'blue'))->withFakeBatch();
+        $job->handle();
+        $this->assertCount(1, $batch->added);
+        $this->assertEquals('blue', $batch->added[0]->channelMode);
+    }
+
     public function testHandleNoImages()
     {
         Log::spy();

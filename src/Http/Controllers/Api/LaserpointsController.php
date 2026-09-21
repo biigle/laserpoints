@@ -173,6 +173,7 @@ class LaserpointsController extends Controller
      * @apiParam {Number} id The volume ID.
      * @apiParam (Required arguments) {Number} distance The distance between two laser points in cm.
      * @apiParam (Required arguments) {Number} num_laserpoints Number of laser points to search for (2-4).
+     * @apiParam (Optional arguments) {String} channel_mode Color channel to use (red/green/blue/gray). If omitted, the color channel is determined automatically.
      *
      * @param Request $request
      * @param int $id
@@ -199,13 +200,14 @@ class LaserpointsController extends Controller
         $request->validate([
             'distance' => 'required|numeric|min:1',
             'num_laserpoints' => 'required|integer|min:'.Image::MIN_POINTS.'|max:'.Image::MAX_POINTS,
+            'channel_mode' => 'nullable|in:red,green,blue,gray',
         ]);
 
         $this->acquireVolumeLock($volume);
 
         $this->dispatchVolumeBatch(
             $volume,
-            new ProcessVolumeAutomaticJob($volume, $request->input('distance'), $request->input('num_laserpoints')),
+            new ProcessVolumeAutomaticJob($volume, $request->input('distance'), $request->input('num_laserpoints'), $request->input('channel_mode')),
             config('laserpoints.process_automatic_queue')
         );
     }
