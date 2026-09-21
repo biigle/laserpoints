@@ -5,6 +5,7 @@
                 :is="plugins.laserpointsForm"
                 :volume-id="{{$volume->id}}"
                 :manual-only="{{$volume->hasTiledImages() ? 'true' : 'false'}}"
+                manual-url="{{route('manual-tutorials', ['laserpoints', 'laserpoint-detection'])}}"
                 ></component>
         </sidebar-tab>
     @endcan

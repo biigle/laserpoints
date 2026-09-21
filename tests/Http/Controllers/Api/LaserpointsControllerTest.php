@@ -369,6 +369,31 @@ class LaserpointsControllerTest extends ApiTestCase
         Queue::assertPushed(ProcessVolumeAutomaticJob::class);
     }
 
+    public function testVolumeAutomaticChannelMode()
+    {
+        $id = $this->volume()->id;
+        $this->beEditor();
+
+        $this->postJson("/api/v1/volumes/{$id}/laserpoints/automatic", [
+                'distance' => 50,
+                'num_laserpoints' => 2,
+                'channel_mode' => 'invalid',
+            ])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('channel_mode');
+
+        Queue::assertNotPushed(ProcessVolumeAutomaticJob::class);
+
+        $this->postJson("/api/v1/volumes/{$id}/laserpoints/automatic", [
+                'distance' => 50,
+                'num_laserpoints' => 2,
+                'channel_mode' => 'green',
+            ])
+            ->assertStatus(200);
+
+        Queue::assertPushed(ProcessVolumeAutomaticJob::class, fn ($job) => $job->channelMode === 'green');
+    }
+
     public function testVolumeAutomaticTiled()
     {
         $id = $this->volume()->id;

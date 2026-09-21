@@ -27,6 +27,7 @@ class ProcessVolumeAutomaticJob extends Job
      * @param Volume $volume The volume to process the images of.
      * @param float $distance Distance between laser points im cm to use for computation.
      * @param int $numLaserpoints Number of laser points to search for.
+     * @param ?string $channelMode Channel mode override (red/green/blue/gray). If null, the channel mode is detected automatically.
      *
      * @return void
      */
@@ -34,6 +35,7 @@ class ProcessVolumeAutomaticJob extends Job
         protected Volume $volume,
         protected float $distance,
         protected int $numLaserpoints = 2,
+        public ?string $channelMode = null,
     )
     {
         //
@@ -46,24 +48,7 @@ class ProcessVolumeAutomaticJob extends Job
      */
     public function handle()
     {
-        $colorSampleImages = $this->volume->images()
-            ->inRandomOrder()
-            ->take(100)
-            ->get()
-            ->all();
-
-        try {
-            $channelMode = FileCache::batch($colorSampleImages, function ($images, $paths) {
-                return $this->performColorDetection($images, $paths);
-            });
-        } catch (Exception $e) {
-            // Fall back to the automatic channel detection of each individual image
-            // instead of failing the detection for the whole volume.
-            Log::warning('Laser point color detection failed for volume '.$this->volume->id.'. Falling back to automatic detection per image.', [
-                'exception' => $e->getMessage(),
-            ]);
-            $channelMode = null;
-        }
+        $channelMode = $this->channelMode ?: $this->detectChannelMode();
 
         // The volume lock is released by the batch that this job is part of.
         $this->volume->images()
@@ -79,6 +64,34 @@ class ProcessVolumeAutomaticJob extends Job
 
                 $this->batch()->add($jobs->all());
             });
+    }
+
+    /**
+     * Detect the channel mode on a random sample of images of the volume.
+     *
+     * @return ?string
+     */
+    protected function detectChannelMode()
+    {
+        $colorSampleImages = $this->volume->images()
+            ->inRandomOrder()
+            ->take(100)
+            ->get()
+            ->all();
+
+        try {
+            return FileCache::batch($colorSampleImages, function ($images, $paths) {
+                return $this->performColorDetection($images, $paths);
+            });
+        } catch (Exception $e) {
+            // Fall back to the automatic channel detection of each individual image
+            // instead of failing the detection for the whole volume.
+            Log::warning('Laser point color detection failed for volume '.$this->volume->id.'. Falling back to automatic detection per image.', [
+                'exception' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
     }
 
     /**

@@ -1,24 +1,33 @@
 <template>
     <form class="form-stacked" @submit.prevent="submit">
-        <div class="btn-group btn-group-justified">
-            <div class="btn-group">
-              <button
-                type="button"
-                class="btn btn-default"
-                :class="automaticButtonClass"
-                :disabled="manualOnly || null"
-                :title="automaticButtonTitle"
-                @click="selectAutomatic"
-                >Automatic</button>
+        <div class="mode-row">
+            <div class="btn-group btn-group-justified">
+                <div class="btn-group">
+                  <button
+                    type="button"
+                    class="btn btn-default"
+                    :class="automaticButtonClass"
+                    :disabled="manualOnly || null"
+                    :title="automaticButtonTitle"
+                    @click="selectAutomatic"
+                    >Automatic</button>
+                </div>
+                <div class="btn-group">
+                  <button
+                    type="button"
+                    class="btn btn-default"
+                    :class="manualButtonClass"
+                    @click="selectManual"
+                    >Manual</button>
+                </div>
             </div>
-            <div class="btn-group">
-              <button
-                type="button"
+            <a
+                v-if="manualUrl"
+                :href="manualUrl"
+                target="_blank"
                 class="btn btn-default"
-                :class="manualButtonClass"
-                @click="selectManual"
-                >Manual</button>
-            </div>
+                title="Learn more about laser point detection"
+                ><span class="fa fa-info-circle" aria-hidden="true"></span></a>
         </div>
         <div class="form-group">
             <label for="distance">Laser distance in cm</label>
@@ -37,18 +46,12 @@
                 </div>
             </div>
         </div>
-        <div class="form-group" v-if="imageId && !manualMode">
-            <label>Color channel</label>
-            <div class="btn-group btn-group-justified">
-                <div class="btn-group" v-for="mode in channelModes" :key="mode">
-                    <button
-                        type="button"
-                        class="btn btn-default text-capitalize"
-                        :class="{active: channelMode === mode}"
-                        @click="channelMode = mode"
-                        >{{ mode }}</button>
-                </div>
-            </div>
+        <div class="form-group" v-show="!manualMode">
+            <label for="channel_mode">Color channel</label>
+            <select v-model="channelMode" id="channel_mode" class="form-control" title="Color channel that is used to find the laser points">
+                <option v-if="!imageId" value="">Automatic</option>
+                <option v-for="(label, mode) in channelModes" :key="mode" :value="mode" v-text="label"></option>
+            </select>
         </div>
         <div v-show="manualMode" class="form-group">
             <label for="label">Laser point label</label>
@@ -91,13 +94,22 @@ export default {
             type: Boolean,
             default: false,
         },
+        manualUrl: {
+            type: String,
+            default: '',
+        },
     },
     data() {
         return {
             distance: null,
             numLaserpoints: 2,
             channelMode: '',
-            channelModes: ['gray', 'red', 'green', 'blue'],
+            channelModes: {
+                gray: 'Gray',
+                red: 'Red',
+                green: 'Green',
+                blue: 'Blue',
+            },
             processing: false,
             error: false,
             labels: [],
@@ -114,7 +126,7 @@ export default {
             if (this.imageId) {
                 return this.loading || this.processing || !this.distance || !this.channelMode;
             }
-            // For volume automatic, channel_mode is not required
+            // For volume automatic, channel_mode is optional (empty means automatic)
             return this.loading || this.processing || !this.distance;
         },
         automaticButtonClass() {
@@ -226,5 +238,16 @@ export default {
 <style scoped>
     .btn-group-justified {
         margin-bottom: 15px;
+    }
+
+    .mode-row {
+        display: flex;
+        gap: 5px;
+        margin-bottom: 15px;
+    }
+
+    .mode-row .btn-group-justified {
+        flex: 1;
+        margin-bottom: 0;
     }
 </style>
