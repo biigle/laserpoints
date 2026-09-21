@@ -11,13 +11,14 @@ use Exception;
 use FileCache;
 use Illuminate\Bus\Batchable;
 use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Log;
 
 #[DeleteWhenMissingModels]
 class ProcessVolumeAutomaticJob extends Job
 {
-    use Batchable, SerializesModels;
+    use Batchable, InteractsWithQueue, SerializesModels;
 
     public $tries = 1;
 

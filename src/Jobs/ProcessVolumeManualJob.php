@@ -9,12 +9,13 @@ use Biigle\Shape;
 use Biigle\Volume;
 use Illuminate\Bus\Batchable;
 use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
 #[DeleteWhenMissingModels]
 class ProcessVolumeManualJob extends Job
 {
-    use Batchable, SerializesModels;
+    use Batchable, InteractsWithQueue, SerializesModels;
 
     public $tries = 1;
 
