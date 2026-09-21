@@ -7,13 +7,14 @@ use Biigle\Label;
 use Biigle\Modules\Laserpoints\Image;
 use Biigle\Shape;
 use Biigle\Volume;
+use Illuminate\Bus\Batchable;
 use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
 use Illuminate\Queue\SerializesModels;
 
 #[DeleteWhenMissingModels]
 class ProcessVolumeManualJob extends Job
 {
-    use SerializesModels;
+    use Batchable, SerializesModels;
 
     public $tries = 1;
 
@@ -42,18 +43,23 @@ class ProcessVolumeManualJob extends Job
      */
     public function handle()
     {
+        // The volume lock is released by the batch that this job is part of.
         Image::where('volume_id', $this->volume->id)
             ->join('image_annotations', 'images.id', '=', 'image_annotations.image_id')
             ->join('image_annotation_labels', 'image_annotation_labels.annotation_id', '=', 'image_annotations.id')
             ->where('image_annotation_labels.label_id', $this->label->id)
             ->where('image_annotations.shape_id', Shape::pointId())
-            ->select('images.id as images_id')
+            ->select('images.id as images_id', 'images.volume_id')
             ->distinct()
-            ->eachById(function ($image) {
-                // Reassign the ID because the ambiguous column had to use an alias.
-                $image->id = $image->images_id;
-                ProcessImageManualJob::dispatch($image, $this->label, $this->distance)
-                    ->onQueue(config('laserpoints.process_manual_queue'));
-            }, 1000, 'images.id', 'images_id');
+            ->chunkById(1000, function ($images) {
+                $jobs = $images->map(function ($image) {
+                    // Reassign the ID because the ambiguous column had to use an alias.
+                    $image->id = $image->images_id;
+
+                    return new ProcessImageManualJob($image, $this->label, $this->distance, batch: true);
+                });
+
+                $this->batch()->add($jobs->all());
+            }, 'images.id', 'images_id');
     }
 }

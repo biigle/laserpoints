@@ -10,7 +10,9 @@ use Biigle\ImageAnnotationLabel;
 use Biigle\Modules\Laserpoints\Image;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageManualJob;
 use Biigle\Modules\Laserpoints\Support\DetectManual;
+use Biigle\Modules\Laserpoints\Support\DetectionLock;
 use Biigle\Tests\ImageTest;
+use Cache;
 use Exception;
 use Mockery;
 use TestCase;
@@ -171,5 +173,64 @@ class ProcessImageManualJobTest extends TestCase
         ];
 
         $this->assertSame($expect, $this->image->fresh()->laserpoints);
+    }
+
+    public function testHandleReleasesImageLock()
+    {
+        $this->mockDetection();
+        DetectionLock::acquireImage($this->image->volume_id, $this->image->id);
+
+        with(new ProcessImageManualJob($this->image, $this->label, 30))->handle();
+        $this->assertFalse(Cache::has(DetectionLock::key($this->image->volume_id)));
+    }
+
+    public function testFailedReleasesImageLock()
+    {
+        DetectionLock::acquireImage($this->image->volume_id, $this->image->id);
+
+        with(new ProcessImageManualJob($this->image, $this->label, 30))->failed(new Exception);
+        $this->assertFalse(Cache::has(DetectionLock::key($this->image->volume_id)));
+    }
+
+    public function testHandleBatchKeepsVolumeLock()
+    {
+        $this->mockDetection();
+        DetectionLock::acquireVolume($this->image->volume_id);
+
+        with(new ProcessImageManualJob($this->image, $this->label, 30, batch: true))->handle();
+        $this->assertTrue(Cache::has(DetectionLock::key($this->image->volume_id)));
+    }
+
+    public function testHandleImageDeleted()
+    {
+        $mock = Mockery::mock(DetectManual::class);
+        $mock->shouldReceive('execute')->never();
+        App::singleton(DetectManual::class, fn () => $mock);
+        DetectionLock::acquireImage($this->image->volume_id, $this->image->id);
+        $job = new ProcessImageManualJob($this->image, $this->label, 30);
+        $this->image->delete();
+
+        $job->handle();
+        $this->assertFalse(Cache::has(DetectionLock::key($this->image->volume_id)));
+    }
+
+    public function testHandleImageDeletedBatch()
+    {
+        $mock = Mockery::mock(DetectManual::class);
+        $mock->shouldReceive('execute')->never();
+        App::singleton(DetectManual::class, fn () => $mock);
+        DetectionLock::acquireVolume($this->image->volume_id);
+        $job = new ProcessImageManualJob($this->image, $this->label, 30, batch: true);
+        $this->image->delete();
+
+        $job->handle();
+        $this->assertTrue(Cache::has(DetectionLock::key($this->image->volume_id)));
+    }
+
+    protected function mockDetection()
+    {
+        $mock = Mockery::mock(DetectManual::class);
+        $mock->shouldReceive('execute')->andReturn(['error' => false]);
+        App::singleton(DetectManual::class, fn () => $mock);
     }
 }

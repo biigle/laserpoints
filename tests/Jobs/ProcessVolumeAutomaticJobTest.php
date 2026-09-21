@@ -7,9 +7,9 @@ use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeAutomaticJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageAutomaticJob;
 use Biigle\Modules\Laserpoints\Support\DetectColor;
 use Biigle\Shape;
+use Biigle\Volume;
 use Exception;
 use Illuminate\Support\Facades\Log;
-use Queue;
 use TestCase;
 use Mockery;
 use App;
@@ -31,14 +31,30 @@ class ProcessVolumeAutomaticJobTest extends TestCase
         $image = Image::factory()->create();
         $image2 = Image::factory()->create();
 
-        (new ProcessVolumeAutomaticJob($image->volume, 30))->handle();
-        Queue::assertPushed(ProcessImageAutomaticJob::class, function ($j) use ($image) {
-            $this->assertEquals($image->id, $j->image->id);
-            $this->assertEquals(30, $j->distance);
-            $this->assertEquals('red', $j->channelMode);
-            $this->assertEquals(2, $j->numLaserpoints);
-            return true;
-        });
+        [$job, $batch] = (new ProcessVolumeAutomaticJob($image->volume, 30))->withFakeBatch();
+        $job->handle();
+        $this->assertCount(1, $batch->added);
+        $j = $batch->added[0];
+        $this->assertInstanceOf(ProcessImageAutomaticJob::class, $j);
+        $this->assertEquals($image->id, $j->imageId);
+        $this->assertEquals($image->volume_id, $j->volumeId);
+        $this->assertEquals(30, $j->distance);
+        $this->assertEquals('red', $j->channelMode);
+        $this->assertEquals(2, $j->numLaserpoints);
+        $this->assertTrue($j->batch);
+    }
+
+    public function testHandleNoImages()
+    {
+        Log::spy();
+        $mock = Mockery::mock(DetectColor::class);
+        $mock->shouldReceive('execute')->andReturn(null);
+        App::singleton(DetectColor::class, fn () => $mock);
+        $volume = Volume::factory()->create();
+
+        [$job, $batch] = (new ProcessVolumeAutomaticJob($volume, 30))->withFakeBatch();
+        $job->handle();
+        $this->assertEmpty($batch->added);
     }
 
     public function testHandleColorDetectionFailure()
@@ -56,15 +72,14 @@ class ProcessVolumeAutomaticJobTest extends TestCase
 
         $image = Image::factory()->create();
 
-        (new ProcessVolumeAutomaticJob($image->volume, 30))->handle();
+        [$job, $batch] = (new ProcessVolumeAutomaticJob($image->volume, 30))->withFakeBatch();
+        $job->handle();
 
         // The images are still processed, using the automatic channel detection of the
         // detection script for each individual image.
-        Queue::assertPushed(ProcessImageAutomaticJob::class, function ($j) use ($image) {
-            $this->assertEquals($image->id, $j->image->id);
-            $this->assertNull($j->channelMode);
-
-            return true;
-        });
+        $this->assertCount(1, $batch->added);
+        $j = $batch->added[0];
+        $this->assertEquals($image->id, $j->imageId);
+        $this->assertNull($j->channelMode);
     }
 }

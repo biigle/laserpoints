@@ -10,7 +10,9 @@ use Biigle\ImageAnnotationLabel;
 use Biigle\Modules\Laserpoints\Image;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageAutomaticJob;
 use Biigle\Modules\Laserpoints\Support\DetectAutomatic;
+use Biigle\Modules\Laserpoints\Support\DetectionLock;
 use Biigle\Tests\ImageTest;
+use Cache;
 use Exception;
 use Mockery;
 use TestCase;
@@ -140,5 +142,64 @@ class ProcessImageAutomaticJobTest extends TestCase
         $this->assertSame(true, $actual['error']);
         $this->assertSame('Fatal error message.', $actual['message']);
         $this->assertSame(30, $actual['distance']);
+    }
+
+    public function testHandleReleasesImageLock()
+    {
+        $this->mockDetection();
+        DetectionLock::acquireImage($this->image->volume_id, $this->image->id);
+
+        with(new ProcessImageAutomaticJob($this->image, 30))->handle();
+        $this->assertFalse(Cache::has(DetectionLock::key($this->image->volume_id)));
+    }
+
+    public function testFailedReleasesImageLock()
+    {
+        DetectionLock::acquireImage($this->image->volume_id, $this->image->id);
+
+        with(new ProcessImageAutomaticJob($this->image, 30))->failed(new Exception);
+        $this->assertFalse(Cache::has(DetectionLock::key($this->image->volume_id)));
+    }
+
+    public function testHandleBatchKeepsVolumeLock()
+    {
+        $this->mockDetection();
+        DetectionLock::acquireVolume($this->image->volume_id);
+
+        with(new ProcessImageAutomaticJob($this->image, 30, batch: true))->handle();
+        $this->assertTrue(Cache::has(DetectionLock::key($this->image->volume_id)));
+    }
+
+    public function testHandleImageDeleted()
+    {
+        $mock = Mockery::mock(DetectAutomatic::class);
+        $mock->shouldReceive('execute')->never();
+        App::singleton(DetectAutomatic::class, fn () => $mock);
+        DetectionLock::acquireImage($this->image->volume_id, $this->image->id);
+        $job = new ProcessImageAutomaticJob($this->image, 30);
+        $this->image->delete();
+
+        $job->handle();
+        $this->assertFalse(Cache::has(DetectionLock::key($this->image->volume_id)));
+    }
+
+    public function testHandleImageDeletedBatch()
+    {
+        $mock = Mockery::mock(DetectAutomatic::class);
+        $mock->shouldReceive('execute')->never();
+        App::singleton(DetectAutomatic::class, fn () => $mock);
+        DetectionLock::acquireVolume($this->image->volume_id);
+        $job = new ProcessImageAutomaticJob($this->image, 30, batch: true);
+        $this->image->delete();
+
+        $job->handle();
+        $this->assertTrue(Cache::has(DetectionLock::key($this->image->volume_id)));
+    }
+
+    protected function mockDetection()
+    {
+        $mock = Mockery::mock(DetectAutomatic::class);
+        $mock->shouldReceive('execute')->andReturn(['error' => false]);
+        App::singleton(DetectAutomatic::class, fn () => $mock);
     }
 }

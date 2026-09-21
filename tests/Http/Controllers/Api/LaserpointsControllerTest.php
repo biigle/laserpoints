@@ -10,11 +10,14 @@ use Biigle\Modules\Laserpoints\Jobs\ProcessImageAutomaticJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageManualJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeAutomaticJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeManualJob;
+use Biigle\Modules\Laserpoints\Support\DetectionLock;
 use Biigle\Shape;
 use Biigle\Tests\ImageAnnotationLabelTest;
 use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\LabelTest;
+use Bus;
+use Cache;
 use Queue;
 
 class LaserpointsControllerTest extends ApiTestCase
@@ -258,7 +261,7 @@ class LaserpointsControllerTest extends ApiTestCase
                 'label_id' => $label->id,
             ])
             ->assertStatus(200);
-        Queue::assertPushed(ProcessVolumeManualJob::class);
+        Queue::assertPushed(ProcessVolumeManualJob::class, fn ($job) => !is_null($job->batchId));
     }
 
     public function testVolumeManualTiled()
@@ -308,7 +311,33 @@ class LaserpointsControllerTest extends ApiTestCase
                 'num_laserpoints' => 2,
             ])
             ->assertStatus(200);
-        Queue::assertPushed(ProcessVolumeAutomaticJob::class);
+        Queue::assertPushed(ProcessVolumeAutomaticJob::class, fn ($job) => !is_null($job->batchId));
+    }
+
+    public function testVolumeAutomaticBatchReleasesLock()
+    {
+        Bus::fake();
+        $id = $this->volume()->id;
+        $this->beEditor();
+
+        $this->postJson("/api/v1/volumes/{$id}/laserpoints/automatic", [
+                'distance' => 50,
+                'num_laserpoints' => 2,
+            ])
+            ->assertStatus(200);
+
+        $this->assertTrue(Cache::has(DetectionLock::key($id)));
+
+        Bus::assertBatched(function ($batch) use ($id) {
+            $this->assertCount(1, $batch->jobs);
+            $this->assertInstanceOf(ProcessVolumeAutomaticJob::class, $batch->jobs->first());
+            $this->assertTrue($batch->allowsFailures());
+            $this->assertCount(1, $batch->finallyCallbacks());
+            $batch->finallyCallbacks()[0]($batch);
+            $this->assertFalse(Cache::has(DetectionLock::key($id)));
+
+            return true;
+        });
     }
 
     public function testVolumeAutomaticNumLaserpoints()
@@ -366,6 +395,82 @@ class LaserpointsControllerTest extends ApiTestCase
                 'label_id' => $label->id,
             ])
             ->assertStatus(422);
+    }
+
+    public function testVolumeLockedByVolume()
+    {
+        $id = $this->volume()->id;
+        $image = ImageTest::create(['volume_id' => $id]);
+        $this->beEditor();
+        DetectionLock::acquireVolume($id);
+
+        $this->postJson("/api/v1/volumes/{$id}/laserpoints/automatic", [
+                'distance' => 50,
+                'num_laserpoints' => 2,
+            ])
+            ->assertStatus(422);
+
+        $this->postJson("/api/v1/images/{$image->id}/laserpoints/automatic", [
+                'distance' => 50,
+                'num_laserpoints' => 2,
+                'channel_mode' => 'red',
+            ])
+            ->assertStatus(422);
+
+        Queue::assertNothingPushed();
+    }
+
+    public function testVolumeLockedByImage()
+    {
+        $id = $this->volume()->id;
+        $image = ImageTest::create(['volume_id' => $id]);
+        $image2 = ImageTest::create(['volume_id' => $id, 'filename' => 'b.jpg']);
+        $this->beEditor();
+
+        $this->postJson("/api/v1/images/{$image->id}/laserpoints/automatic", [
+                'distance' => 50,
+                'num_laserpoints' => 2,
+                'channel_mode' => 'red',
+            ])
+            ->assertStatus(200);
+
+        // Same image.
+        $this->postJson("/api/v1/images/{$image->id}/laserpoints/automatic", [
+                'distance' => 50,
+                'num_laserpoints' => 2,
+                'channel_mode' => 'red',
+            ])
+            ->assertStatus(422);
+
+        // Other image of the same volume.
+        $this->postJson("/api/v1/images/{$image2->id}/laserpoints/automatic", [
+                'distance' => 50,
+                'num_laserpoints' => 2,
+                'channel_mode' => 'red',
+            ])
+            ->assertStatus(200);
+
+        $this->postJson("/api/v1/volumes/{$id}/laserpoints/automatic", [
+                'distance' => 50,
+                'num_laserpoints' => 2,
+            ])
+            ->assertStatus(422);
+
+        Queue::assertPushed(ProcessImageAutomaticJob::class, 2);
+        Queue::assertNotPushed(ProcessVolumeAutomaticJob::class);
+    }
+
+    public function testVolumeLockOtherVolume()
+    {
+        $id = $this->volume()->id;
+        $this->beEditor();
+        DetectionLock::acquireVolume($id + 1);
+
+        $this->postJson("/api/v1/volumes/{$id}/laserpoints/automatic", [
+                'distance' => 50,
+                'num_laserpoints' => 2,
+            ])
+            ->assertStatus(200);
     }
 
     protected function makeManualAnnotations($label, $annotations, $images = 4)

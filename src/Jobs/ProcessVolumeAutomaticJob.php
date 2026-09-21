@@ -9,6 +9,7 @@ use Biigle\Modules\Laserpoints\Support\DetectColor;
 use Biigle\Volume;
 use Exception;
 use FileCache;
+use Illuminate\Bus\Batchable;
 use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
 use Illuminate\Queue\SerializesModels;
 use Log;
@@ -16,7 +17,7 @@ use Log;
 #[DeleteWhenMissingModels]
 class ProcessVolumeAutomaticJob extends Job
 {
-    use SerializesModels;
+    use Batchable, SerializesModels;
 
     public $tries = 1;
 
@@ -64,11 +65,19 @@ class ProcessVolumeAutomaticJob extends Job
             $channelMode = null;
         }
 
+        // The volume lock is released by the batch that this job is part of.
         $this->volume->images()
-            ->eachById(function ($image) use ($channelMode) {
-                $image = Image::convert($image);
-                ProcessImageAutomaticJob::dispatch($image, $this->distance, $channelMode, $this->numLaserpoints)
-                    ->onQueue(config('laserpoints.process_automatic_queue'));
+            ->select('id', 'volume_id')
+            ->chunkById(1000, function ($images) use ($channelMode) {
+                $jobs = $images->map(fn ($image) => new ProcessImageAutomaticJob(
+                    Image::convert($image),
+                    $this->distance,
+                    $channelMode,
+                    $this->numLaserpoints,
+                    batch: true
+                ));
+
+                $this->batch()->add($jobs->all());
             });
     }
 

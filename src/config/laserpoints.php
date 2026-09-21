@@ -22,4 +22,16 @@ return [
      */
     'process_automatic_queue' => env('LASERPOINTS_PROCESS_AUTOMATIC_QUEUE', env('LASERPOINTS_PROCESS_DELPHI_QUEUE', 'default')),
     'process_manual_queue' => env('LASERPOINTS_PROCESS_MANUAL_QUEUE', 'default'),
+
+    /*
+    | Seconds after which the lock that prevents concurrent detections for the same
+    | volume expires, in case a job was killed without releasing it.
+    */
+    'lock_ttl' => env('LASERPOINTS_LOCK_TTL', 86400),
+
+    /*
+    | Seconds to wait for another request that currently updates the lock state of the
+    | same volume.
+    */
+    'lock_wait' => env('LASERPOINTS_LOCK_WAIT', 5),
 ];
