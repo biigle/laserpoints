@@ -27,7 +27,7 @@
                 target="_blank"
                 class="btn btn-default"
                 title="Learn more about laser point detection"
-                ><span class="fa fa-info-circle" aria-hidden="true"></span></a>
+                ><span class="fa fa-question-circle" aria-hidden="true"></span></a>
         </div>
         <div class="form-group">
             <label for="distance">Laser distance in cm</label>
