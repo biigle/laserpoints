@@ -25,7 +25,7 @@
             <li>4 parallel lasers painting the points of a square</li>
         </ul>
         <p>
-            The laser point detection is only available for image volumes. It can not be used for volumes that contain very large (tiled) images.
+            The laser point detection is only available for image volumes. The automatic detection cannot be used for very large (tiled) images, but the manual detection can.
         </p>
     </div>
 
