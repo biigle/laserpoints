@@ -83,10 +83,9 @@ class LaserpointsControllerTest extends ApiTestCase
 
     public function testImageManualTiled()
     {
-        $this->markTestIncomplete('todo');
         $label = LabelTest::create(['name' => 'Laser Point']);
-        $image = ImageTest::create(['tiled' => true, 'volume_id' => $this->volume()->id]);
-        $this->makeManualAnnotations($label, 3);
+        $this->makeManualAnnotations($label, 3, 1, true);
+        $image = Image::first();
 
         $this->beEditor();
         $this->postJson("/api/v1/images/{$image->id}/laserpoints/manual", [
@@ -203,8 +202,11 @@ class LaserpointsControllerTest extends ApiTestCase
         $this->beEditor();
         $this->postJson("/api/v1/images/{$image->id}/laserpoints/automatic", [
                 'distance' => 50,
+                'num_laserpoints' => 2,
+                'channel_mode' => 'red',
             ])
-            ->assertStatus(422);
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('id');
         Queue::assertNotPushed(ProcessImageAutomaticJob::class);
     }
 
@@ -266,10 +268,9 @@ class LaserpointsControllerTest extends ApiTestCase
 
     public function testVolumeManualTiled()
     {
-        $this->markTestIncomplete();
         $label = LabelTest::create(['name' => 'Laser Point']);
         $id = $this->volume()->id;
-        $image = ImageTest::create(['tiled' => true, 'volume_id' => $id]);
+        $this->makeManualAnnotations($label, 3, 1, true);
         $this->makeManualAnnotations($label, 3);
 
         $this->beEditor();
@@ -370,17 +371,17 @@ class LaserpointsControllerTest extends ApiTestCase
 
     public function testVolumeAutomaticTiled()
     {
-        $label = LabelTest::create(['name' => 'Laser Point']);
         $id = $this->volume()->id;
-        $image = ImageTest::create(['tiled' => true, 'volume_id' => $id]);
-        $this->makeManualAnnotations($label, 3);
+        ImageTest::create(['volume_id' => $id]);
+        ImageTest::create(['tiled' => true, 'volume_id' => $id, 'filename' => 'b.jpg']);
 
         $this->beEditor();
         $this->postJson("/api/v1/volumes/{$id}/laserpoints/automatic", [
                 'distance' => 50,
-                'label_id' => $label->id,
+                'num_laserpoints' => 2,
             ])
-            ->assertStatus(422);
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('id');
         Queue::assertNotPushed(ProcessVolumeAutomaticJob::class);
     }
 
@@ -473,13 +474,14 @@ class LaserpointsControllerTest extends ApiTestCase
             ->assertStatus(200);
     }
 
-    protected function makeManualAnnotations($label, $annotations, $images = 4)
+    protected function makeManualAnnotations($label, $annotations, $images = 4, $tiled = false)
     {
         $annotations = $annotations ?: rand(1, 10);
         for ($i = 0; $i < $images; $i++) {
             $image = ImageTest::create([
                 'volume_id' => $this->volume()->id,
                 'filename' => uniqid(),
+                'tiled' => $tiled,
             ]);
 
             for ($j = 0; $j < $annotations; $j++) {

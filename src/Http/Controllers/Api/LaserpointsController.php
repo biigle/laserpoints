@@ -40,14 +40,6 @@ class LaserpointsController extends Controller
     {
         $image = Image::with('volume')->findOrFail($id);
         $this->authorize('edit-in', $image->volume);
-        // The manual detection itself works for tiled images, too, as it only needs
-        // the image dimensions. This restriction can be lifted once the UI offers the
-        // manual detection for volumes with very large images.
-        if ($image->tiled) {
-            throw ValidationException::withMessages([
-                'id' => 'Laser point detection is not available for very large images.',
-            ]);
-        }
         $request->validate([
             'distance' => 'required|numeric|min:1',
             'label_id' => 'required|integer|exists:labels,id',
@@ -143,14 +135,6 @@ class LaserpointsController extends Controller
         if (!$volume->isImageVolume()) {
             throw ValidationException::withMessages([
                 'id' => 'Laser point detection is only available for image volumes.',
-            ]);
-        }
-        // The manual detection itself works for tiled images, too, as it only needs
-        // the image dimensions. This restriction can be lifted once the UI offers the
-        // manual detection for volumes with very large images.
-        if ($volume->hasTiledImages()) {
-            throw ValidationException::withMessages([
-                'id' => 'Laser point detection is not available for volumes with very large images.',
             ]);
         }
         $request->validate([

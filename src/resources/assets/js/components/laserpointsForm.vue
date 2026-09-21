@@ -6,6 +6,8 @@
                 type="button"
                 class="btn btn-default"
                 :class="automaticButtonClass"
+                :disabled="manualOnly || null"
+                :title="automaticButtonTitle"
                 @click="selectAutomatic"
                 >Automatic</button>
             </div>
@@ -85,6 +87,10 @@ export default {
             type: Number,
             default: null,
         },
+        manualOnly: {
+            type: Boolean,
+            default: false,
+        },
     },
     data() {
         return {
@@ -96,7 +102,7 @@ export default {
             error: false,
             labels: [],
             label: null,
-            manualMode: false,
+            manualMode: this.manualOnly,
         };
     },
     computed: {
@@ -105,7 +111,7 @@ export default {
                 return this.loading || this.processing || !this.distance || !this.label;
             }
             // For per-image automatic, channel_mode is required
-            if (this.imageId && !this.manualMode) {
+            if (this.imageId) {
                 return this.loading || this.processing || !this.distance || !this.channelMode;
             }
             // For volume automatic, channel_mode is not required
@@ -117,9 +123,24 @@ export default {
         manualButtonClass() {
             return this.manualMode ? 'active' : '';
         },
+        automaticButtonTitle() {
+            if (this.manualOnly) {
+                if (this.imageId) {
+                    return 'The automatic laser point detection is not available for very large images';
+                }
+
+                return 'The automatic laser point detection is not available for volumes containing very large images';
+            }
+
+            return 'Detect the laser points automatically';
+        },
     },
     methods: {
         selectAutomatic() {
+            if (this.manualOnly) {
+                return;
+            }
+
             this.manualMode = false;
         },
         selectManual() {
@@ -190,11 +211,13 @@ export default {
         },
     },
     mounted() {
-        // For per-image detection, use previous channel_mode if available, otherwise default to gray
-        if (this.imageId && window.biigle && window.biigle.laserpoints && window.biigle.laserpoints.channel_mode) {
-            this.channelMode = window.biigle.laserpoints.channel_mode;
-        } else if (this.imageId) {
-            this.channelMode = 'gray';
+        if (this.manualOnly) {
+            return;
+        }
+
+        // For per-image detection, use the channel_mode of the previous detection.
+        if (this.imageId) {
+            this.channelMode = biigle.$require('laserpoints.channel_mode');
         }
     },
 };
