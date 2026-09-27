@@ -18,6 +18,7 @@ from pathlib import Path
 from dataclasses import dataclass, asdict
 from typing import List, Tuple, Optional, Dict
 
+import scipy.ndimage
 import scipy.spatial.distance
 
 
@@ -167,7 +168,41 @@ def detect_laser_points(image_path, num_points=3, num_candidates=50,
     if best_combo is None:
         best_combo = [c['pt'] for c in candidates[:num_points]]
 
+    # 5. Refine the peaks to the centers of their spots. The window is larger than the
+    # candidate mask because the peak may lie on the rim of a large spot.
+    best_combo = [_refine_spot_center(signal_smooth, pt, 2 * mask_radius) for pt in best_combo]
+
     return img, width, height, best_combo
+
+
+def _refine_spot_center(signal, pt, radius, rel_threshold=0.5):
+    """
+    Move a peak to the center of the spot it belongs to.
+
+    The DoG response of a large or saturated laser spot has a flat or even ring-shaped
+    top, so its peak pixel can be anywhere on the spot. Instead, this returns the
+    centroid of the spot region, i.e. all pixels that are connected to the peak and
+    whose signal exceeds rel_threshold of the peak height above the local background.
+    Holes in the region (e.g. from a saturated white core) are filled.
+    """
+    x, y = pt
+    h, w = signal.shape[:2]
+    x0, x1 = max(0, x - radius), min(w, x + radius + 1)
+    y0, y1 = max(0, y - radius), min(h, y + radius + 1)
+    window = signal[y0:y1, x0:x1]
+
+    # The spot covers only a small part of the window so the median is the background.
+    background = float(np.median(window))
+    peak = float(signal[y, x])
+    if peak <= background:
+        return pt
+    threshold = background + rel_threshold * (peak - background)
+
+    _, labels = cv2.connectedComponents((window >= threshold).astype(np.uint8))
+    spot = scipy.ndimage.binary_fill_holes(labels == labels[y - y0, x - x0])
+    ys, xs = np.nonzero(spot)
+
+    return (int(round(xs.mean() + x0)), int(round(ys.mean() + y0)))
 
 
 def _pixel_channel_purity(img: np.ndarray, x: int, y: int, mode: str, radius: int = 2) -> float:
