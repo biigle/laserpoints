@@ -4,21 +4,20 @@ namespace Biigle\Modules\Laserpoints\Jobs;
 
 use App;
 use Biigle\Jobs\Job;
-use Biigle\Label;
-use Biigle\Modules\Laserpoints\Image;
-use Biigle\Modules\Laserpoints\Support\DetectManual;
-use Biigle\Modules\Laserpoints\Support\DetectionLock;
 use Biigle\Shape;
+use Biigle\Modules\Laserpoints\Image;
+use Biigle\Modules\Laserpoints\Support\DetectAutomatic;
+use Biigle\Modules\Laserpoints\Support\DetectionLock;
 use Exception;
+use FileCache;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use Throwable;
 
-class ProcessImageManualJob extends Job implements ShouldQueue
+class ProcessImageAutomaticJob extends Job implements ShouldQueue
 {
-    use Batchable, InteractsWithQueue, SerializesModels;
+    use Batchable, InteractsWithQueue;
 
     public $tries = 1;
 
@@ -45,8 +44,9 @@ class ProcessImageManualJob extends Job implements ShouldQueue
      * Create a new job instance.
      *
      * @param Image $image The image to process. Must have the id and volume_id attributes.
-     * @param Label $label The laser point label.
      * @param float $distance Distance between laser points im cm to use for computation.
+     * @param ?string $channelMode Channel mode override (red/green/blue/gray)
+     * @param int $numLaserpoints Number of laser points to search for.
      * @param bool $batch Whether the job is part of a volume detection. Otherwise it
      * releases the image lock when it's finished.
      *
@@ -54,8 +54,9 @@ class ProcessImageManualJob extends Job implements ShouldQueue
      */
     public function __construct(
         Image $image,
-        public Label $label,
         public float $distance,
+        public ?string $channelMode = null,
+        public int $numLaserpoints = 2,
         public bool $batch = false,
     )
     {
@@ -102,13 +103,11 @@ class ProcessImageManualJob extends Job implements ShouldQueue
     protected function detect(Image $image)
     {
         try {
-            $detect = App::make(DetectManual::class);
-            $output = $detect->execute(
-                $image->width,
-                $image->height,
-                $this->distance,
-                $this->getLaserpoints($image)
-            );
+            $output = FileCache::get($image, function ($image, $path) {
+                $detect = App::make(DetectAutomatic::class);
+
+                return $detect->execute($path, $this->distance, $this->channelMode, $this->numLaserpoints);
+            });
         } catch (Exception $e) {
             $output = [
                 'error' => true,
@@ -116,31 +115,14 @@ class ProcessImageManualJob extends Job implements ShouldQueue
             ];
         }
 
+        $output['method'] = DetectAutomatic::METHOD;
         $output['distance'] = $this->distance;
+        if ($this->channelMode) {
+            $output['channel_mode'] = $this->channelMode;
+        }
 
         $image->laserpoints = $output;
         $image->save();
-    }
-
-    /**
-     * Collects the laser point annotations of the given image.
-     *
-     * @param Image $image
-     *
-     * @return array Array of annotation coordinates as `[x, y]` pairs
-     */
-    protected function getLaserpoints(Image $image)
-    {
-        // Use an exists constraint instead of a join because the same label can be
-        // attached to the same annotation by multiple users. A join would return the
-        // points of these annotations more than once, which would distort the computed
-        // image area.
-        return $image->annotations()
-            ->where('shape_id', Shape::pointId())
-            ->whereHas('labels', fn ($query) => $query->where('label_id', $this->label->id))
-            ->orderBy('id')
-            ->pluck('points')
-            ->toArray();
     }
 
     /**

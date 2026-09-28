@@ -86,7 +86,13 @@ class ImageTest extends TestCase
         $label = LabelTest::create();
         $image = Image::convert(BaseImageTest::create());
 
-        $this->assertFalse($image->readyForManualDetection($label));
+        try {
+            $image->readyForManualDetection($label);
+            $this->assertFalse(true);
+        } catch (Exception $e) {
+            $this->assertStringContainsString('must have at least 2 manually annotated laser points (has 0)', $e->getMessage());
+        }
+
         static::addLaserpoints($image, $label);
 
         try {
@@ -97,9 +103,9 @@ class ImageTest extends TestCase
         }
 
         static::addLaserpoints($image, $label);
-        $this->assertTrue($image->readyForManualDetection($label));
+        $image->readyForManualDetection($label);
         static::addLaserpoints($image, $label, 2);
-        $this->assertTrue($image->readyForManualDetection($label));
+        $image->readyForManualDetection($label);
         static::addLaserpoints($image, $label);
 
         try {
@@ -108,5 +114,36 @@ class ImageTest extends TestCase
         } catch (Exception $e) {
             $this->assertStringContainsString('can\'t have more than 4 manually annotated laser points', $e->getMessage());
         }
+    }
+
+    public function testReadyForManualDetectionDuplicateLabels()
+    {
+        $label = LabelTest::create();
+        $image = Image::convert(BaseImageTest::create());
+        static::addLaserpoints($image, $label, Image::MAX_POINTS);
+
+        // The same label can be attached to the same annotation by multiple users. This
+        // must not be counted as an additional laser point.
+        ImageAnnotationLabelTest::create([
+            'annotation_id' => $image->annotations()->first()->id,
+            'label_id' => $label->id,
+        ]);
+
+        $this->expectNotToPerformAssertions();
+        $image->readyForManualDetection($label);
+    }
+
+    public function testChannelModeAttribute()
+    {
+        $image = Image::convert(BaseImageTest::create());
+        $this->assertNull($image->channel_mode);
+
+        $image->laserpoints = [
+            'area' => 500,
+            'channel_mode' => 'red',
+        ];
+        $image->save();
+
+        $this->assertSame('red', $image->fresh()->channel_mode);
     }
 }

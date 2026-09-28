@@ -6,21 +6,29 @@ import { Resource } from '../import.js';
  * var resource = biigle.$require('api.laserpoints');
  *
  * Perform the laser point detection on all images of a volume:
- * resource.processVolume({volume_id: 1}, {distance: 50}).then(...);
+ * resource.processVolumeAutomatic({volume_id: 1}, {distance: 50}).then(...);
  *
  * Perform the laser point detection on a single image:
- * resource.processImage({image_id: 1}, {distance: 50}).then(...);
+ * resource.processImageAutomatic({image_id: 1}, {distance: 50}).then(...);
  *
  * Get the laser point information for an image
  * resource.get({image_id: 1}).then(...);
  */
 export default Resource('api/v1/images{/image_id}/laserpoints', {}, {
-    processVolume: {
+    processVolumeAutomatic: {
         method: 'POST',
-        url: 'api/v1/volumes{/volume_id}/laserpoints/area',
+        url: 'api/v1/volumes{/volume_id}/laserpoints/automatic',
     },
-    processImage: {
+    processImageAutomatic: {
         method: 'POST',
-        url: 'api/v1/images{/image_id}/laserpoints/area',
+        url: 'api/v1/images{/image_id}/laserpoints/automatic',
+    },
+    processVolumeManual: {
+        method: 'POST',
+        url: 'api/v1/volumes{/volume_id}/laserpoints/manual',
+    },
+    processImageManual: {
+        method: 'POST',
+        url: 'api/v1/images{/image_id}/laserpoints/manual',
     },
 });
