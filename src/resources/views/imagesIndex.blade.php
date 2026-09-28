@@ -62,7 +62,11 @@
                     @if ($img->message)
                         <strong>{{$img->message}}</strong>
                     @endif
-                    The automatic laser point detection failed. You can always annotate the laser points manually and restart the detection.
+                    @if ($img->method === 'manual')
+                        The laser point detection failed. Please check the manually annotated laser points and restart the detection.
+                    @else
+                        The automatic laser point detection failed. You can always annotate the laser points manually and restart the detection.
+                    @endif
                 </div>
             @endif
             @can('edit-in', $volume)

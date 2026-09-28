@@ -46,6 +46,13 @@ class LaserpointsControllerTest extends ApiTestCase
             ])
             ->assertStatus(422);
 
+        // No manual annotations on this image.
+        $this->postJson("/api/v1/images/{$image->id}/laserpoints/manual", [
+                'distance' => 50,
+                'label_id' => $label->id,
+            ])
+            ->assertStatus(422);
+
         Image::getQuery()->delete();
         $this->makeManualAnnotations($label, 1, 1);
         $image = Image::first();

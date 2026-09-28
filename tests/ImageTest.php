@@ -86,7 +86,13 @@ class ImageTest extends TestCase
         $label = LabelTest::create();
         $image = Image::convert(BaseImageTest::create());
 
-        $this->assertFalse($image->readyForManualDetection($label));
+        try {
+            $image->readyForManualDetection($label);
+            $this->assertFalse(true);
+        } catch (Exception $e) {
+            $this->assertStringContainsString('must have at least 2 manually annotated laser points (has 0)', $e->getMessage());
+        }
+
         static::addLaserpoints($image, $label);
 
         try {
@@ -97,9 +103,9 @@ class ImageTest extends TestCase
         }
 
         static::addLaserpoints($image, $label);
-        $this->assertTrue($image->readyForManualDetection($label));
+        $image->readyForManualDetection($label);
         static::addLaserpoints($image, $label, 2);
-        $this->assertTrue($image->readyForManualDetection($label));
+        $image->readyForManualDetection($label);
         static::addLaserpoints($image, $label);
 
         try {
@@ -123,7 +129,8 @@ class ImageTest extends TestCase
             'label_id' => $label->id,
         ]);
 
-        $this->assertTrue($image->readyForManualDetection($label));
+        $this->expectNotToPerformAssertions();
+        $image->readyForManualDetection($label);
     }
 
     public function testChannelModeAttribute()

@@ -56,6 +56,10 @@ class Volume extends BaseVolume
                 return $annotations->count();
             });
 
+        if ($points->isEmpty()) {
+            throw new Exception('No image has manually annotated laser points with this label.');
+        }
+
         $reference = $points->first();
         if ($reference < Image::MIN_POINTS) {
             throw new Exception('There must be at least '.Image::MIN_POINTS.' manually annotated laser points per image ('.$reference.' found).');

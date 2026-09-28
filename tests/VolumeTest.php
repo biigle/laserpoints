@@ -36,6 +36,13 @@ class VolumeTest extends TestCase
             })
             ->create();
 
+        try {
+            $volume->readyForManualDetection($label);
+            $this->assertFalse(true);
+        } catch (Exception $e) {
+            $this->assertStringContainsString('No image has manually annotated laser points', $e->getMessage());
+        }
+
         $images->each(function ($i) use ($label) {
             ImageTest::addLaserpoints($i, $label);
         });

@@ -181,8 +181,6 @@ class Image extends BaseImage
      *
      * @param Label $label The laser point label.
      * @throws Exception If the image has an invalid count of manually annotated laser points
-     *
-     * @return bool
      */
     public function readyForManualDetection(Label $label)
     {
@@ -194,15 +192,11 @@ class Image extends BaseImage
             ->whereHas('labels', fn ($query) => $query->where('label_id', $label->id))
             ->count();
 
-        if ($count > 0) {
-            if ($count < self::MIN_POINTS) {
-                throw new Exception('An image must have at least '.self::MIN_POINTS.' manually annotated laser points (has '.$count.').');
-            } elseif ($count > self::MAX_POINTS) {
-                throw new Exception('An image can\'t have more than '.self::MAX_POINTS.' manually annotated laser points (has '.$count.').');
-            }
+        if ($count < self::MIN_POINTS) {
+            throw new Exception('An image must have at least '.self::MIN_POINTS.' manually annotated laser points (has '.$count.').');
+        } elseif ($count > self::MAX_POINTS) {
+            throw new Exception('An image can\'t have more than '.self::MAX_POINTS.' manually annotated laser points (has '.$count.').');
         }
-
-        return $count > 0;
     }
 
     /**
