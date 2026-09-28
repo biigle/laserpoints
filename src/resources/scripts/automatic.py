@@ -130,60 +130,102 @@ def detect_laser_points(image_path, num_points=3, num_candidates=50,
 
     candidates = []
     mask_radius = int(max_dimension * 0.01)
+    # The spot region is searched in a larger window than the candidate mask because
+    # the peak may lie on the rim of a large spot.
+    spot_radius = 2 * mask_radius
 
     for _ in range(num_candidates):
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(search_area)
         if max_val < 5:
             break
-        candidates.append({'pt': max_loc, 'score': max_val})
+        spot = _spot_region(signal_smooth, max_loc, spot_radius)
+        candidates.append({'pt': max_loc, 'score': max_val, 'area': spot['area'] if spot else 0})
         cv2.circle(search_area, max_loc, mask_radius, 0, -1)
 
     if len(candidates) < num_points:
         return img, width, height, []
 
-    # 4. Geometric Triplet Scoring
-    best_combo = None
-    best_score = -1
-
-    for combo in itertools.combinations(candidates, num_points):
-        pts = [c['pt'] for c in combo]
-        distances = []
-        for i in range(num_points):
-            for j in range(i + 1, num_points):
-                distances.append(math.hypot(pts[i][0] - pts[j][0], pts[i][1] - pts[j][1]))
-
-        if num_points > 1:
-            combo_max_dist = max(distances)
-            combo_min_dist = min(distances)
-            valid_geometry = (combo_min_dist >= min_spread) and (combo_max_dist <= max_spread)
-        else:
-            valid_geometry = True
-
-        if valid_geometry:
-            score = sum(c['score'] for c in combo)
-            if score > best_score:
-                best_score = score
-                best_combo = pts
-
+    # 4. Geometric Scoring
+    best_combo = _select_combo(candidates, num_points, min_spread, max_spread)
     if best_combo is None:
-        best_combo = [c['pt'] for c in candidates[:num_points]]
+        best_combo = candidates[:num_points]
 
-    # 5. Refine the peaks to the centers of their spots. The window is larger than the
-    # candidate mask because the peak may lie on the rim of a large spot.
-    best_combo = [_refine_spot_center(signal_smooth, pt, 2 * mask_radius) for pt in best_combo]
+    # 5. Refine the peaks to the centers of their spots
+    points = [_refine_spot_center(signal_smooth, c['pt'], spot_radius) for c in best_combo]
 
-    return img, width, height, best_combo
+    return img, width, height, points
 
 
-def _refine_spot_center(signal, pt, radius, rel_threshold=0.5):
+def _select_combo(candidates, num_points, min_spread, max_spread, size_weight=60.0,
+                  size_offset=10.0, size_tolerance=1.7, shape_weight=200.0,
+                  shape_tolerance=0.1):
     """
-    Move a peak to the center of the spot it belongs to.
+    Choose the combination of candidates that most likely are the laser points.
 
-    The DoG response of a large or saturated laser spot has a flat or even ring-shaped
-    top, so its peak pixel can be anywhere on the spot. Instead, this returns the
-    centroid of the spot region, i.e. all pixels that are connected to the peak and
-    whose signal exceeds rel_threshold of the peak height above the local background.
-    Holes in the region (e.g. from a saturated white core) are filled.
+    Only combinations whose pairwise distances are within the physical bounds of the rig
+    are considered. The score of a combination is the sum of the candidate scores minus
+    a penalty if the spots have very different sizes (the spots of one rig look alike,
+    whereas e.g. hot pixels are much smaller than laser spots) and, for three or four
+    points, minus a penalty if they don't form an equilateral triangle or a square (the
+    shapes that the area computation assumes). Both penalties only apply beyond a
+    tolerance: the spot areas of one rig may differ by a factor of about 5 (size_tolerance
+    is a difference of log areas) and the shape may be slightly distorted, e.g. by an
+    oblique camera. Of equally scored combinations, the first one wins.
+
+    Returns the chosen candidates or None if no combination is valid.
+    """
+    combos = np.array(list(itertools.combinations(range(len(candidates)), num_points)))
+    total = np.array([c['score'] for c in candidates], dtype=float)[combos].sum(axis=1)
+
+    if num_points > 1:
+        pts = np.array([c['pt'] for c in candidates], dtype=float)
+        pairs = list(itertools.combinations(range(num_points), 2))
+        dists = np.stack([
+            np.hypot(*(pts[combos[:, i]] - pts[combos[:, j]]).T) for i, j in pairs
+        ], axis=1)
+        valid = (dists.min(axis=1) >= min_spread) & (dists.max(axis=1) <= max_spread)
+
+        areas = np.maximum([c['area'] for c in candidates], 1)
+        log_areas = np.log(areas + size_offset)[combos]
+        size_spread = log_areas.max(axis=1) - log_areas.min(axis=1)
+        total -= size_weight * np.maximum(0, size_spread - size_tolerance)
+        irregularity = _shape_irregularity(dists, num_points)
+        total -= shape_weight * np.maximum(0, irregularity - shape_tolerance)
+    else:
+        valid = np.ones(len(combos), dtype=bool)
+
+    if not valid.any():
+        return None
+    total[~valid] = -np.inf
+
+    return [candidates[i] for i in combos[np.argmax(total)]]
+
+
+def _shape_irregularity(dists, num_points):
+    """
+    Deviation of combinations from an equilateral triangle (3 points) or a square (4
+    points), given their pairwise distances. 0 is a perfect shape.
+    """
+    dists = np.sort(dists, axis=1)
+    if num_points == 3:
+        return 1 - dists[:, 0] / dists[:, -1]
+    if num_points == 4:
+        sides, diagonals = dists[:, :4], dists[:, 4:]
+        side_ratio = sides[:, 0] / sides[:, -1]
+        diagonal_ratio = diagonals.mean(axis=1) / sides.mean(axis=1) / math.sqrt(2)
+        return (1 - side_ratio) + np.abs(diagonal_ratio - 1)
+
+    return np.zeros(len(dists))
+
+
+def _spot_region(signal, pt, radius, rel_threshold=0.5):
+    """
+    Get the region of the spot around a peak in a window of the given radius.
+
+    The region are all pixels that are connected to the peak and whose signal exceeds
+    rel_threshold of the peak height above the local background. Holes in the region
+    (e.g. from a saturated white core) are filled. Returns None if the peak does not
+    exceed the background.
     """
     x, y = pt
     h, w = signal.shape[:2]
@@ -195,14 +237,45 @@ def _refine_spot_center(signal, pt, radius, rel_threshold=0.5):
     background = float(np.median(window))
     peak = float(signal[y, x])
     if peak <= background:
-        return pt
+        return None
     threshold = background + rel_threshold * (peak - background)
 
     _, labels = cv2.connectedComponents((window >= threshold).astype(np.uint8))
-    spot = scipy.ndimage.binary_fill_holes(labels == labels[y - y0, x - x0])
-    ys, xs = np.nonzero(spot)
+    region = scipy.ndimage.binary_fill_holes(labels == labels[y - y0, x - x0])
+    ys, xs = np.nonzero(region)
+    cx, cy = xs.mean(), ys.mean()
+    max_radius = math.sqrt(((xs - cx) ** 2 + (ys - cy) ** 2).max()) + 0.5
 
-    return (int(round(xs.mean() + x0)), int(round(ys.mean() + y0)))
+    return {
+        'center': (cx + x0, cy + y0),
+        'area': len(xs),
+        # 1 for a disk, smaller for irregular or elongated regions.
+        'compactness': len(xs) / (math.pi * max_radius ** 2),
+        'touches_border': bool(ys.min() == 0 or xs.min() == 0 or
+                               ys.max() == window.shape[0] - 1 or
+                               xs.max() == window.shape[1] - 1),
+    }
+
+
+def _refine_spot_center(signal, pt, radius, min_compactness=0.3):
+    """
+    Move a peak to the center of the spot it belongs to.
+
+    The DoG response of a large or saturated laser spot has a flat or even ring-shaped
+    top, so its peak pixel can be anywhere on the spot. The center of the spot region is
+    a better estimate. If the region is not compact or reaches the border of the window
+    (e.g. because the spot merges with a reddish background), higher thresholds are
+    tried to isolate the core of the spot. If this fails, too, the peak is kept.
+    """
+    for rel_threshold in (0.5, 0.65, 0.8):
+        spot = _spot_region(signal, pt, radius, rel_threshold)
+        if spot is None:
+            break
+        if spot['compactness'] >= min_compactness and not spot['touches_border']:
+            cx, cy = spot['center']
+            return (int(round(cx)), int(round(cy)))
+
+    return pt
 
 
 def _pixel_channel_purity(img: np.ndarray, x: int, y: int, mode: str, radius: int = 2) -> float:
