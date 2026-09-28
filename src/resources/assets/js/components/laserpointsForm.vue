@@ -219,6 +219,10 @@ export default {
         },
     },
     mounted() {
+        if (this.imageId) {
+            this.distance = biigle.$require('laserpoints.distance');
+        }
+
         if (this.manualOnly) {
             return;
         }

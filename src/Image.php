@@ -52,13 +52,6 @@ class Image extends BaseImage
     ];
 
     /**
-     * Attributes that should be appended during serialization.
-     *
-     * @var array
-     */
-    protected $appends = ['laserpoints'];
-
-    /**
      * Converts a regular Biigle image to a Laserpoints image.
      *
      * @param BaseImage $image Regular Biigle image instance
