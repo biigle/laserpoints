@@ -115,6 +115,7 @@ class ProcessImageAutomaticJob extends Job implements ShouldQueue
             ];
         }
 
+        $output['method'] = DetectAutomatic::METHOD;
         $output['distance'] = $this->distance;
         if ($this->channelMode) {
             $output['channel_mode'] = $this->channelMode;

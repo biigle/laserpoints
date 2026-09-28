@@ -37,7 +37,6 @@ class ProcessImageAutomaticJobTest extends TestCase
                 'error' => false,
                 'area' => 100,
                 'count' => 3,
-                'method' => 'manual',
                 'points' => [[100, 100], [100, 100], [100, 100]],
                 'channel_mode' => 'red',
             ]);
@@ -52,7 +51,7 @@ class ProcessImageAutomaticJobTest extends TestCase
         $this->assertSame(false, $actual['error']);
         $this->assertSame(100, $actual['area']);
         $this->assertSame(3, $actual['count']);
-        $this->assertSame('manual', $actual['method']);
+        $this->assertSame('automatic', $actual['method']);
         $this->assertSame([[100, 100], [100, 100], [100, 100]], $actual['points']);
         $this->assertSame(30, $actual['distance']);
         $this->assertSame('red', $actual['channel_mode']);
@@ -70,7 +69,6 @@ class ProcessImageAutomaticJobTest extends TestCase
                 'error' => false,
                 'area' => 100,
                 'count' => 3,
-                'method' => 'manual',
                 'points' => [[100, 100], [100, 100], [100, 100]],
             ]);
 
@@ -84,7 +82,7 @@ class ProcessImageAutomaticJobTest extends TestCase
         $this->assertSame(false, $actual['error']);
         $this->assertSame(100, $actual['area']);
         $this->assertSame(3, $actual['count']);
-        $this->assertSame('manual', $actual['method']);
+        $this->assertSame('automatic', $actual['method']);
         $this->assertSame([[100, 100], [100, 100], [100, 100]], $actual['points']);
         $this->assertSame(30, $actual['distance']);
         $this->assertSame('red', $actual['channel_mode']);
@@ -111,6 +109,7 @@ class ProcessImageAutomaticJobTest extends TestCase
         $actual = $this->image->fresh()->laserpoints;
         $this->assertSame(true, $actual['error']);
         $this->assertSame('Some expected error occurred.', $actual['message']);
+        $this->assertSame('automatic', $actual['method']);
         $this->assertSame(30, $actual['distance']);
     }
 
@@ -141,6 +140,7 @@ class ProcessImageAutomaticJobTest extends TestCase
         $actual = $this->image->fresh()->laserpoints;
         $this->assertSame(true, $actual['error']);
         $this->assertSame('Fatal error message.', $actual['message']);
+        $this->assertSame('automatic', $actual['method']);
         $this->assertSame(30, $actual['distance']);
     }
 

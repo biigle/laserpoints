@@ -33,7 +33,8 @@
                 @if ($img->method)
                     <tr>
                         <th>Detection method</th>
-                        <td>{{ $img->method }}</td>
+                        {{-- Results of the former Delphi detection store other method names. --}}
+                        <td>{{ $img->method === 'manual' ? 'manual' : 'automatic' }}</td>
                     </tr>
                 @endif
 

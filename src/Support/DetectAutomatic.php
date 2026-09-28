@@ -5,6 +5,13 @@ namespace Biigle\Modules\Laserpoints\Support;
 class DetectAutomatic extends LaserpointsScript
 {
     /**
+     * Name of the detection method that is stored with the results.
+     *
+     * @var string
+     */
+    const METHOD = 'automatic';
+
+    /**
      * Execute an automatic laser point detection run.
      *
      * @param string $imagePath Absolute path to the image file to detect laserpoints on

@@ -472,7 +472,7 @@ def process_image(img_path: Path, args, channel_mode: str,
 # ---------------------------------------------------------------------------
 
 def _compute_area(laserpoints: np.ndarray, width: int, height: int,
-                  laserdistance: float, method_name: str) -> Optional[dict]:
+                  laserdistance: float) -> Optional[dict]:
     """
     Compute the image area (in m²) from detected laser points.
     Returns a JSON-serialisable dict
@@ -485,7 +485,7 @@ def _compute_area(laserpoints: np.ndarray, width: int, height: int,
         dists.sort()
         apx = np.mean(dists[0:4]) ** 2
         if apx == 0:
-            return {"error": True, "message": "Computed pixel area is zero.", "method": method_name}
+            return {"error": True, "message": "Computed pixel area is zero."}
         aqm = laserdist ** 2 * (float(width) * float(height)) / apx
 
     elif n == 3:
@@ -500,10 +500,10 @@ def _compute_area(laserpoints: np.ndarray, width: int, height: int,
         s_px = (a + b + c) / 2.0
         sqrtinp = s_px * (s_px - a) * (s_px - b) * (s_px - c)
         if sqrtinp < 0:
-            return {"error": True, "message": "Computed pixel area is invalid.", "method": method_name}
+            return {"error": True, "message": "Computed pixel area is invalid."}
         apx = np.sqrt(sqrtinp)
         if apx == 0:
-            return {"error": True, "message": "Computed pixel area is zero.", "method": method_name}
+            return {"error": True, "message": "Computed pixel area is zero."}
         aqm = are * (float(width) * float(height)) / apx
 
     elif n == 2:
@@ -513,26 +513,23 @@ def _compute_area(laserpoints: np.ndarray, width: int, height: int,
         aqm = (flen * width) / a * (flen * height) / a
 
     else:
-        return {"error": True, "message": "Unsupported number of laserpoints.", "method": method_name}
+        return {"error": True, "message": "Unsupported number of laserpoints."}
 
     if aqm <= 0:
         return {
             "error": True,
             "message": "The estimated image area is too small (was {} sqm).".format(round(aqm)),
-            "method": method_name,
         }
     elif aqm > 50:
         return {
             "error": True,
             "message": "The estimated image area is too large (max is 50 sqm but was {} sqm).".format(round(aqm)),
-            "method": method_name,
         }
 
     return {
         "error": False,
         "area": aqm,
         "count": n,
-        "method": method_name,
         "points": laserpoints.tolist(),
     }
 
@@ -585,22 +582,19 @@ def run_detect_without_lines_mode(args, img_paths: List[Path],
 def run_biigle_mode(args, img_paths: List[Path], img_id_map: Optional[Dict[str, Path]],
                     channel_mode: str):
     """Mode D: Detect laser points without line constraints – output JSON to stdout."""
-    detection = "dog_detector (biigle_mode)"
-
     result = process_image(img_paths[0], args, channel_mode, img_id=None)
     if result:
         image_info, _, _, simple_points = result
         laserpoints = np.array(simple_points)
 
         area_result = _compute_area(laserpoints, image_info.width, image_info.height,
-                                    args.laserdistance, detection)
+                                    args.laserdistance)
         area_result["channel_mode"] = channel_mode
         print(json.dumps(area_result))
     else:
         print(json.dumps({
             "error": True,
             "message": "No laserpoints could be detected.",
-            "method": detection,
         }))
 
 
