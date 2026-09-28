@@ -78,7 +78,7 @@ class LaserpointsController extends Controller
      * @apiParam {Number} id The image ID.
      * @apiParam (Required arguments) {Number} distance The distance between two laser points in cm.
      * @apiParam (Required arguments) {Number} num_laserpoints Number of laser points to search for (2-4).
-     * @apiParam (Required arguments) {String} channel_mode Color channel to use (red/green/blue/gray).
+     * @apiParam (Optional arguments) {String} channel_mode Color channel to use (red/green/blue/gray). If omitted, the color channel is determined automatically for the image.
      *
      * @param Request $request
      * @param int $id
@@ -97,7 +97,7 @@ class LaserpointsController extends Controller
         $request->validate([
             'distance' => 'required|numeric|min:1',
             'num_laserpoints' => 'required|integer|min:'.Image::MIN_POINTS.'|max:'.Image::MAX_POINTS,
-            'channel_mode' => 'required|in:red,green,blue,gray',
+            'channel_mode' => 'nullable|in:red,green,blue,gray',
         ]);
 
         $this->acquireImageLock($image);

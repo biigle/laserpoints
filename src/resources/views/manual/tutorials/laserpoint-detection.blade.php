@@ -45,7 +45,7 @@
                 <strong>Number of laser points:</strong> The number of laser points of your laser point pattern (2, 3 or 4). The detection only accepts an image if exactly this number of laser points was found.
             </li>
             <li>
-                <strong>Color channel:</strong> The color channel that is used to find the laser points. Choose the color of your lasers (red, green or blue). Gray uses the brightness of the image instead of a color and can be used for white laser points or if the color of the laser points is washed out in the images. For the detection in a whole volume, the color channel is determined automatically by default (based on a random sample of images of the volume) but you can also choose it manually.
+                <strong>Color channel:</strong> The color channel that is used to find the laser points. Choose the color of your lasers (red, green or blue). Gray uses the brightness of the image instead of a color and can be used for white laser points or if the color of the laser points is washed out in the images. By default, the color channel is determined automatically (for a whole volume based on a random sample of its images) but you can also choose it manually. For an individual image, the color channel of its previous detection is preselected.
             </li>
         </ul>
         <p>

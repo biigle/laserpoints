@@ -49,7 +49,7 @@
         <div class="form-group" v-show="!manualMode">
             <label for="channel_mode">Color channel</label>
             <select v-model="channelMode" id="channel_mode" class="form-control" title="Color channel that is used to find the laser points">
-                <option v-if="!imageId" value="">Automatic</option>
+                <option value="">Automatic</option>
                 <option v-for="(label, mode) in channelModes" :key="mode" :value="mode" v-text="label"></option>
             </select>
         </div>
@@ -122,11 +122,7 @@ export default {
             if (this.manualMode) {
                 return this.loading || this.processing || !this.distance || !this.label;
             }
-            // For per-image automatic, channel_mode is required
-            if (this.imageId) {
-                return this.loading || this.processing || !this.distance || !this.channelMode;
-            }
-            // For volume automatic, channel_mode is optional (empty means automatic)
+            // The channel_mode is optional (empty means automatic).
             return this.loading || this.processing || !this.distance;
         },
         automaticButtonClass() {
@@ -227,7 +223,8 @@ export default {
             return;
         }
 
-        // For per-image detection, use the channel_mode of the previous detection.
+        // For per-image detection, use the channel_mode of the previous detection
+        // (automatic if there is none).
         if (this.imageId) {
             this.channelMode = biigle.$require('laserpoints.channel_mode');
         }

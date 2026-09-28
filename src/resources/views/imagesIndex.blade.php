@@ -6,7 +6,7 @@
     <script type="module">
         biigle.$declare('laserpoints.image', {!! $image->toJson() !!});
         biigle.$declare('laserpoints.distance', {!! $img->distance ?: 'null' !!});
-        biigle.$declare('laserpoints.channel_mode', {!! json_encode($img->channel_mode ?: 'gray') !!});
+        biigle.$declare('laserpoints.channel_mode', {!! json_encode($img->channel_mode ?: '') !!});
     </script>
 @endpush
 
