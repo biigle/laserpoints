@@ -302,7 +302,7 @@ class LaserpointsControllerTest extends ApiTestCase
     public function testVolumeManualVideo()
     {
         $label = LabelTest::create(['name' => 'Laser Point']);
-        $id = $this->volume(['media_type_id' => MediaType::videoId()])->id;
+        $id = $this->volume(['media_type' => MediaType::VIDEO])->id;
         $this->beEditor();
         $this->makeManualAnnotations($label, 3);
         $this->postJson("/api/v1/volumes/{$id}/laserpoints/manual", [
@@ -430,7 +430,7 @@ class LaserpointsControllerTest extends ApiTestCase
     public function testVolumeAutomaticVideo()
     {
         $label = LabelTest::create(['name' => 'Laser Point']);
-        $id = $this->volume(['media_type_id' => MediaType::videoId()])->id;
+        $id = $this->volume(['media_type' => MediaType::VIDEO])->id;
         $this->beEditor();
         $this->makeManualAnnotations($label, 3);
         $this->postJson("/api/v1/volumes/{$id}/laserpoints/automatic", [
@@ -529,7 +529,7 @@ class LaserpointsControllerTest extends ApiTestCase
             for ($j = 0; $j < $annotations; $j++) {
                 $annotation = ImageAnnotationTest::create([
                     'image_id' => $image->id,
-                    'shape_id' => Shape::pointId(),
+                    'shape' => Shape::POINT,
                 ]);
                 ImageAnnotationLabelTest::create([
                     'annotation_id' => $annotation->id,

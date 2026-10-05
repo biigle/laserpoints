@@ -33,7 +33,7 @@ class ProcessImageManualJobTest extends TestCase
             'label_id' => $this->label->id,
             'annotation_id' => ImageAnnotation::factory()->create([
                 'points' => [100, 100],
-                'shape_id' => Shape::pointId(),
+                'shape' => Shape::POINT,
                 'image_id' => $this->image->id,
             ])->id,
         ]);
@@ -41,7 +41,7 @@ class ProcessImageManualJobTest extends TestCase
             'label_id' => $this->label->id,
             'annotation_id' => ImageAnnotation::factory()->create([
                 'points' => [100, 100],
-                'shape_id' => Shape::pointId(),
+                'shape' => Shape::POINT,
                 'image_id' => $this->image->id,
             ])->id,
         ]);
@@ -49,7 +49,7 @@ class ProcessImageManualJobTest extends TestCase
             'label_id' => $this->label->id,
             'annotation_id' => ImageAnnotation::factory()->create([
                 'points' => [100, 100],
-                'shape_id' => Shape::pointId(),
+                'shape' => Shape::POINT,
                 'image_id' => $this->image->id,
             ])->id,
         ]);

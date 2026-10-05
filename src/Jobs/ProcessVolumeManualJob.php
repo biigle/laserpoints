@@ -49,7 +49,7 @@ class ProcessVolumeManualJob extends Job
             ->join('image_annotations', 'images.id', '=', 'image_annotations.image_id')
             ->join('image_annotation_labels', 'image_annotation_labels.annotation_id', '=', 'image_annotations.id')
             ->where('image_annotation_labels.label_id', $this->label->id)
-            ->where('image_annotations.shape_id', Shape::pointId())
+            ->where('image_annotations.shape', Shape::POINT->value)
             ->select('images.id as images_id', 'images.volume_id')
             ->distinct()
             ->chunkById(1000, function ($images) {
