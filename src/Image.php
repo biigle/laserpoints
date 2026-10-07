@@ -187,7 +187,7 @@ class Image extends BaseImage
         // attached to the same annotation by multiple users. A join would count these
         // annotations more than once.
         $count = $this->annotations()
-            ->where('shape', Shape::POINT->value)
+            ->where('shape', Shape::POINT)
             ->whereHas('labels', fn ($query) => $query->where('label_id', $label->id))
             ->count();
 

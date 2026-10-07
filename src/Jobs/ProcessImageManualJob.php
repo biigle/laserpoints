@@ -136,7 +136,7 @@ class ProcessImageManualJob extends Job implements ShouldQueue
         // points of these annotations more than once, which would distort the computed
         // image area.
         return $image->annotations()
-            ->where('shape', Shape::POINT->value)
+            ->where('shape', Shape::POINT)
             ->whereHas('labels', fn ($query) => $query->where('label_id', $this->label->id))
             ->orderBy('id')
             ->pluck('points')

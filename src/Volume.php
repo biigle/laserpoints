@@ -46,7 +46,7 @@ class Volume extends BaseVolume
         // would count these annotations more than once.
         $points = ImageAnnotation::join('images', 'image_annotations.image_id', '=', 'images.id')
             ->where('images.volume_id', $this->id)
-            ->where('image_annotations.shape', Shape::POINT->value)
+            ->where('image_annotations.shape', Shape::POINT)
             ->whereHas('labels', fn ($query) => $query->where('label_id', $label->id))
             ->select('image_annotations.points', 'image_annotations.image_id')
             ->get()
