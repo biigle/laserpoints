@@ -2,13 +2,13 @@
 
 namespace Biigle\Tests\Modules\Laserpoints\Jobs;
 
+use Biigle\Enums\Shape;
 use Biigle\Image;
 use Biigle\ImageAnnotation;
 use Biigle\ImageAnnotationLabel;
 use Biigle\Label;
 use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeManualJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageManualJob;
-use Biigle\Shape;
 use Biigle\Volume;
 use TestCase;
 

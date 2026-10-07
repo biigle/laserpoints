@@ -2,10 +2,10 @@
 
 namespace Biigle\Modules\Laserpoints\Jobs;
 
+use Biigle\Enums\Shape;
 use Biigle\Jobs\Job;
 use Biigle\Label;
 use Biigle\Modules\Laserpoints\Image;
-use Biigle\Shape;
 use Biigle\Volume;
 use Illuminate\Bus\Batchable;
 use Illuminate\Queue\Attributes\DeleteWhenMissingModels;

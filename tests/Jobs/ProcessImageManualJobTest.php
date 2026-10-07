@@ -3,8 +3,8 @@
 namespace Biigle\Tests\Modules\Laserpoints\Jobs;
 
 use App;
+use Biigle\Enums\Shape;
 use Biigle\Label;
-use Biigle\Shape;
 use Biigle\ImageAnnotation;
 use Biigle\ImageAnnotationLabel;
 use Biigle\Modules\Laserpoints\Image;

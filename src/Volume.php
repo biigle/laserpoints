@@ -2,10 +2,10 @@
 
 namespace Biigle\Modules\Laserpoints;
 
+use Biigle\Enums\Shape;
 use Biigle\ImageAnnotation;
 use Biigle\Label;
 use Biigle\Modules\Laserpoints\Traits\FiltersInvalidLaserPoints;
-use Biigle\Shape;
 use Biigle\Volume as BaseVolume;
 use Exception;
 

@@ -3,9 +3,9 @@
 namespace Biigle\Modules\Laserpoints;
 
 use Arr;
+use Biigle\Enums\Shape;
 use Biigle\Image as BaseImage;
 use Biigle\Label;
-use Biigle\Shape;
 use Exception;
 
 /**

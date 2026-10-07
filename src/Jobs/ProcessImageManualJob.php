@@ -3,12 +3,12 @@
 namespace Biigle\Modules\Laserpoints\Jobs;
 
 use App;
+use Biigle\Enums\Shape;
 use Biigle\Jobs\Job;
 use Biigle\Label;
 use Biigle\Modules\Laserpoints\Image;
 use Biigle\Modules\Laserpoints\Support\DetectManual;
 use Biigle\Modules\Laserpoints\Support\DetectionLock;
-use Biigle\Shape;
 use Exception;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;

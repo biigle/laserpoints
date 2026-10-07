@@ -2,10 +2,10 @@
 
 namespace Biigle\Tests\Modules\Laserpoints;
 
+use Biigle\Enums\Shape;
 use Biigle\Image as BaseImage;
 use Biigle\Label;
 use Biigle\Modules\Laserpoints\Image;
-use Biigle\Shape;
 use Biigle\Tests\ImageAnnotationLabelTest;
 use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\ImageTest as BaseImageTest;
