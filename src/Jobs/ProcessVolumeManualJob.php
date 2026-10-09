@@ -2,10 +2,10 @@
 
 namespace Biigle\Modules\Laserpoints\Jobs;
 
+use Biigle\Enums\Shape;
 use Biigle\Jobs\Job;
 use Biigle\Label;
 use Biigle\Modules\Laserpoints\Image;
-use Biigle\Shape;
 use Biigle\Volume;
 use Illuminate\Bus\Batchable;
 use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
@@ -49,7 +49,7 @@ class ProcessVolumeManualJob extends Job
             ->join('image_annotations', 'images.id', '=', 'image_annotations.image_id')
             ->join('image_annotation_labels', 'image_annotation_labels.annotation_id', '=', 'image_annotations.id')
             ->where('image_annotation_labels.label_id', $this->label->id)
-            ->where('image_annotations.shape_id', Shape::pointId())
+            ->where('image_annotations.shape', Shape::POINT)
             ->select('images.id as images_id', 'images.volume_id')
             ->distinct()
             ->chunkById(1000, function ($images) {

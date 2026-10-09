@@ -2,11 +2,11 @@
 
 namespace Biigle\Tests\Modules\Laserpoints\Jobs;
 
+use Biigle\Enums\Shape;
 use Biigle\Image;
 use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeAutomaticJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageAutomaticJob;
 use Biigle\Modules\Laserpoints\Support\DetectColor;
-use Biigle\Shape;
 use Biigle\Volume;
 use Exception;
 use Illuminate\Support\Facades\Log;

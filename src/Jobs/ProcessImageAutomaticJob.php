@@ -3,8 +3,8 @@
 namespace Biigle\Modules\Laserpoints\Jobs;
 
 use App;
+use Biigle\Enums\Shape;
 use Biigle\Jobs\Job;
-use Biigle\Shape;
 use Biigle\Modules\Laserpoints\Image;
 use Biigle\Modules\Laserpoints\Support\DetectAutomatic;
 use Biigle\Modules\Laserpoints\Support\DetectionLock;

@@ -2,10 +2,10 @@
 
 namespace Biigle\Tests\Modules\Laserpoints;
 
+use Biigle\Enums\Shape;
 use Biigle\Image as BaseImage;
 use Biigle\Label;
 use Biigle\Modules\Laserpoints\Image;
-use Biigle\Shape;
 use Biigle\Tests\ImageAnnotationLabelTest;
 use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\ImageTest as BaseImageTest;
@@ -20,7 +20,7 @@ class ImageTest extends TestCase
         for ($i = 0; $i < $count; $i++) {
             $id = ImageAnnotationTest::create([
                 'image_id' => $image->id,
-                'shape_id' => Shape::pointId(),
+                'shape' => Shape::POINT,
             ])->id;
             ImageAnnotationLabelTest::create([
                 'annotation_id' => $id,

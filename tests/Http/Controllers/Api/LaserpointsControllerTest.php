@@ -3,15 +3,15 @@
 namespace Biigle\Tests\Modules\Laserpoints\Http\Controllers\Api;
 
 use ApiTestCase;
+use Biigle\Enums\MediaType;
+use Biigle\Enums\Shape;
 use Biigle\Image;
-use Biigle\MediaType;
 use Biigle\Modules\Laserpoints\Image as LaserpointsImage;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageAutomaticJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageManualJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeAutomaticJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeManualJob;
 use Biigle\Modules\Laserpoints\Support\DetectionLock;
-use Biigle\Shape;
 use Biigle\Tests\ImageAnnotationLabelTest;
 use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\ImageTest;
@@ -302,7 +302,7 @@ class LaserpointsControllerTest extends ApiTestCase
     public function testVolumeManualVideo()
     {
         $label = LabelTest::create(['name' => 'Laser Point']);
-        $id = $this->volume(['media_type_id' => MediaType::videoId()])->id;
+        $id = $this->volume(['media_type' => MediaType::VIDEO])->id;
         $this->beEditor();
         $this->makeManualAnnotations($label, 3);
         $this->postJson("/api/v1/volumes/{$id}/laserpoints/manual", [
@@ -430,7 +430,7 @@ class LaserpointsControllerTest extends ApiTestCase
     public function testVolumeAutomaticVideo()
     {
         $label = LabelTest::create(['name' => 'Laser Point']);
-        $id = $this->volume(['media_type_id' => MediaType::videoId()])->id;
+        $id = $this->volume(['media_type' => MediaType::VIDEO])->id;
         $this->beEditor();
         $this->makeManualAnnotations($label, 3);
         $this->postJson("/api/v1/volumes/{$id}/laserpoints/automatic", [
@@ -529,7 +529,7 @@ class LaserpointsControllerTest extends ApiTestCase
             for ($j = 0; $j < $annotations; $j++) {
                 $annotation = ImageAnnotationTest::create([
                     'image_id' => $image->id,
-                    'shape_id' => Shape::pointId(),
+                    'shape' => Shape::POINT,
                 ]);
                 ImageAnnotationLabelTest::create([
                     'annotation_id' => $annotation->id,

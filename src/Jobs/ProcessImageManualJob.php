@@ -3,12 +3,12 @@
 namespace Biigle\Modules\Laserpoints\Jobs;
 
 use App;
+use Biigle\Enums\Shape;
 use Biigle\Jobs\Job;
 use Biigle\Label;
 use Biigle\Modules\Laserpoints\Image;
 use Biigle\Modules\Laserpoints\Support\DetectManual;
 use Biigle\Modules\Laserpoints\Support\DetectionLock;
-use Biigle\Shape;
 use Exception;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -136,7 +136,7 @@ class ProcessImageManualJob extends Job implements ShouldQueue
         // points of these annotations more than once, which would distort the computed
         // image area.
         return $image->annotations()
-            ->where('shape_id', Shape::pointId())
+            ->where('shape', Shape::POINT)
             ->whereHas('labels', fn ($query) => $query->where('label_id', $this->label->id))
             ->orderBy('id')
             ->pluck('points')

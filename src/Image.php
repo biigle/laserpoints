@@ -3,9 +3,9 @@
 namespace Biigle\Modules\Laserpoints;
 
 use Arr;
+use Biigle\Enums\Shape;
 use Biigle\Image as BaseImage;
 use Biigle\Label;
-use Biigle\Shape;
 use Exception;
 
 /**
@@ -187,7 +187,7 @@ class Image extends BaseImage
         // attached to the same annotation by multiple users. A join would count these
         // annotations more than once.
         $count = $this->annotations()
-            ->where('shape_id', Shape::pointId())
+            ->where('shape', Shape::POINT)
             ->whereHas('labels', fn ($query) => $query->where('label_id', $label->id))
             ->count();
 

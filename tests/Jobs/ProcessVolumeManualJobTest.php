@@ -2,13 +2,13 @@
 
 namespace Biigle\Tests\Modules\Laserpoints\Jobs;
 
+use Biigle\Enums\Shape;
 use Biigle\Image;
 use Biigle\ImageAnnotation;
 use Biigle\ImageAnnotationLabel;
 use Biigle\Label;
 use Biigle\Modules\Laserpoints\Jobs\ProcessVolumeManualJob;
 use Biigle\Modules\Laserpoints\Jobs\ProcessImageManualJob;
-use Biigle\Shape;
 use Biigle\Volume;
 use TestCase;
 
@@ -22,7 +22,7 @@ class ProcessVolumeManualJobTest extends TestCase
             'label_id' => $label->id,
             'annotation_id' => ImageAnnotation::factory()->create([
                 'points' => [100, 100],
-                'shape_id' => Shape::pointId(),
+                'shape' => Shape::POINT,
                 'image_id' => $image->id,
             ])->id,
         ]);
@@ -31,7 +31,7 @@ class ProcessVolumeManualJobTest extends TestCase
             'label_id' => $label->id,
             'annotation_id' => ImageAnnotation::factory()->create([
                 'points' => [200, 200],
-                'shape_id' => Shape::pointId(),
+                'shape' => Shape::POINT,
                 'image_id' => $image->id,
             ])->id,
         ]);
@@ -44,7 +44,7 @@ class ProcessVolumeManualJobTest extends TestCase
         ImageAnnotationLabel::factory()->create([
             'annotation_id' => ImageAnnotation::factory()->create([
                 'points' => [100, 100],
-                'shape_id' => Shape::pointId(),
+                'shape' => Shape::POINT,
                 'image_id' => $image->id,
             ])->id,
         ]);
@@ -54,7 +54,7 @@ class ProcessVolumeManualJobTest extends TestCase
             'label_id' => $label->id,
             'annotation_id' => ImageAnnotation::factory()->create([
                 'points' => [100, 100],
-                'shape_id' => Shape::pointId(),
+                'shape' => Shape::POINT,
             ])->id,
         ]);
 
