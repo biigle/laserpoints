@@ -516,6 +516,113 @@ class LaserpointsControllerTest extends ApiTestCase
             ->assertStatus(200);
     }
 
+    public function testDestroyImage()
+    {
+        $image = ImageTest::create([
+            'volume_id' => $this->volume()->id,
+            'attrs' => [
+                'laserpoints' => ['area' => 2, 'method' => 'lp-automatic'],
+                'size' => 123,
+            ],
+        ]);
+        $this->doTestApiRoute('DELETE', "/api/v1/images/{$image->id}/laserpoints");
+
+        $this->beGuest();
+        $this->deleteJson("/api/v1/images/{$image->id}/laserpoints")
+            ->assertStatus(403);
+
+        $this->beEditor();
+        $this->deleteJson("/api/v1/images/{$image->id}/laserpoints")
+            ->assertStatus(200);
+
+        $this->assertSame(['size' => 123], $image->fresh()->attrs);
+        $this->assertFalse(Cache::has(DetectionLock::key($image->volume_id)));
+
+        // Image without laser point information.
+        $this->deleteJson("/api/v1/images/{$image->id}/laserpoints")
+            ->assertStatus(200);
+    }
+
+    public function testDestroyImageLocked()
+    {
+        $id = $this->volume()->id;
+        $image = ImageTest::create([
+            'volume_id' => $id,
+            'attrs' => ['laserpoints' => ['area' => 2]],
+        ]);
+        $this->beEditor();
+
+        DetectionLock::acquireImage($id, $image->id);
+        $this->deleteJson("/api/v1/images/{$image->id}/laserpoints")
+            ->assertStatus(422);
+        DetectionLock::releaseImage($id, $image->id);
+
+        DetectionLock::acquireVolume($id);
+        $this->deleteJson("/api/v1/images/{$image->id}/laserpoints")
+            ->assertStatus(422);
+        DetectionLock::releaseVolume($id);
+
+        $this->assertSame(['laserpoints' => ['area' => 2]], $image->fresh()->attrs);
+    }
+
+    public function testDestroyVolume()
+    {
+        $id = $this->volume()->id;
+        $image1 = ImageTest::create([
+            'volume_id' => $id,
+            'filename' => 'a.jpg',
+            'attrs' => [
+                'laserpoints' => ['area' => 2, 'method' => 'lp-automatic'],
+                'size' => 123,
+            ],
+        ]);
+        $image2 = ImageTest::create([
+            'volume_id' => $id,
+            'filename' => 'b.jpg',
+            'attrs' => ['laserpoints' => ['error' => true, 'method' => 'manual']],
+        ]);
+        $other = ImageTest::create([
+            'attrs' => ['laserpoints' => ['area' => 3]],
+        ]);
+
+        $this->doTestApiRoute('DELETE', "/api/v1/volumes/{$id}/laserpoints");
+
+        $this->beGuest();
+        $this->deleteJson("/api/v1/volumes/{$id}/laserpoints")
+            ->assertStatus(403);
+
+        $this->beEditor();
+        $this->deleteJson("/api/v1/volumes/{$id}/laserpoints")
+            ->assertStatus(200);
+
+        $this->assertSame(['size' => 123], $image1->fresh()->attrs);
+        $this->assertNull($image2->fresh()->attrs);
+        $this->assertSame(['laserpoints' => ['area' => 3]], $other->fresh()->attrs);
+        $this->assertFalse(Cache::has(DetectionLock::key($id)));
+    }
+
+    public function testDestroyVolumeLocked()
+    {
+        $id = $this->volume()->id;
+        $image = ImageTest::create([
+            'volume_id' => $id,
+            'attrs' => ['laserpoints' => ['area' => 2]],
+        ]);
+        $this->beEditor();
+
+        DetectionLock::acquireVolume($id);
+        $this->deleteJson("/api/v1/volumes/{$id}/laserpoints")
+            ->assertStatus(422);
+        DetectionLock::releaseVolume($id);
+
+        DetectionLock::acquireImage($id, $image->id);
+        $this->deleteJson("/api/v1/volumes/{$id}/laserpoints")
+            ->assertStatus(422);
+        DetectionLock::releaseImage($id, $image->id);
+
+        $this->assertSame(['laserpoints' => ['area' => 2]], $image->fresh()->attrs);
+    }
+
     protected function makeManualAnnotations($label, $annotations, $images = 4, $tiled = false)
     {
         $annotations = $annotations ?: rand(1, 10);

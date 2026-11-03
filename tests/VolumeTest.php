@@ -185,4 +185,56 @@ class VolumeTest extends TestCase
         $image->save();
         $this->assertTrue($volume->hasDetectedLaserpoints());
     }
+
+    public function testHasLaserpoints()
+    {
+        $volume = Volume::convert(BaseVolumeTest::create());
+        $image = Image::factory()->create(['volume_id' => $volume->id]);
+        $this->assertFalse($volume->hasLaserpoints());
+
+        $image->attrs = ['size' => 123];
+        $image->save();
+        $this->assertFalse($volume->hasLaserpoints());
+
+        $image->attrs = ['laserpoints' => ['error' => true]];
+        $image->save();
+        $this->assertTrue($volume->hasLaserpoints());
+
+        $other = Volume::convert(BaseVolumeTest::create());
+        $this->assertFalse($other->hasLaserpoints());
+    }
+
+    public function testDeleteLaserpoints()
+    {
+        $volume = Volume::convert(BaseVolumeTest::create());
+        $image1 = Image::factory()->create([
+            'volume_id' => $volume->id,
+            'filename' => 'a.jpg',
+            'attrs' => [
+                'laserpoints' => ['area' => 2, 'method' => 'lp-automatic'],
+                'size' => 123,
+            ],
+        ]);
+        $image2 = Image::factory()->create([
+            'volume_id' => $volume->id,
+            'filename' => 'b.jpg',
+            'attrs' => ['laserpoints' => ['error' => true, 'method' => 'manual']],
+        ]);
+        $image3 = Image::factory()->create([
+            'volume_id' => $volume->id,
+            'filename' => 'c.jpg',
+            'attrs' => ['size' => 456],
+        ]);
+        $other = Image::factory()->create([
+            'attrs' => ['laserpoints' => ['area' => 3]],
+        ]);
+
+        $this->assertSame(2, $volume->deleteLaserpoints());
+
+        $this->assertSame(['size' => 123], $image1->fresh()->attrs);
+        $this->assertNull($image2->fresh()->attrs);
+        $this->assertSame(['size' => 456], $image3->fresh()->attrs);
+        $this->assertSame(['laserpoints' => ['area' => 3]], $other->fresh()->attrs);
+        $this->assertFalse($volume->hasLaserpoints());
+    }
 }

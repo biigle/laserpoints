@@ -6,6 +6,7 @@
                 :volume-id="{{$volume->id}}"
                 :manual-only="{{$volume->hasTiledImages() ? 'true' : 'false'}}"
                 manual-url="{{route('manual-tutorials', ['laserpoints', 'laserpoint-detection'])}}"
+                :has-laserpoints="{{\Biigle\Modules\Laserpoints\Volume::convert($volume)->hasLaserpoints() ? 'true' : 'false'}}"
                 ></component>
         </sidebar-tab>
     @endcan
