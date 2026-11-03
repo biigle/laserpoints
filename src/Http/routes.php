@@ -25,6 +25,14 @@ $router->group([
         'uses' => 'ImagesController@showLaserpoints',
     ]);
 
+    $router->delete('images/{id}/laserpoints', [
+        'uses' => 'LaserpointsController@destroyImage',
+    ]);
+
+    $router->delete('volumes/{id}/laserpoints', [
+        'uses' => 'LaserpointsController@destroyVolume',
+    ]);
+
     $router->get('volumes/{id}/images/filter/laserpoints', [
         'uses' => 'VolumeImageController@index',
     ]);
