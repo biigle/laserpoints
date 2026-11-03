@@ -70,6 +70,7 @@
 import LaserpointsApi from '../api/laserpoints.js';
 import {handleErrorResponse} from '../import.js';
 import {LabelTypeahead} from '../import.js';
+import {Events} from '../import.js';
 import {LoaderMixin} from '../import.js';
 import {VolumesApi} from '../import.js';
 
@@ -165,6 +166,9 @@ export default {
         setProcessing() {
             this.processing = true;
             this.error = false;
+            if (!this.imageId) {
+                Events.emit('laserpoints.volume.submitted', this.volumeId);
+            }
         },
         setLabels(response) {
             this.labels = response.body;

@@ -92,6 +92,21 @@ class DetectionLock
     }
 
     /**
+     * Determine whether a volume detection or any single image detection is running in
+     * a volume.
+     *
+     * @param int $volumeId
+     *
+     * @return bool
+     */
+    public static function isRunning(int $volumeId): bool
+    {
+        $state = Cache::get(static::key($volumeId));
+
+        return is_array($state) && ($state['volume'] || !empty($state['images']));
+    }
+
+    /**
      * Get the cache key of the state of a volume.
      *
      * @param int $volumeId
