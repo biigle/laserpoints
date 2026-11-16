@@ -63,7 +63,19 @@
         <div class="alert alert-success" v-if="processing">
             The laser point detection was submitted and will be available soon.
         </div>
+        <div class="alert alert-success" v-else-if="deleted">
+            The laser point information was deleted.
+        </div>
         <div class="alert alert-danger" v-else-if="error" v-text="error"></div>
+        <div class="form-group" v-if="canDelete">
+            <button
+                type="button"
+                class="btn btn-default btn-block"
+                :title="deleteButtonTitle"
+                :disabled="deleteDisabled || null"
+                @click="deleteLaserpoints"
+                ><span class="fa fa-trash" aria-hidden="true"></span> Delete laser point information</button>
+        </div>
     </form>
 </template>
 <script>
@@ -98,6 +110,10 @@ export default {
             type: String,
             default: '',
         },
+        hasLaserpoints: {
+            type: Boolean,
+            default: false,
+        },
     },
     data() {
         return {
@@ -115,6 +131,7 @@ export default {
             labels: [],
             label: null,
             manualMode: this.manualOnly,
+            deleted: false,
         };
     },
     computed: {
@@ -124,6 +141,19 @@ export default {
             }
             // The channel_mode is optional (empty means automatic).
             return this.loading || this.processing || !this.distance;
+        },
+        canDelete() {
+            return this.hasLaserpoints && !this.deleted;
+        },
+        deleteDisabled() {
+            return this.loading || this.processing;
+        },
+        deleteButtonTitle() {
+            if (this.imageId) {
+                return 'Delete the laser point information of this image';
+            }
+
+            return 'Delete the laser point information of all images of this volume';
         },
         automaticButtonClass() {
             return this.manualMode ? '' : 'active';
@@ -165,6 +195,40 @@ export default {
         setProcessing() {
             this.processing = true;
             this.error = false;
+            this.deleted = false;
+        },
+        deleteLaserpoints() {
+            let message;
+            if (this.imageId) {
+                message = 'Do you really want to delete the laser point information of this image? The computed image area will be deleted, too.';
+            } else {
+                message = 'Do you really want to delete the laser point information of ALL images of this volume? The computed image areas will be deleted, too.';
+            }
+
+            if (!confirm(message)) {
+                return;
+            }
+
+            this.startLoading();
+            let promise;
+            if (this.imageId) {
+                promise = LaserpointsApi.delete({image_id: this.imageId});
+            } else {
+                promise = LaserpointsApi.deleteVolume({volume_id: this.volumeId});
+            }
+
+            promise.then(this.handleDeleted)
+                .catch(this.handleError)
+                .finally(this.finishLoading);
+        },
+        handleDeleted() {
+            this.error = false;
+            if (this.imageId) {
+                // The detection results of the image are rendered by the server.
+                window.location.reload();
+            } else {
+                this.deleted = true;
+            }
         },
         setLabels(response) {
             this.labels = response.body;

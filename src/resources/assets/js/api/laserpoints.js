@@ -13,6 +13,12 @@ import { Resource } from '../import.js';
  *
  * Get the laser point information for an image
  * resource.get({image_id: 1}).then(...);
+ *
+ * Delete the laser point information of an image:
+ * resource.delete({image_id: 1}).then(...);
+ *
+ * Delete the laser point information of all images of a volume:
+ * resource.deleteVolume({volume_id: 1}).then(...);
  */
 export default Resource('api/v1/images{/image_id}/laserpoints', {}, {
     processVolumeAutomatic: {
@@ -30,5 +36,9 @@ export default Resource('api/v1/images{/image_id}/laserpoints', {}, {
     processImageManual: {
         method: 'POST',
         url: 'api/v1/images{/image_id}/laserpoints/manual',
+    },
+    deleteVolume: {
+        method: 'DELETE',
+        url: 'api/v1/volumes{/volume_id}/laserpoints',
     },
 });

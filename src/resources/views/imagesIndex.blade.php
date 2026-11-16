@@ -76,6 +76,7 @@
                     :image-id="{{$img->id}}"
                     :manual-only="{{$img->tiled ? 'true' : 'false'}}"
                     manual-url="{{route('manual-tutorials', ['laserpoints', 'laserpoint-detection'])}}"
+                    :has-laserpoints="{{$img->laserpoints ? 'true' : 'false'}}"
                     ></laserpoints-form>
             @endcan
         </div>

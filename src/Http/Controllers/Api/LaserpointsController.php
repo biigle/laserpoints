@@ -213,6 +213,65 @@ class LaserpointsController extends Controller
     }
 
     /**
+     * Delete the laser point information of an image.
+     *
+     * @api {delete} images/:id/laserpoints Delete laser point information of an image
+     * @apiGroup Images
+     * @apiName ImagesDestroyLaserpoints
+     * @apiPermission projectEditor
+     * @apiDescription This removes the result of a previous automatic or manual laser point detection (including the computed area) from the image. Manual laser point annotations are not deleted. The information can't be deleted while a laser point detection runs for the image or its volume.
+     *
+     * @apiParam {Number} id The image ID.
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function destroyImage($id)
+    {
+        $image = Image::with('volume')->findOrFail($id);
+        $this->authorize('edit-in', $image->volume);
+
+        $this->acquireImageLock($image);
+
+        try {
+            $image->laserpoints = null;
+            $image->save();
+        } finally {
+            DetectionLock::releaseImage($image->volume_id, $image->id);
+        }
+    }
+
+    /**
+     * Delete the laser point information of all images of a volume.
+     *
+     * @api {delete} volumes/:id/laserpoints Delete laser point information of a volume
+     * @apiGroup Volumes
+     * @apiName VolumesDestroyLaserpoints
+     * @apiPermission projectEditor
+     * @apiDescription This removes the results of all previous automatic or manual laser point detections (including the computed areas) from all images of the volume. Manual laser point annotations are not deleted. The information can't be deleted while a laser point detection runs in the volume.
+     *
+     * @apiParam {Number} id The volume ID.
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function destroyVolume($id)
+    {
+        $volume = Volume::findOrFail($id);
+        $this->authorize('edit-in', $volume);
+
+        $this->acquireVolumeLock($volume);
+
+        try {
+            $volume->deleteLaserpoints();
+        } finally {
+            DetectionLock::releaseVolume($volume->id);
+        }
+    }
+
+    /**
      * Dispatch a volume job as a batch that releases the volume lock when it's
      * finished. The volume job adds the image jobs to the same batch in chunks. The
      * batch can't finish before all image jobs were added because the volume job is

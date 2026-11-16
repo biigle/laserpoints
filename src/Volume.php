@@ -7,6 +7,7 @@ use Biigle\ImageAnnotation;
 use Biigle\Label;
 use Biigle\Modules\Laserpoints\Traits\FiltersInvalidLaserPoints;
 use Biigle\Volume as BaseVolume;
+use DB;
 use Exception;
 
 /**
@@ -88,5 +89,37 @@ class Volume extends BaseVolume
             ->where('attrs->laserpoints->error', 'false')
             ->where('attrs->laserpoints->method', '!=', 'manual')
             ->exists();
+    }
+
+    /**
+     * Determines whether any image of this volume has laser point information (of an
+     * automatic or manual detection, successful or not).
+     *
+     * @return bool
+     */
+    public function hasLaserpoints()
+    {
+        return $this->images()
+            ->whereNotNull('attrs->'.Image::LASERPOINTS_ATTRIBUTE)
+            ->exists();
+    }
+
+    /**
+     * Delete the laser point information of all images of this volume.
+     *
+     * @return int Number of updated images.
+     */
+    public function deleteLaserpoints()
+    {
+        $key = Image::LASERPOINTS_ATTRIBUTE;
+
+        // Remove the key in the database instead of loading each image model. The
+        // attrs are set to null if nothing else is left, like setJsonAttr() does.
+        return $this->images()
+            ->whereNotNull("attrs->{$key}")
+            ->toBase()
+            ->update([
+                'attrs' => DB::raw("NULLIF(attrs::jsonb - '{$key}', '{}'::jsonb)::json"),
+            ]);
     }
 }

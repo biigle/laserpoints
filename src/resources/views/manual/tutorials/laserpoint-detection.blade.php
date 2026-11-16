@@ -81,5 +81,8 @@
         <p>
             If you choose to detect laser points automatically, make sure you check the results before further processing your data. The easiest way is to apply the "detected laser points" filter in the image volume overview and then cycle through all images that contain automatically detected laser points using the image annotation tool. Detected laser points will be displayed as small circles on the image. If the detected laser points were not correct for an image, annotate them manually and resubmit the laser point detection for the image.
         </p>
+        <p>
+            Some images may not show any laser points, e.g. because the lasers were switched off. If the automatic detection produced wrong results for such an image, you can delete the laser point information of the image with the "Delete laser point information" button on the image information page. The same button in the laser point tab of the volume overview deletes the laser point information of <em>all</em> images of the volume. This also deletes the computed image areas but not any manual laser point annotations. The laser point information can't be deleted while a laser point detection is running.
+        </p>
     </div>
 @endsection
