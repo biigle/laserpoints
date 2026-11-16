@@ -13,6 +13,9 @@ import { Resource } from '../import.js';
  *
  * Get the laser point information for an image
  * resource.get({image_id: 1}).then(...);
+ *
+ * Get the laser point detection statistics of a volume:
+ * resource.getVolumeStatistics({volume_id: 1}).then(...);
  */
 export default Resource('api/v1/images{/image_id}/laserpoints', {}, {
     processVolumeAutomatic: {
@@ -30,5 +33,9 @@ export default Resource('api/v1/images{/image_id}/laserpoints', {}, {
     processImageManual: {
         method: 'POST',
         url: 'api/v1/images{/image_id}/laserpoints/manual',
+    },
+    getVolumeStatistics: {
+        method: 'GET',
+        url: 'api/v1/volumes{/volume_id}/laserpoints/statistics',
     },
 });

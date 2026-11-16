@@ -35,6 +35,24 @@ class DetectionLockTest extends TestCase
         $this->assertTrue(DetectionLock::acquireVolume(1));
     }
 
+    public function testIsRunning()
+    {
+        $this->assertFalse(DetectionLock::isRunning(1));
+
+        DetectionLock::acquireVolume(1);
+        $this->assertTrue(DetectionLock::isRunning(1));
+        $this->assertFalse(DetectionLock::isRunning(2));
+
+        DetectionLock::releaseVolume(1);
+        $this->assertFalse(DetectionLock::isRunning(1));
+
+        DetectionLock::acquireImage(1, 1);
+        $this->assertTrue(DetectionLock::isRunning(1));
+
+        DetectionLock::releaseImage(1, 1);
+        $this->assertFalse(DetectionLock::isRunning(1));
+    }
+
     public function testMutexTimeout()
     {
         config(['laserpoints.lock_wait' => 0]);

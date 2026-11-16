@@ -7,6 +7,10 @@
                 :manual-only="{{$volume->hasTiledImages() ? 'true' : 'false'}}"
                 manual-url="{{route('manual-tutorials', ['laserpoints', 'laserpoint-detection'])}}"
                 ></component>
+            <component
+                :is="plugins.laserpointsStatistics"
+                :volume-id="{{$volume->id}}"
+                ></component>
         </sidebar-tab>
     @endcan
 @endif
